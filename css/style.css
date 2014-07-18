@@ -1,0 +1,140 @@
+﻿body {
+}
+  .btn{ padding: 5px 10px;margin: 2px;opacity: .9;background-color: #fff;font-size: 12px;width: 110px;border-radius: 6px;}
+           .btn.active {
+               border: 1px solid #999;
+               color: #FEFEFE;
+               background-color:#555;
+                text-shadow:none;
+           }
+           .btn:hover {
+               border: #888 1px solid;
+           }
+          
+           .btn.active:hover {
+               border: 1px solid #CCC;
+               color: #FEFEFE;
+           }
+           
+           #maps > button > div {
+               vertical-align: middle;
+               background-position: 0% 100%;
+               float:left;
+               margin-right: 5px;
+           }
+       
+           #maps > button.active > div{
+            background-position: 0% 0%;
+            }
+
+#labels{
+  float: left;
+  padding-right: 15px;
+   margin:2px;
+   clear:both;
+}
+#symbols{
+  float: right;
+}
+.symbolBox{
+  width:20px;
+  height:20px;
+  margin:2px;
+}
+#legend{
+ border:1px solid #CCC;
+ border-radius:5px;
+padding:5px;
+height:542px;
+overflow-y:auto;
+}
+
+.legend {
+margin-left: 5px;
+}
+
+.legend-item{
+margin-left:5px;
+}
+
+ .img-block{
+ transition-property: border-color;
+ transition-duration: .2s;
+  transition-timing-function: linear;
+  border:2px solid #EEE;
+  border-radius: 12px;
+  padding:7px;
+  margin:5px;
+  width:100px;
+  height:110px;
+  position: relative;
+  cursor:pointer;
+  float:left;
+  }
+
+  .img-block:hover{
+  border-color:#BBB;
+  }
+
+  .img-block.active{
+  border:2px solid #6896AC;
+  }
+
+.caption {
+  opacity: 1;
+  transition: background-color 0.2s linear;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  color:#222;
+  border-bottom-right-radius: 9px;
+  border-bottom-left-radius: 9px;
+  background-color:#FFF;
+  width: 108px;
+  height: 35px;
+  padding-left:6px;
+  font-size:11px;
+  line-height:13px;
+  padding-top:3px;
+}
+
+caption.active{
+opacity: 1;
+}
+
+.caption.hover{
+background-color:#EEE;
+    transition: background-color 0.2s linear;
+}
+
+.palette {
+cursor: pointer;
+display: inline-block;
+vertical-align: bottom;
+margin: 1px 1px 1px 1px;
+padding: 1px;
+background: #fff;
+border: solid 1px #aaa;
+}
+        .temppalette {
+            cursor: pointer;
+            display: inline-block;
+            vertical-align: bottom;
+            margin: 1px 1px 1px 1px;
+            padding: 1px;
+            background: #fff;
+            border: solid 1px #aaa;
+        }
+
+.swatch {
+display: block;
+vertical-align: middle;
+width: 20px;
+float:left;
+height: 12px;
+}
+
+.slider {
+    margin: 0 20px;
+width: 100px;
+}
