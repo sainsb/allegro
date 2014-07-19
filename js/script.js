@@ -3,7 +3,9 @@ var map, points_layer, baseAll, baseAnno, photo;
 
 var STYLE_KEYWORDS = ['marker-size', 'marker-symbol', 'marker-color', 'stroke', 'stroke-opacity', 'stroke-width', 'fill', 'fill-opacity'];
 
-var LAYER_TYPES = { geojson: 1, shapefile: 2, tilejson:3 };
+var LAYER_TYPES = { 'geojson': 1, 'shapefile': 2, 'tilejson':3 };
+
+var FIELD_TYPES = { 'number': 1, 'string': 2 };
 
 var SUBDOMAINS = ['gistiles1', 'gistiles2', 'gistiles3', 'gistiles4'];
 
@@ -43,7 +45,9 @@ function initMap() {
 
 $(document).ready(function () {
 
-    //$('#colorpicker').colorpicker();
+    $('.color').colorpicker();
+
+    $('.selectpicker').selectpicker();
 
     $('#btnAddData').click(function () {
         $('#dataModal').modal('show');
@@ -282,26 +286,27 @@ function parseGeoJSON(data, layer) {
                     style: (typeof (layer.style) != 'undefined') ?
                         layer.style :
                         (layer.legend.symbols.length > 0) ?
-                        function (feature) {
-                        return {
-                            fillColor: styleSymbolsFromLegend(feature.properties[layer.symbolField], layer.legend),
-                            fillOpacity: 1,
-                            stroke: true,
-                            weight: 1,
-                            opacity: 1,
-                            color: "#FFF"
-                        };
-                    } : function (feature) {
-                        return {
-                            fillColor: styleFactory(feature, layer),
-                            fillOpacity: 1,
-                            stroke: true,
-                            weight: 1,
-                            opacity: 1,
-                            color: '#CCC'
-                        };
-                    },
-                    onEachFeature: (typeof (layer.clickable) == 'undefined' || layer.clickable == true) ? _onEachFeature : false
+                        function(feature) {
+                            return {
+                                fillColor: styleSymbolsFromLegend(feature.properties[layer.symbolField], layer.legend),
+                                fillOpacity: 1,
+                                stroke: true,
+                                weight: 1,
+                                opacity: 1,
+                                color: "#FFF"
+                            };
+                        } : function(feature) {
+                            return {
+                                fillColor: styleFactory(feature, layer),
+                                fillOpacity: 1,
+                                stroke: true,
+                                weight: 1,
+                                opacity: 1,
+                                color: '#CCC'
+                            };
+                        },
+                    onEachFeature: _onEachFeature,
+                    clickable: (typeof (layer.clickable) == 'undefined' || layer.clickable == true)
                 });
         }
     }
@@ -311,6 +316,16 @@ function parseGeoJSON(data, layer) {
     layer.geom = data.features[0].geometry.type;
     if (layer.legend.symbols.length == 0) {
        layer.legend.symbols.push({ value: ' ', color: layer.style.color });
+    }
+
+    //parse fields:
+    layer.fields = [];
+    for (var field in data.features[0].properties) {
+        if (isNaN(data.features[0].properties[field])) {
+            layer.fields.push({ name: field, type: FIELD_TYPES.string });
+        } else {
+            layer.fields.push({ name: field, type: FIELD_TYPES.number });
+        }
     }
 
     var legend = createHTMLLegend(layer);
@@ -479,16 +494,32 @@ function styleFactory(feature, layer) {
 }
 
 function populateLayers() {
-
+    var madeFirstActiveTab = false;
     for (var _layer in config.layers) {
 
         var layer = config.layers[_layer];
         var id = layer.name.replace(/\s/g, '_');
         //If the layers source tab doesn't exist, create it.
         if (!$('#' + layer.source).length) {
-            $('#sourceTabs').append('<li><a href="#' + layer.source + '" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;' + layer.source + '</a></li>');
 
-            $('#sourceTabs').next().append('<div class="tab-pane fade active in" id="' + layer.source + '"></div>');
+            var sourceTabString = '<li ';
+            if (!madeFirstActiveTab) {
+                sourceTabString += 'class="active"';
+            }
+
+            sourceTabString += '><a href="#' + layer.source + '" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;' + layer.source + '</a></li>';
+
+            $('#sourceTabs').append(sourceTabString);
+
+            var tabstring = '<div class="tab-pane fade ';
+            
+            if (!madeFirstActiveTab) {
+                tabstring += 'active in';
+                madeFirstActiveTab = true;
+            }
+            tabstring += '" id="' + layer.source + '"></div>';
+
+            $('#sourceTabs').next().append(tabstring);
         }
 
         //If the layers theme section doesn't exist in the source tab content,
@@ -536,9 +567,13 @@ function populateLayers() {
       );
 }
 
+function populateBasemaps() {
+    
+}
+
 function populatePalettes() {
     for (ramp in colorbrewer) {
-        if (typeof (colorbrewer[ramp]['9'] != 'undefined')) {
+        if (typeof (colorbrewer[ramp]['9']) != 'undefined') {
             var $li = $('<li></li>');
             var $span = $('<span class="palette" title="' + ramp + '"></span>');
             for (var col in colorbrewer[ramp]['9']) {
@@ -581,6 +616,68 @@ function changeSymbolHandler(id) {
 
     $('#selGradient').prepend($span);
 
+    $('#selField').empty();
+
+    $.each(layer.fields, function (key, value) {
+        $('#selField')
+            .append($("<option></option>")
+            .attr("value", value.name)
+            .text(value.name));
+    });
+
+    $('#selField').on('change', function(e) {
+        console.log($('#selField').val());
+        layer.symbolField = $('#selField').val();
+        //rerender?
+        //phantom_symbols = [];
+        //for (symbol in layer.legend.symbols) {
+        //    phantom_symbols.push({ value: layer.legend.symbols[symbol].value, color: getColorFromRamp(colorbrewer[ramp]['9']) });
+        //}
+
+        var legenditems = HTMLLegendFactory({ name: layer.name, geom: layer.geom, legend: { title: layer.legend.title, symbols: phantom_symbols } });
+
+        $('#rendererLegend').empty().html(legenditems);
+
+        $('#btnApplySymbol').off().on('click', function () {
+
+            //use the new jsonlegend
+            layer.legend.symbols = phantom_symbols;
+            //resymbolize the features
+            layer.mapLayer.setStyle(function (feature) {
+                return {
+                    fillColor: styleSymbolsFromLegend(feature.properties[layer.symbolField], layer.legend),
+                    fillOpacity: (typeof (layer.opacity) !== 'undefined') ? layer.opacity : 1,
+                    stroke: true,
+                    weight: 1,
+                    opacity: (typeof (layer.opacity) !== 'undefined') ? layer.opacity : 1,
+                    color: "#FFF"
+                };
+            });
+
+            layer.ramp = colorbrewer[ramp]['9'];
+            $('#leg' + id + ' .legend-item').remove();
+            $('#leg' + id).append(legenditems);
+
+            var HTMLLegend = $('#leg' + id).clone().html();
+            layer.HTMLLegend = '<div class="legend" id="leg' + id + '">' + HTMLLegend + '</div';
+        });
+    });
+
+    $('.selectpicker').selectpicker('refresh');
+
+    //setup event handlers for single color
+    $('#colFill').off('changeColor').on('changeColor', function (ev) {
+        layer.mapLayer.setStyle({ fillColor: ev.color.toHex() });
+    });
+
+    $('#colStroke').off('changeColor').on('changeColor', function (ev) {
+        layer.mapLayer.setStyle({ color: ev.color.toHex() });
+    });
+
+    $('#numStroke').off('change').on('change', function(e) {
+        layer.mapLayer.setStyle({ weight: $('#numStroke').val() });
+    });
+
     //strip any handlers from selGradient and create new to match correct layer
     $('.palette').off().on('click', function (e) {
         var ramp = $(this).attr('title');
@@ -588,9 +685,9 @@ function changeSymbolHandler(id) {
         for (col in colorbrewer[ramp]['9']) {
             $span.append('<span class="swatch" style="background-color: ' + colorbrewer[ramp]['9'][col] + ';"></span>');
         }
+
         $('#selGradient span').first().remove();
         $('#selGradient').prepend($span);
-
         //take the ramp and reparse the geoJSON
 
         //for each value in the options.legend
@@ -601,7 +698,7 @@ function changeSymbolHandler(id) {
 
         var legenditems = HTMLLegendFactory({name : layer.name,geom: layer.geom, legend: { title: layer.legend.title, symbols: phantom_symbols }});
 
-        $('#divSymLegend').empty().html(legenditems);
+        $('#rendererLegend').empty().html(legenditems);
 
         $('#btnApplySymbol').off().on('click', function () {
 
@@ -644,7 +741,7 @@ function changeSymbolHandler(id) {
 
     //recreate the legend in the dialog???
 
-    $('#divSymLegend').empty().append(HTMLLegendFactory(layer));
+    $('#rendererLegend').empty().append(HTMLLegendFactory(layer));
     $('#symbolModal').modal('show');
 }
 

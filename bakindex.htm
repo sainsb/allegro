@@ -742,9 +742,9 @@ height: 12px;
             return '<div class="legend">'
                 +'<svg width="16" height="14">'
                 +'<rect width="12" height="12" fill='+color+' stroke-width="1" stroke="#777">'
-                +'</svg> '+value+'</div>';
-          return 
-          }
+                + '</svg> ' + value + '</div>';
+              }
+          return false;
       }
 
       function createImpromptuLegend(title, geom, symbol){
@@ -827,8 +827,8 @@ height: 12px;
               callback: function(key, options) {
                 var id = options.selector.replace('#lbl', '');
                 var layer = getLayerById(id);
-                
-                var $span = $('<span class="palette"></span>')
+
+                  var $span = $('<span class="palette"></span>');
                 for(col in layer.ramp){
                   $span.append('<span class="swatch" style="background-color: '+layer.ramp[col]+';"></span>')
                 }

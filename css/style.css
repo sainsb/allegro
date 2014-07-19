@@ -116,6 +116,14 @@ padding: 1px;
 background: #fff;
 border: solid 1px #aaa;
 }
+
+.swatch {
+display: block;
+vertical-align: middle;
+width: 15px;
+float:left;
+height: 12px;
+}
         .temppalette {
             cursor: pointer;
             display: inline-block;
@@ -126,15 +134,23 @@ border: solid 1px #aaa;
             border: solid 1px #aaa;
         }
 
-.swatch {
-display: block;
-vertical-align: middle;
-width: 20px;
-float:left;
-height: 12px;
-}
+
 
 .slider {
     margin: 0 20px;
 width: 100px;
+}
+
+.btn {
+    padding: 1px;
+    margin: 1px;
+
+}
+
+.bootstrap-select.btn-group {
+margin-bottom: 0 !important;
+}
+
+.well {
+    margin-bottom: 0 !important;
 }
