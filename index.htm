@@ -139,30 +139,60 @@
                 </div>
                 <div class="modal-body" style='min-height:300px;' id='pnlSymbolModalBody'>
                     <ul id="aboutTabs" class="nav nav-tabs">
-                        <li class="active"><a href="#singleFill" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Single Color</a></li>
-                        <li><a href="#uniqueValues" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Renderer</a></li>
+                        <li ><a href="#singleFill" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Single Color</a></li>
+                        <li class="active"><a href="#uniqueValues" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Categories</a></li>
+                        <li><a href="#classes" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Classes</a></li>
                     </ul>
                     <div class="tab-content" style="max-height:300px;">
-                        <div class="tab-pane fade active in" id="singleFill">
-                            Fill: <div class="input-append color" id='colFill' data-color="rgb(255, 146, 180)" data-color-format="rgb">
-                                      <input type="text" class="span2" value="rgb(191,104,131)" >
+                        <div class="tab-pane fade" id="singleFill">
+                            Fill: <div class="input-append color" id='_colSingleFill' data-color="rgb(255, 146, 180)" data-color-format="rgb">
+                                      <input type="text" class="span2" value="rgb(191,104,131)" id='colSingleFill' >
     <span class="add-on"><i style="background-color: rgb(255, 146, 180)"></i></span>
 </div>
                             <br />
-                            Stroke: <div class="input-append color" id="colStroke" data-color="rgb(255, 146, 180)" data-color-format="rgb">
-                                        <input type="text" class="span2" value="rgb(191,104,131)" >
+                            Stroke: <div class="input-append color" id="_colSingleStroke" data-color="rgb(255, 146, 180)" data-color-format="rgb">
+                                        <input type="text" class="span2" value="rgb(191,104,131)" id="colSingleStroke">
     <span class="add-on"><i style="background-color: rgb(255, 146, 180)"></i></span>
 </div><br />
-                            Stroke Thickness: <input type="number" id="numStroke" min="1" max="5" value="1" style="width:45px;">
+                            Stroke Weight: <input type="number" id="rngSingleStroke" min="0" max="5" value="1" style="width:45px;">
 
                         </div>
-                        <div class="tab-pane fade" id="uniqueValues" style='height:242px'>
+                        <div class="tab-pane fade  active in" id="uniqueValues" style='height:242px'>
                             Color Ramp: &nbsp;<div class="dropdown" style='display:inline-block;margin-bottom:10px;'>
                                 <button class='btn' data-target="#" data-toggle="dropdown" class="dropdown-toggle" id='selGradient' style='width:173px;'> <b class="caret"></b></button>
                                 <ul class="dropdown-menu" id='lstRamps' style='height:190px;overflow-y:scroll;'></ul>
-                            </div>&nbsp;Field: &nbsp;<select data-width='150' class="selectpicker" id='selField' style="display:inline-block;"></select>
+                            </div>&nbsp;Field: &nbsp;<select data-width='150' data-size="5" class="selectpicker" id='selCatField' style="display:inline-block;"></select>
                             <br/>
-                            Classification method: &nbsp; 
+                            
+                            
+                          <!--   <label class="radio" style='display:inline-block;'>
+                                <input type="radio"  id="rdoCatFill" checked name="strokeFillRadios">
+                                Apply to Fill  :: <b>Stroke:</b> 
+                                <div class="color"  data-color="rgb(255, 146, 180)" data-color-format="rgb" style='display:inline-block;'>
+                                      <input type='text' style='display:none;'  value="rgb(191,104,131)" id='colFillStroke' >
+                                    <span class="add-on"><i style="background-color: rgb(255, 146, 180)"></i></span>
+                                </div>
+                            </label>
+                            <label class="radio" style='display:inline-block;'>
+                                <input type="radio" id="rdoCatStroke" name="strokeFillRadios" >
+                                Apply to Stroke :: <b>Fill:</b> 
+                                <div class="color"  data-color="rgb(255, 146, 180)" data-color-format="rgb" style='display:inline-block;'>
+                                      <input type='text' style='display:none;' value="rgb(191,104,131)" id='colStrokeFill' >
+                                    <span class="add-on"><i style="background-color: rgb(255, 146, 180)"></i></span>
+                                </div>
+                            </label> -->
+<label style='display:inline-block;margin-bottom:0;'>
+                            <b>Stroke:</b> Weight: <input type="number" id="rngCatWeight" min="0" max="5" value="1" style="width:25px;padding:1px;margin-bottom:0px;">
+                            Color: <div class="color" data-color="rgb(180,180,180)" id='_colCatStroke' data-color-format="rgb" style='display:inline-block;'>
+                                      <input type='hidden' value="rgb(180,180,180)" id='colCatStroke' />
+                                    <span class="add-on"><i style="background-color: rgb(180,180, 180)"></i></span>
+                                </div>
+                            </label>
+
+                            <div id='rendererLegend' class="well well-small" style="margin-right:10px;margin-top:10px;max-height:150px;overflow-y:scroll;"></div>
+                        </div>
+                        <div class='tab-pane fade' id='classes'>
+                        Classification method: &nbsp; 
                             <select class="selectpicker" id='selMethod' data-width='180'>
                                 <option>Unique Values</option>
                                 <option value="1">Equal Interval</option>
@@ -171,23 +201,15 @@
                                 <option value='4'>Jenks (Natural Breaks)</option>
                             </select>
                             &nbsp;&nbsp;&nbsp;&nbsp;Classes:<input type="number" name="numClasses" value='3' min="1" max="5" style="height:26px;width:45px;margin-bottom:0;padding:0;margin-left:7px;" disabled="disabled"><br/>
-                            <label class="radio">
-                                <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked>
-                                Apply to Fill  :: <b>Stroke:</b> <a href="#" class="color" data-color="rgb(255, 255, 255)">Color</a>
-                            Thickness: <input type="number" id="numStroke" min="1" max="5" value="1" style="width:45px;">
-                            </label>
-                            <label class="radio">
-                                <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
-                                Apply to Stroke :: <b>Fill:</b> <a href="#" class="color" data-color="rgb(255, 255, 255)">Color</a>
-                            </label>
-                            <div id='rendererLegend' class="well well-small" style="margin-right:10px;margin-top:10px;max-height:150px;overflow-y:scroll;"></div>
                         </div>
+
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-small" data-dismiss="modal" id='btnOK'>OK</button>
+                       <button type="button" class="btn btn-primary btn-small" data-dismiss="modal" id="btnCancel">Cancel</button>
                     <button type="button" class="btn btn-default btn-small" data-dismiss="modal" id='btnApplySymbol'>Apply</button>
-                    <button type="button" class="btn btn-primary btn-small" data-dismiss="modal" id="btnCancel">Cancel</button>
+                 
+                    <button type="button" class="btn btn-default btn-small" data-dismiss="modal" id='btnOK'>OK</button>
                 </div>
             </div>
         </div>
