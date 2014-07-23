@@ -4,7 +4,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
     <link rel="icon" href="http://www.oregonmetro.gov/favicon.ico" type="image/x-icon">
     <meta charset="utf-8">
-    <title>RISE Prototype</title>
+    <title>Allegro</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -22,7 +22,8 @@
     <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/bootstrap-context/context.bootstrap.css" />
       <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css" />
     <link rel="stylesheet" href="./css/style.css" />
-      <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/bootstrap-select/1.3.1/css/bootstrap-select.min.css" /> 
+      <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/bootstrap-select/1.3.1/css/bootstrap-select.min.css" />
+  
    <!--  <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/leaflet.draw/leaflet.draw.css" /> -->
 
     </head>
@@ -58,7 +59,7 @@
           </div>
           <button class='btn' style='float:left;margin:0 0 0 100px;padding:4px;' id='btnAddData'><i class="icon-plus"></i> Add Data</button>
 
-             <button class='btn' style='float:left;margin:0 0 0 10px;padding:4px;' id='btnBasemaps'><i class="icon-th"></i> Basemap</button>
+             <button class='btn' style='float:left;margin:0 0 0 10px;padding:4px;' id='btnBasemap'><i class="icon-th"></i> Basemap</button>
 
             <button class='btn btn-success' style='float:left;margin:0 0 0 10px;padding:4px;' id='btnSave'><i class="icon-download-alt icon-white"></i> Save map</button>
         </div>
@@ -74,7 +75,7 @@
       </div>
     </div>
 
-<div class="btn-group" data-toggle="buttons-radio" id="basemap">
+<!--<div class="btn-group" data-toggle="buttons-radio" id="basemap">
     <button type="button" class="btn active " id="btnRoads">Roads</button>
     <button type="button" class="btn " id="btnAerial" style='padding:1px;'>Air Photo<br/>
     
@@ -82,138 +83,116 @@
      <input type='checkbox' id='chkLabels' style='margin:0;' disabled='disabled'/>Labels
                   
     </span></button>
-</div>  
+</div>-->  
 
-<div class="modal hide fade" id="dataModal">
-   <div class="modal-dialog">
-      <div class="modal-content">
-         <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title">Add Data</h4>
-         </div>
-         <div class="modal-body">
-            <ul id="sourceTabs" class="nav nav-tabs">
-               
-            </ul>
-            <div class="tab-content" style="max-height:300px;">
-               
-            </div>
-         </div>
-      </div>
-      <div class="modal-footer">
-         <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-      </div>
-   </div>
-</div>
-
-<!--<div class='modal hide fade' id='symbolModal'>
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Layer Symbology</h4>
-      </div>
-      <div class="modal-body" style='min-height:300px;' id='pnlSymbolModalBody'>
-        <div class="dropdown">
-        <button class='btn' data-target="#" data-toggle="dropdown" class="dropdown-toggle" id='selGradient' style='width:auto;'> <b class="caret"></b></button>
-        <ul class="dropdown-menu" id='lstRamps'>
-        </ul>
-        </div>
-        <div id='divSymLegend'></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-    <button type="button" class="btn btn-default btn-small" data-dismiss="modal" id='btnOK'>OK</button>
-         <button type="button" class="btn btn-default btn-small" data-dismiss="modal" id='btnApplySymbol'>Apply</button>
-         <button type="button" class="btn btn-primary btn-small" data-dismiss="modal" id="btnCancel">Cancel</button>
-    </div>
-  </div>
-</div>-->
-
-    <div class='modal hide fade' id='symbolModal'>
+    <div class="modal hide fade" id="dataModal">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Change Symbol</h4>
+                    <h4 class="modal-title">Add Data</h4>
                 </div>
-                <div class="modal-body" style='min-height:300px;' id='pnlSymbolModalBody'>
-                    <ul id="aboutTabs" class="nav nav-tabs">
-                        <li ><a href="#singleFill" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Single Color</a></li>
-                        <li class="active"><a href="#uniqueValues" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Categories</a></li>
-                        <li><a href="#classes" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Classes</a></li>
+                <div class="modal-body">
+                    <ul id="layerSourceTabs" class="nav nav-tabs">
+               
                     </ul>
                     <div class="tab-content" style="max-height:300px;">
-                        <div class="tab-pane fade" id="singleFill">
-                            Fill: <div class="input-append color" id='_colSingleFill' data-color="rgb(255, 146, 180)" data-color-format="rgb">
-                                      <input type="text" class="span2" value="rgb(191,104,131)" id='colSingleFill' >
-    <span class="add-on"><i style="background-color: rgb(255, 146, 180)"></i></span>
-</div>
-                            <br />
-                            Stroke: <div class="input-append color" id="_colSingleStroke" data-color="rgb(255, 146, 180)" data-color-format="rgb">
-                                        <input type="text" class="span2" value="rgb(191,104,131)" id="colSingleStroke">
-    <span class="add-on"><i style="background-color: rgb(255, 146, 180)"></i></span>
-</div><br />
-                            Stroke Weight: <input type="number" id="rngSingleStroke" min="0" max="5" value="1" style="width:45px;">
-
-                        </div>
-                        <div class="tab-pane fade  active in" id="uniqueValues" style='height:242px'>
-                            Color Ramp: &nbsp;<div class="dropdown" style='display:inline-block;margin-bottom:10px;'>
-                                <button class='btn' data-target="#" data-toggle="dropdown" class="dropdown-toggle" id='selGradient' style='width:173px;'> <b class="caret"></b></button>
-                                <ul class="dropdown-menu" id='lstRamps' style='height:190px;overflow-y:scroll;'></ul>
-                            </div>&nbsp;Field: &nbsp;<select data-width='150' data-size="5" class="selectpicker" id='selCatField' style="display:inline-block;"></select>
-                            <br/>
-                            
-                            
-                          <!--   <label class="radio" style='display:inline-block;'>
-                                <input type="radio"  id="rdoCatFill" checked name="strokeFillRadios">
-                                Apply to Fill  :: <b>Stroke:</b> 
-                                <div class="color"  data-color="rgb(255, 146, 180)" data-color-format="rgb" style='display:inline-block;'>
-                                      <input type='text' style='display:none;'  value="rgb(191,104,131)" id='colFillStroke' >
-                                    <span class="add-on"><i style="background-color: rgb(255, 146, 180)"></i></span>
-                                </div>
-                            </label>
-                            <label class="radio" style='display:inline-block;'>
-                                <input type="radio" id="rdoCatStroke" name="strokeFillRadios" >
-                                Apply to Stroke :: <b>Fill:</b> 
-                                <div class="color"  data-color="rgb(255, 146, 180)" data-color-format="rgb" style='display:inline-block;'>
-                                      <input type='text' style='display:none;' value="rgb(191,104,131)" id='colStrokeFill' >
-                                    <span class="add-on"><i style="background-color: rgb(255, 146, 180)"></i></span>
-                                </div>
-                            </label> -->
-<label style='display:inline-block;margin-bottom:0;'>
-                            <b>Stroke:</b> Weight: <input type="number" id="rngCatWeight" min="0" max="5" value="1" style="width:25px;padding:1px;margin-bottom:0px;">
-                            Color: <div class="color" data-color="rgb(180,180,180)" id='_colCatStroke' data-color-format="rgb" style='display:inline-block;'>
-                                      <input type='hidden' value="rgb(180,180,180)" id='colCatStroke' />
-                                    <span class="add-on"><i style="background-color: rgb(180,180, 180)"></i></span>
-                                </div>
-                            </label>
-
-                            <div id='rendererLegend' class="well well-small" style="margin-right:10px;margin-top:10px;max-height:150px;overflow-y:scroll;"></div>
-                        </div>
-                        <div class='tab-pane fade' id='classes'>
-                        Classification method: &nbsp; 
-                            <select class="selectpicker" id='selMethod' data-width='180'>
-                                <option>Unique Values</option>
-                                <option value="1">Equal Interval</option>
-                                <option value='2'>Standard Deviations</option>
-                                <option value='3'>Quantile</option>
-                                <option value='4'>Jenks (Natural Breaks)</option>
-                            </select>
-                            &nbsp;&nbsp;&nbsp;&nbsp;Classes:<input type="number" name="numClasses" value='3' min="1" max="5" style="height:26px;width:45px;margin-bottom:0;padding:0;margin-left:7px;" disabled="disabled"><br/>
-                        </div>
-
+               
                     </div>
                 </div>
-                <div class="modal-footer">
-                       <button type="button" class="btn btn-primary btn-small" data-dismiss="modal" id="btnCancel">Cancel</button>
-                    <button type="button" class="btn btn-default btn-small" data-dismiss="modal" id='btnApplySymbol'>Apply</button>
-                 
-                    <button type="button" class="btn btn-default btn-small" data-dismiss="modal" id='btnOK'>OK</button>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
             </div>
         </div>
     </div>
+    
+    <div class="modal hide fade" id="basemapModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Choose Basemap</h4>
+                </div>
+                <div class="modal-body">
+                    <ul id="basemapSourceTabs" class="nav nav-tabs"></ul>
+                    <div class="tab-content" style="max-height:300px;">
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class='modal hide fade' id='symbolModal'>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Change Symbol</h4>
+            </div>
+            <div class="modal-body" style='min-height:300px;' id='pnlSymbolModalBody'>
+                <ul id="aboutTabs" class="nav nav-tabs">
+                    <li ><a href="#singleFill" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Single Color</a></li>
+                    <li class="active"><a href="#uniqueValues" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Categories</a></li>
+                    <li><a href="#classes" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Classes</a></li>
+                </ul>
+                <div class="tab-content" style="max-height:300px;">
+                    <div class="tab-pane fade" id="singleFill">
+                        Fill: <div class="input-append color" id='_colSingleFill' data-color="rgb(255, 146, 180)" data-color-format="rgb">
+                                    <input type="text" class="span2" value="rgb(191,104,131)" id='colSingleFill' >
+                        <span class="add-on"><i style="background-color: rgb(255, 146, 180)"></i></span>
+                        </div>
+                        <br />
+                        Stroke: <div class="input-append color" id="_colSingleStroke" data-color="rgb(255, 146, 180)" data-color-format="rgb">
+                                    <input type="text" class="span2" value="rgb(191,104,131)" id="colSingleStroke">
+                        <span class="add-on"><i style="background-color: rgb(255, 146, 180)"></i></span>
+                        </div><br />
+                        Stroke Weight: <input type="number" id="rngSingleStroke" min="0" max="5" value="1" style="width:45px;">
+
+                        </div>
+                        <div class="tab-pane fade  active in" id="uniqueValues" style='height:242px'>
+                        Color Ramp: &nbsp;<div class="dropdown" style='display:inline-block;margin-bottom:10px;'>
+                            <button class='btn' data-target="#" data-toggle="dropdown" class="dropdown-toggle" id='selGradient' style='width:173px;'> <b class="caret"></b></button>
+                            <ul class="dropdown-menu" id='lstRamps' style='height:190px;overflow-y:scroll;'></ul>
+                        </div>&nbsp;Field: &nbsp;<select data-width='150' data-size="5" class="selectpicker" id='selCatField' style="display:inline-block;"></select>
+                        <br/>
+                        <label style='display:inline-block;margin-bottom:0;'>
+                        <b>Stroke:</b> Weight: <input type="number" id="rngCatWeight" min="0" max="5" value="1" style="width:25px;padding:1px;margin-bottom:0px;">
+                        Color: <div class="color" data-color="rgb(180,180,180)" id='_colCatStroke' data-color-format="rgb" style='display:inline-block;'>
+                                    <input type='hidden' value="rgb(180,180,180)" id='colCatStroke' />
+                                <span class="add-on"><i style="background-color: rgb(180,180, 180)"></i></span>
+                            </div>
+                        </label>
+
+                        <div id='rendererLegend' class="well well-small" style="margin-right:10px;margin-top:10px;max-height:150px;overflow-y:scroll;"></div>
+                    </div>
+                    <div class='tab-pane fade' id='classes'>
+                    Classification method: &nbsp; 
+                        <select class="selectpicker" id='selMethod' data-width='180'>
+                            <option>Unique Values</option>
+                            <option value="1">Equal Interval</option>
+                            <option value='2'>Standard Deviations</option>
+                            <option value='3'>Quantile</option>
+                            <option value='4'>Jenks (Natural Breaks)</option>
+                        </select>
+                        &nbsp;&nbsp;&nbsp;&nbsp;Classes:<input type="number" name="numClasses" value='3' min="1" max="5" style="height:26px;width:45px;margin-bottom:0;padding:0;margin-left:7px;" disabled="disabled"><br/>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                    <button type="button" class="btn btn-primary btn-small" data-dismiss="modal" id="btnCancel">Cancel</button>
+                <button type="button" class="btn btn-default btn-small" data-dismiss="modal" id='btnApplySymbol'>Apply</button>
+                 
+                <button type="button" class="btn btn-default btn-small" data-dismiss="modal" id='btnOK'>OK</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class='modal hide fade' id='colorModal'>
   <div class="modal-dialog">
@@ -251,6 +230,7 @@
     <script type="text/javascript" src="//library.oregonmetro.gov/libraries/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
     <script type="text/javascript" src="//library.oregonmetro.gov/libraries/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
     <script type="text/javascript" src="//library.oregonmetro.gov/libraries/bootstrap-select/1.3.1/js/bootstrap-select.min.js"></script>
+    <script type="text/javascript" src="//library.oregonmetro.gov/libraries/chroma/chroma.min.js" ></script> 
     <script type="text/javascript" src="./js/script.js"></script>
     <script type="text/javascript" src="./config.js"></script>
    </body>

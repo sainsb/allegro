@@ -199,31 +199,38 @@
     "symbols": [
       {
         "value": "Solid waste facilities",
-        "color": "#CEEC3B"
+        "fillColor": "#CEEC3B",
+        "color": "#666"
       },
       {
         "value": "Portland 5",
-        "color": "#41973A"
+        "fillColor": "#41973A",
+        "color": "#666"
       },
       {
         "value": "Nature in neighborhood grants",
-        "color": "#276A95"
+        "fillColor": "#276A95",
+        "color": "#666"
       },
       {
         "value": "TOD Acquisitions",
-        "color": "#FFC526"
+        "fillColor": "#FFC526",
+        "color": "#666"
       },
       {
         "value": "TOD Investments",
-        "color": "#FC8C58"
+        "fillColor": "#FC8C58",
+        "color": "#666"
       },
       {
         "value": "Special Projects",
-        "color": "#D63E50"
+        "fillColor": "#D63E50",
+        "color": "#666"
       },
       {
         "value": "Recycling grants",
-        "color": "#D63E50"
+        "fillColor": "#D63E50",
+        "color": "#666"
       }
     ],
     "title": "Metro Direct Assets"

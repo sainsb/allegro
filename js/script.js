@@ -11,37 +11,11 @@ var SUBDOMAINS = ['gistiles1', 'gistiles2', 'gistiles3', 'gistiles4'];
 
 var GRAPHIC_PREFIX = 'http://library.oregonmetro.gov/rlisdiscovery/browse_graphic/';
 
-function initMap() {
+var DEFAULT_RAMP = 'RdYlBu';
+var DEFAULT_COLOR = '#444';
+var DEFAULT_WEIGHT = 1;
 
-    baseAll = new L.TileLayer('//{s}.oregonmetro.gov/ArcGIS/rest/services/metromap/baseAll/MapServer/tile/{z}/{y}/{x}/?token=' + RLIS.token, { zIndex: 10, subdomains: SUBDOMAINS });
-    baseAnno = new L.TileLayer('//{s}.oregonmetro.gov/ArcGIS/rest/services/metromap/baseAnno/MapServer/tile/{z}/{y}/{x}/?token=' + RLIS.token, { zIndex: 9100, subdomains: SUBDOMAINS });
-    photo = new L.TileLayer('//{s}.oregonmetro.gov/ArcGIS/rest/services/photo/2013aerialphoto/MapServer/tile/{z}/{y}/{x}/?token=' + RLIS.token, { maxZoom: 19, zIndex: 10, subdomains: SUBDOMAINS });
-
-    map = new L.Map('map', {
-        center: new L.LatLng(45.44944, -122.67599),
-        zoom: 10,
-        minZoom: 9,
-        maxZoom: 19,
-        layers: [baseAll],
-        fullscreenControl: true
-    });
-
-    var basemaps = L.Control.extend({
-        options: {
-            position: 'topright'
-        },
-
-        onAdd: function (map) {
-            var basemapcontainer = L.DomUtil.get('basemap');
-            L.DomEvent.disableClickPropagation(basemapcontainer);
-            return basemapcontainer;
-        }
-    });
-
-    map.addControl(new basemaps());
-    L.control.scale().addTo(map);
-    var hash = new L.Hash(map);
-}
+var scaleCounter = 0;
 
 $(document).ready(function () {
 
@@ -55,6 +29,10 @@ $(document).ready(function () {
 
     $('#btnTouchMe').click(function () {
         $('#colorModal').modal('show');
+    });
+
+    $('#btnBasemap').click(function() {
+        $('#basemapModal').modal('show');
     });
 
     //Attach behavior to legend checkboxes
@@ -94,6 +72,8 @@ $(document).ready(function () {
     });
 
     populateLayers();
+
+    populateBasemaps();
     
     populatePalettes();
 
@@ -150,6 +130,25 @@ $(document).ready(function () {
 
 });
 
+function initMap() {
+
+    baseAll = new L.TileLayer('//{s}.oregonmetro.gov/ArcGIS/rest/services/metromap/baseAll/MapServer/tile/{z}/{y}/{x}/?token=' + RLIS.token, { zIndex: 10, subdomains: SUBDOMAINS });
+    baseAnno = new L.TileLayer('//{s}.oregonmetro.gov/ArcGIS/rest/services/metromap/baseAnno/MapServer/tile/{z}/{y}/{x}/?token=' + RLIS.token, { zIndex: 9100, subdomains: SUBDOMAINS });
+    photo = new L.TileLayer('//{s}.oregonmetro.gov/ArcGIS/rest/services/photo/2013aerialphoto/MapServer/tile/{z}/{y}/{x}/?token=' + RLIS.token, { maxZoom: 19, zIndex: 10, subdomains: SUBDOMAINS });
+
+    map = new L.Map('map', {
+        center: new L.LatLng(45.44944, -122.67599),
+        zoom: 10,
+        minZoom: 9,
+        maxZoom: 19,
+        layers: [baseAll],
+        fullscreenControl: true
+    });
+
+    L.control.scale().addTo(map);
+    var hash = new L.Hash(map);
+}
+
 function addData(layerObject) {
 
     //Is this a tiled layer or a JSON layer or....?
@@ -177,6 +176,7 @@ function addData(layerObject) {
 
 function loadGeoJSON(options) {
     $.getJSON(options.url, function (data) {
+
         parseGeoJSON(data, options);
     });
 }
@@ -199,33 +199,43 @@ function loadTileJSON(layer) {
 
         applyContextMenu('#lbl' + id, LAYER_TYPES.tilejson);
 
-        layer.mapLayer = new L.TileLayer(data.canonicalURL + '?token=' + RLIS.token, { subdomains: data.subdomains, zIndex: 70 });
+        layer.mapLayer = new L.TileLayer(data.canonicalURL + '?token=' + RLIS.token, { subdomains: data.subdomains, zIndex: (typeof layer.zIndex != 'undefined') ? layer.zIndex : 70});
 
         layer.mapLayer.addTo(map);
 
     });
 }
 
-function getLayerById(id) {
-    for (var layer in config.layers) {
-        if (config.layers[layer].name.replace(/\s/g, '_') == id) {
-            return config.layers[layer];
-        }
-    }
-    return null;
-}
-
 function parseGeoJSON(data, layer) {
+
     var geoJson = {};
 
-    if (typeof(data.legend) != 'undefined') {
-        layer.legend = data.legend;
+    // take legend def in config over data legend
+    if (typeof (layer.legend) === 'undefined') {
+        if (typeof (data.legend) === 'undefined') {
+            layer.ramp = DEFAULT_RAMP;
+            layer.legend = { "symbols": [], "title": layer.name };
+
+            var values = [];
+            
+            for (var i = 0; i < data.features.length; i++) {
+                if ($.inArray(data.features[i].properties[layer.symbolField], values) === -1) {
+                    values.push(data.features[i].properties[layer.symbolField]);
+                }
+            }
+
+            layer.scale = chroma.scale(DEFAULT_RAMP).domain([1, values.length]).out('hex');
+
+            for (var val in values.sort(myComparator)) {
+                values[val] = values[val];
+                createJSONLegend(values[val], layer.scale, layer.legend.symbols);
+            }
+
+        } else {
+            layer.legend = data.legend;
+        }
     }
 
-    if (typeof (layer.legend) === 'undefined') {
-        layer.legend = { "symbols": [], "title": layer.name };
-    }
-    
     var _onEachFeature = function (feature, slayer) {
         if (feature.properties) {
             slayer.bindPopup(Object.keys(feature.properties).map(function (k) {
@@ -244,21 +254,16 @@ function parseGeoJSON(data, layer) {
             style: L.mapbox.simplestyle.style,
             onEachFeature: _onEachFeature
         });
+
+        //create legend....
     }
     else {
-        var ramp = colorbrewer[pickRandomProperty(colorbrewer)];
-        layer.ramp = 'RdYlBu';
-        //ramp[pickRandomProperty(ramp)];
-
         switch (data.features[0].geometry.type) {
-
             case "Point":
                 geoJson = L.geoJson(data, {
-                    pointToLayer: (layer.legend.symbols.length > 0) ?
+                    pointToLayer: 
                         function (feature, latlng) {
-                        return L.circleMarker(latlng, styleFromLegend(feature.properties[layer.symbolField], layer.legend)) }:
-                         function (feature, latlng) {
-                            return L.circleMarker(latlng, styleFromScratch(feature, layer));
+                            return L.circleMarker(latlng, styleFromLegend(feature, layer));
                         },
                     onEachFeature: _onEachFeature
                 });
@@ -268,13 +273,7 @@ function parseGeoJSON(data, layer) {
             case "MultiPolygon":
                 geoJson = L.geoJson(data, {
                     style: (typeof (layer.style) != 'undefined') ?
-                        layer.style :
-                        (layer.legend.symbols.length > 0) ?
-                        function(feature) {
-                            return styleFromLegend(feature.properties[layer.symbolField], layer.legend);
-                        } : function(feature) {
-                            return styleFromScratch(feature, layer);
-                        },
+                        layer.style : function(feature) {return styleFromLegend(feature, layer); },
                     onEachFeature: _onEachFeature,
                     clickable: (typeof (layer.clickable) == 'undefined' || layer.clickable == true)
                 });
@@ -285,18 +284,12 @@ function parseGeoJSON(data, layer) {
 
     layer.geom = data.features[0].geometry.type;
 
-    if (layer.legend.symbols.length == 0) {
-       layer.legend.symbols.push({ value: ' ', color: layer.style.color });
-    }
-
     //parse fields and add to layer object
     layer.fields = [];
     for (var field in data.features[0].properties) {
-        if (isNaN(data.features[0].properties[field])) {
-            layer.fields.push({ name: field, type: FIELD_TYPES.string });
-        } else {
-            layer.fields.push({ name: field, type: FIELD_TYPES.number });
-        }
+        var fieldType = isNaN(data.features[0].properties[field]) ? 'string' : 'number';
+        layer.fields.push({ name: field, type: fieldType});
+        
     }
 
     //create the HTMLLegend from the jsonLegend property of the layer.
@@ -430,104 +423,56 @@ function createHTMLLegendItem(geom, symbol) {
     return legendItem;
 }
 
-function styleFromLegend(value, legend) {
+function styleFromLegend(feature, layer) {
     
     var color, weight, fillColor;
 
-    //value will always be found in legend.
-    for (var i = 0; i < legend.symbols.length; i++) {
-        var sym = legend.symbols[i];
-        if (isNaN(value)) {
-            if (sym.value.toUpperCase() == value.toUpperCase()) {
-                color = (typeof sym.color != 'undefined') ? sym.color : '#777'
-                weight = (typeof sym.weight != 'undefined') ? sym.weight : 1;
-                fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777'
-                break;
-            }
-        }
-        else if (legend.symbols[i].value == value) {
-            color = (typeof sym.color != 'undefined') ? sym.color : '#777'
-            weight = (typeof sym.weight != 'undefined') ? sym.weight : 1;
-            fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777'
-            break;
-        }
-    }
-
-    return  {
-            fillColor: fillColor,
-            fillOpacity: 1,
-            stroke: (weight>0) ? true: false,
-            weight: weight,
-            opacity: 1,
-            color: color
-        };
-};
-
-/*
-Returns a color and adds it and corresponding value to the GeoJSON legend property
-note that we have to check for distinction
-@feature - the feature that leaflet is iterating thru
-@ramp - the selected/assigned color ramp for the layer
-@symbolField - the field upon which the symbols will be assigned
-@dataLegend - passed by ref, creates the JSON legend not the HTML legend
-*/
-function styleFromScratch(feature, layer) {
-    var weight =1,
-        geom = feature.geometry.type;
-
-    style= {
-                fillColor: getColorFromRamp(layer.ramp),
-                fillOpacity: 1,
-                stroke: (weight>0) ? true: false,
-                weight: weight,
-                opacity: 1,
-                color: '#777'
-        };
-
-    if(geom=='Point'){
-        style.radius = 5;
-    }
-
     var value = feature.properties[layer.symbolField];
 
+    //value will always be found in legend.
     for (var i = 0; i < layer.legend.symbols.length; i++) {
         var sym = layer.legend.symbols[i];
         if (isNaN(value)) {
             if (sym.value.toUpperCase() == value.toUpperCase()) {
-                style.color = (typeof sym.color != 'undefined') ? sym.color : '#777'
-                style.weight = (typeof sym.weight != 'undefined') ? sym.width : 1;
-                style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777'
-                return style;
+                color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
+                weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
+                fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777';
+                break;
             }
         }
         else if (layer.legend.symbols[i].value == value) {
-            style.color = (typeof sym.color != 'undefined') ? sym.color : '#777'
-            style.weight = (typeof sym.weight != 'undefined') ? sym.width : 1;
-            style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777'
-            return style;
+            color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
+            weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
+            fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777';
+            break;
         }
     }
 
-    //build the legend while we're here
-    layer.legend.symbols.push({ "value": feature.properties[layer.symbolField],
-     "fillColor": style.fillColor, 'color' : style.color, 'weight':style.weight });
+    var style=  {
+            fillColor: fillColor,
+            fillOpacity: layer.opacity,
+            stroke: (weight>0) ? true: false,
+            weight: weight,
+            opacity: layer.opacity,
+            color: color
+    };
+
+    if (feature.geometry.type == 'Point') {
+        style.radius = 5;
+    }
 
     return style;
-}
+};
 
-function phantomJSONLegendFactory(value, ramp, symbols, weight, color) {
-    
-    //ensure that we haven't symbolized this multipart feature yet.
-    for (var i = 0; i < symbols.length; i++) {
-        if (symbols[i].value == value) {
-            return;
-        }
-    }
+function createJSONLegend(value, scale, symbols, color, weight) {
 
-    var fillColor = getColorFromRamp(ramp);
+    color = (typeof (color) !== 'undefined') ? color : DEFAULT_COLOR;
+    weight = (typeof (weight) !== 'undefined') ? weight : DEFAULT_WEIGHT;
 
-    //build the legend while we're here
-    symbols.push({ "value": value, "color": color, "fillColor" : fillColor, 'weight':weight });
+    symbols.push({
+        "value": value,
+        "fillColor": getColorFromRamp(scale), 'color': color, 'weight': weight
+    });
 }
 
 function populateLayers() {
@@ -536,6 +481,7 @@ function populateLayers() {
 
         var layer = config.layers[_layer];
         var id = layer.name.replace(/\s/g, '_');
+
         //If the layers source tab doesn't exist, create it.
         if (!$('#' + layer.source).length) {
 
@@ -546,7 +492,7 @@ function populateLayers() {
 
             sourceTabString += '><a href="#' + layer.source + '" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;' + layer.source + '</a></li>';
 
-            $('#sourceTabs').append(sourceTabString);
+            $('#layerSourceTabs').append(sourceTabString);
 
             var tabstring = '<div class="tab-pane fade ';
             
@@ -556,7 +502,7 @@ function populateLayers() {
             }
             tabstring += '" id="' + layer.source + '"></div>';
 
-            $('#sourceTabs').next().append(tabstring);
+            $('#layerSourceTabs').next().append(tabstring);
         }
 
         //If the layers theme section doesn't exist in the source tab content,
@@ -570,10 +516,10 @@ function populateLayers() {
         }
 
         var thumb = GRAPHIC_PREFIX + layer.thumb;
-        $('#' + layer.source + '_' + layer.theme).append("<div class='img-block'><div class='caption'>" + layer.name + "</div><img class='idata' src='" + thumb + "' alt='" + layer.name + "' id='img" + id + "'/></div>");
+        $('#' + layer.source + '_' + layer.theme).append("<div class='img-block layer'><div class='caption'>" + layer.name + "</div><img class='idata' src='" + thumb + "' alt='" + layer.name + "' id='img" + id + "'/></div>");
     }
     
-    $('.img-block').on('click', function () {
+    $('.img-block.layer').on('click', function () {
         var id = $(this).find('img').attr('id').replace('img', '');
         layer = getLayerById(id);
 
@@ -605,7 +551,80 @@ function populateLayers() {
 }
 
 function populateBasemaps() {
-    
+    for (_basemap in config.basemaps) {
+
+        var basemap = config.basemaps[_basemap];
+        var id = basemap.name.replace(/\s/g, '_');
+
+        var madeFirstActiveTab = false;
+
+        var source = basemap.source;
+        var theme = basemap.theme.replace(/\s/g, '_');
+
+        //If the layers source tab doesn't exist, create it.
+        if (!$('#' + source).length) {
+            
+            var sourceTabString = '<li ';
+            if (!madeFirstActiveTab) {
+                sourceTabString += 'class="active"';
+            }
+
+            sourceTabString += '><a href="#' +  + '" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;' + source + '</a></li>';
+
+            $('#basemapSourceTabs').append(sourceTabString);
+
+            var tabstring = '<div class="tab-pane fade ';
+
+            if (!madeFirstActiveTab) {
+                tabstring += 'active in';
+                madeFirstActiveTab = true;
+            }
+            tabstring += '" id="' + source + '"></div>';
+
+            $('#basemapSourceTabs').next().append(tabstring);
+        }
+
+        if (!$('#' + source + '_' + basemap.theme).length) {
+            $('#' + source).append('<div style="clear:both;" id="' + source + '_' + theme + '"><h4 style="margin:0;">' + basemap.theme + '</h4><hr style="margin:0;padding:0;"/></div');
+        }
+
+        var thumb = GRAPHIC_PREFIX + basemap.thumb;
+        $('#' + source + '_' + theme).append("<div class='img-block basemap'><div class='caption'>" + basemap.name + "</div><img class='idata' src='" + thumb + "' alt='" + basemap.name + "' id='img" + id + "'/></div>");
+    }
+
+    $('.img-block.basemap').on('click', function () {
+        var id = $(this).find('img').attr('id').replace('img', '');
+        basemap = getBasemapById(id);
+
+        //We will need a lot of intelligence here.
+        //remove previous basemap
+        //handle multi-ply layers etc. etc.
+
+        if ($(this).hasClass('active')) {
+            $(this).removeClass('active');
+            map.removeLayer(basemap.mapLayer);
+        }
+        else {
+            $(this).addClass('active');
+            if (typeof (layer.mapLayer) != 'undefined') {
+                map.addLayer(basemap.mapLayer);
+            }
+            else {
+                addTileLayer(basemap.url);
+            }
+        }
+    });
+
+    $('.img-block.basemap').hover(
+        function () {
+            $(this).find('.caption').addClass('hover');
+        },
+        function () {
+            $(this).find('.caption').removeClass('hover');
+        }
+      );
+
+
 }
 
 function populatePalettes() {
@@ -622,38 +641,42 @@ function populatePalettes() {
     }
 }
 
-function getColorFromRamp(ramp) {
-    var _ramp = colorbrewer[ramp]['9'];
-    var ran = Math.floor(Math.random() * _ramp.length);
-    return _ramp[ran];
-}
-
-function style() {
-    return {
-        fillColor: getRandomColor(),
-        fillOpacity: 1,
-        stroke: true,
-        weight: 1,
-        opacity: 1,
-        color: '#FFF'
-    };
+function getColorFromRamp(scale) {
+    //console.log(scaleCounter+' : '+scale.domain()[1]);
+    //var _ramp = colorbrewer[ramp]['9'];
+    //var ran = Math.floor(Math.random() * _ramp.length);
+    //return _ramp[ran];
+    scaleCounter += 1;
+    var color = scale(scaleCounter);
+    if (scaleCounter == scale.domain()[1]) {
+        //console.log(scaleCounter);
+        scaleCounter = 0;
+    }
+    return color;
 }
 
 function changeSymbolHandler(id) {
 
     id = id.replace('#lbl', '');
     var layer = getLayerById(id);
-    var $span = $('<span class="temppalette" title="'+layer.ramp+'"></span>');
-    var _ramp = colorbrewer[layer.ramp]['9'];
-    for (var col in _ramp) {
-        $span.append('<span class="swatch" style="background-color: ' + _ramp[col] + ';"></span>');
+
+    if (typeof (layer.ramp) != 'undefined') {
+        var $span = $('<span class="temppalette" title="' + layer.ramp + '"></span>');
+
+        var _ramp = colorbrewer[layer.ramp]['9'];
+
+        for (var col in _ramp) {
+            $span.append('<span class="swatch" style="background-color: ' + _ramp[col] + ';"></span>');
+        }
+
+        if (!$($('#selGradient').children()[0]).is('b')) {
+            $('#selGradient span').first().remove();
+        }
+
+        $('#selGradient').prepend($span);
     }
 
-    if (!$($('#selGradient').children()[0]).is('b')) {
-        $('#selGradient span').first().remove();
-    }
-
-    $('#selGradient').prepend($span);
+    $('#selCatField').off('change.core');
 
     $('#selCatField').empty();
 
@@ -663,6 +686,8 @@ function changeSymbolHandler(id) {
             .attr("value", value.name)
             .text(value.name));
     });
+
+    $('#selCatField').selectpicker('val', layer.symbolField);
 
     //match with exisint layer.symbolField;
 
@@ -686,18 +711,16 @@ function changeSymbolHandler(id) {
     });
 
     //event handlers for categories
-    $('#selCatField').off('change').on('change', function(){
+    $('#rngCatWeight').on('change', function(){
        resymbolize(layer);
     });
 
-    $('#rngCatWeight').off('change').on('change', function(){
-        //need a different handler instead of resymbolize here...
-
+    $('#selCatField').on('change.core', function() {
+        resymbolize(layer);
     });
 
     $('.palette').off('click').on('click', function (e) {
         var ramp = $(this).attr('title');
-        
         var $span = $('<span class="palette" title="'+ramp+'"></span>');
         for (col in colorbrewer[ramp]['9']) {
             $span.append('<span class="swatch" style="background-color: ' + colorbrewer[ramp]['9'][col] + ';"></span>');
@@ -715,7 +738,8 @@ function changeSymbolHandler(id) {
     $('#symbolModal').modal('show');
 }
 
-function resymbolize(layer){
+function resymbolize(layer) {
+    console.log('yo');
 
     //get ramp, 
     var ramp= $($('#selGradient').children()[0]).attr('title');
@@ -725,29 +749,38 @@ function resymbolize(layer){
 
     //get stroke width
     var weight = parseInt($('#rngCatWeight').val());
-
+    
     //get whatever color we're not sourcing from the ramp.
     var color = $('#colCatStroke').val();
 
     //! only if the symbolField has changed do we need to iterate the features again
     //take the ramp, reparse the JSON features and build a fake JSON legend
-    var phantom_symbols = [];
+    var phantomSymbols = [];
 
-    if(symbolField != layer.symbolField){
-        for (var feature in layer.mapLayer._layers){
-            var value = layer.mapLayer._layers[feature].feature.properties[symbolField];
-            phantomJSONLegendFactory(value, ramp, phantom_symbols, weight, color);
+    var values = [];
+
+    if (symbolField != layer.symbolField) {
+        for (var feature in layer.mapLayer._layers) {
+            if ($.inArray(layer.mapLayer._layers[feature].feature.properties[symbolField], values) === -1) {
+                values.push(layer.mapLayer._layers[feature].feature.properties[symbolField]);
+            }
         }
     }
     else
     {
+        //load the values with the values from the legend.
         for (var i=0;i<layer.legend.symbols.length;i++) {
-            var value = layer.legend.symbols[i].value;
-            phantomJSONLegendFactory(value, ramp, phantom_symbols, weight, color);
+            values.push(layer.legend.symbols[i].value);
         }
     }
 
-    var legendItems = HTMLLegendFactory({name : layer.name,geom: layer.geom, legend: {symbols: phantom_symbols }});
+    var scale = chroma.scale(ramp).domain([1, values.length]).out('hex');
+
+    for (var val in values.sort(myComparator)) {
+        createJSONLegend(values[val], scale, phantomSymbols, color, weight);
+    }
+
+    var legendItems = HTMLLegendFactory({name : layer.name,geom: layer.geom, legend: {symbols: phantomSymbols }});
 
     $('#rendererLegend').empty().html(legendItems);
 
@@ -755,11 +788,13 @@ function resymbolize(layer){
 
         layer.symbolField = symbolField;
 
+        layer.scale = scale;
+
         //use the new jsonlegend
-        layer.legend.symbols = phantom_symbols;
+        layer.legend.symbols = phantomSymbols;
         
         layer.mapLayer.setStyle(function (feature) {
-            return styleFromLegend(feature.properties[layer.symbolField], layer.legend);
+            return styleFromLegend(feature, layer);
         });
 
         var id=layer.name.replace(/\s/g,'_');
@@ -851,6 +886,42 @@ function pickRandomProperty(obj) {
         if (Math.random() < 1 / ++count)
             result = prop;
     return result;
+}
+
+function getLayerById(id) {
+    for (var layer in config.layers) {
+        if (config.layers[layer].name.replace(/\s/g, '_') == id) {
+            return config.layers[layer];
+        }
+    }
+    return null;
+}
+
+function getBasemapById(id) {
+    for (var layer in config.layers) {
+        if (config.layers[layer].name.replace(/\s/g, '_') == id) {
+            return config.layers[layer];
+        }
+    }
+    return null;
+}
+
+function isNumeric(n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+function myComparator(a, b) {
+    if (isNumeric(a) && isNumeric(b)) {
+        return a - b;
+    } else {
+        if (a < b) {
+            return -1;
+        }
+        if (a > b) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 function compare(a, b) {

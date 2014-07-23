@@ -1,4 +1,22 @@
 ﻿var config = {
+    'basemaps':[
+        {
+            'name': 'Metro Basemap',
+            'url': '//gis.oregonmetro.gov/',
+            'type': 'composite',
+            'thumb': 'cty_fill.png',
+            'source': 'Metro',
+            'theme': 'Roads and Landscape'
+        },
+        {
+            'name': '2013 Air Photos',
+            'url': '//gis.oregonmetro.gov/',
+            'type': 'photo',
+            'thumb': 'cty_fill.png',
+            'source': 'Metro',
+            'theme':'Air Photo'
+        }   
+    ],
     'layers': [
             {
                 'name': 'City Limits',
@@ -415,7 +433,8 @@
                    'type': 'tilejson',
                    'thumb': 'zoning.png',
                    'source': 'RLIS',
-                   'theme': 'land'
+                   'theme': 'land',
+                   'zIndex': 70
                },
                {
                    'name': 'Airports',
