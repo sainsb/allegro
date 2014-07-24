@@ -61,8 +61,8 @@ margin-left:5px;
  transition-property: border-color;
  transition-duration: .2s;
   transition-timing-function: linear;
-  border:2px solid #EEE;
   border-radius: 12px;
+     border: 2px solid #eee;
   padding:7px;
   margin:5px;
   width:100px;
@@ -72,12 +72,21 @@ margin-left:5px;
   float:left;
   }
 
+ /*.img-block.shapefile {
+     border: 2px solid #C59497
+ }
+
+ .img-block.tilejson {
+     border: 2px solid #0E613B
+ }*/
+
   .img-block:hover{
   border-color:#BBB;
   }
 
   .img-block.active{
   border:2px solid #6896AC;
+      /*background-color: #999;*/
   }
 
 .caption {
@@ -100,6 +109,7 @@ margin-left:5px;
 
 caption.active{
 opacity: 1;
+
 }
 
 .caption.hover{

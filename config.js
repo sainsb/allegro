@@ -1,21 +1,90 @@
 ﻿var config = {
-    'basemaps':[
+    'token': 'GYJZSQrfbb8YrZ_RIn-64Kc1SpybpK4LpW4TenvGQmk.',
+    'basemaps': [
+    {
+        'name': 'Metro Basemap',
+        'url': '//{s}.oregonmetro.gov/ArcGIS/rest/services/metromap/baseAll/MapServer/tile/{z}/{y}/{x}/',
+        'type': 'composite',
+        'thumb': 'cty_fill.png',
+        'source': 'Metro',
+        'icon':'img/metro_logo.png',
+        'theme': 'Roads and Landscape',
+        'requireToken':true
+    },
+    {
+        'name': '2013 Air Photos',
+        'url': '//{s}.oregonmetro.gov/ArcGIS/rest/services/photo/2013aerialphoto/MapServer/tile/{z}/{y}/{x}/',
+        'type': 'photo',
+        'thumb': 'photo2013.png',
+        'source': 'Metro',
+        'theme': 'Air Photo',
+        'requireToken': true
+    },
+      {
+          'name': '2012 Air Photos',
+          'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2012aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
+          'type': 'photo',
+          'thumb': 'photo2013.png',
+          'source': 'Metro',
+          'theme': 'Air Photo',
+          'requireToken': true
+      },
         {
-            'name': 'Metro Basemap',
-            'url': '//gis.oregonmetro.gov/',
-            'type': 'composite',
-            'thumb': 'cty_fill.png',
-            'source': 'Metro',
-            'theme': 'Roads and Landscape'
-        },
-        {
-            'name': '2013 Air Photos',
-            'url': '//gis.oregonmetro.gov/',
+            'name': '2011 Air Photos',
+            'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2011aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
             'type': 'photo',
-            'thumb': 'cty_fill.png',
+            'thumb': 'photo2013.png',
             'source': 'Metro',
-            'theme':'Air Photo'
-        }   
+            'theme': 'Air Photo',
+            'requireToken': true
+        },
+          {
+              'name': '2010 Air Photos',
+              'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2010aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
+              'type': 'photo',
+              'thumb': 'photo2013.png',
+              'source': 'Metro',
+              'theme': 'Air Photo',
+              'requireToken': true
+          },
+        {
+            'name': '2009 Air Photos',
+            'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2009aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
+            'type': 'photo',
+            'thumb': 'photo2013.png',
+            'source': 'Metro',
+            'theme': 'Air Photo',
+            'requireToken': true
+        },
+            {
+                'name': '2008 Air Photos',
+                'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2008aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
+                'type': 'photo',
+                'thumb': 'photo2013.png',
+                'source': 'Metro',
+                'theme': 'Air Photo',
+                'requireToken': true
+            },
+            {
+                'name': '2007 Air Photos',
+                'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2007aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
+                'type': 'photo',
+                'thumb': 'photo2013.png',
+                'source': 'Metro',
+                'theme': 'Air Photo',
+                'requireToken': true
+            },
+        
+            {
+                'name': 'Gray Scale',
+                'url': '//server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+                'type': 'basemap',
+                'active': true,
+                'thumb': 'img/esriGray.png',
+                'icon': 'img/esri_logo.png',
+                'source': 'ESRI',
+                'theme': 'Roads and Landscape'
+        }
     ],
     'layers': [
             {
@@ -25,6 +94,7 @@
                 'thumb': 'cty_fill.png',
                 'symbolField': 'CITYNAME',
                 'source': 'RLIS',
+                'icon' : './img/metro_logo.png',
                 'theme': 'boundary'
             },
             {
@@ -64,31 +134,31 @@
                     "symbols": [
                         {
                             "value": 1,
-                            "color": "#CEEC3B"
+                            "fillColor": "#CEEC3B"
                         },
                         {
                             "value": 2,
-                            "color": "#41973A"
+                            "fillColor": "#41973A"
                         },
                         {
                             "value": 3,
-                            "color": "#276A95"
+                            "fillColor": "#276A95"
                         },
                         {
                             "value": 4,
-                            "color": "#FFC526"
+                            "fillColor": "#FFC526"
                         },
                         {
                             "value": 5,
-                            "color": "#FC8C58"
+                            "fillCcolor": "#FC8C58"
                         },
                         {
                             "value": 6,
-                            "color": "#D63E50"
+                            "fillColor": "#D63E50"
                         },
                         {
                             "value": 7,
-                            "color": "#61A19A"
+                            "fillColor": "#61A19A"
                         }
                     ]
                 },
@@ -332,6 +402,16 @@
                   'source': 'RLIS',
                   'theme': 'census'
               },
+              {
+                  'name': '20 Districts',
+                  'url': '//library.oregonmetro.gov/rlisdiscovery/district20.zip',
+                  'type': 'shapefile',
+                  'symbolField': 'DISTRICT',
+                  'thumb': 'district20.png',
+                  'source': 'RLIS',
+                  'theme': 'census',
+                  'metadataUrl' :'http://rlisdiscovery.oregonmetro.gov/metadataviewer/display.cfm?meta_layer_id=2342'
+              },
                {
                    'name': '2013 Vacant Lands',
                    'url': '//gis.oregonmetro.gov/services/Develop/vacantlands2013/tilejson',
@@ -361,6 +441,14 @@
                    'url': '//gis.oregonmetro.gov/services/Environment/Slope25/tilejson',
                    'type': 'tilejson',
                    'thumb': 'slope_25.png',
+                   'source': 'RLIS',
+                   'theme': 'environment'
+               },
+               {
+                   'name': 'Soils',
+                   'url': '//gis.oregonmetro.gov/services/Environment/soils/tilejson',
+                   'type': 'tilejson',
+                   'thumb': 'soils.png',
                    'source': 'RLIS',
                    'theme': 'environment'
                },
@@ -508,16 +596,433 @@
                      'source': 'RLIS',
                      'theme': 'places'
                  },
-                  
-
-        {
-            'name': 'RISE Points',
-            'url':'./data/points.json',
-            'type':'geojson',
-            'source': 'RISE',
-            'thumb': 'zoning.png',
-            'symbolField':'type'
-        }
+                 {
+                     'name': 'Analysis Centers',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/analysis_centers.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'NAME',
+                     'thumb': 'analysis_centers.png',
+                     'source': 'RLIS',
+                     'theme': 'planning'
+                 },
+                  {
+                     'name': 'Concept Centers',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/concept_centers.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'NAME',
+                     'thumb': 'concept_centers.png',
+                     'source': 'RLIS',
+                     'theme': 'planning'
+                 }, {
+                     'name': 'Concept Corridors',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/concept_corridors.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'CORRIDOR',
+                     'thumb': 'concept_corridors.png',
+                     'source': 'RLIS',
+                     'theme': 'planning'
+                 }, {
+                     'name': 'Concept Main Streets',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/concept_main_streets.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'MAINSTEET',
+                     'thumb': 'concept_main_streets.png',
+                     'source': 'RLIS',
+                     'theme': 'planning'
+                 },
+                 {
+                     'name': 'Concept Station Communities',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/concept_station_communities.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'STATION',
+                     'thumb': 'concept_station_communities.png',
+                     'source': 'RLIS',
+                     'theme': 'planning'
+                 }, {
+                     'name': 'Reserves',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/reserves.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'TYPE',
+                     'thumb': 'reserves.png',
+                     'source': 'RLIS',
+                     'theme': 'planning'
+                 }, {
+                     'name': 'Title 13 Riparian',
+                     'url': '//gis.oregonmetro.gov/services/NatureInNeighborhoods/riparianHabitat/tilejson',
+                     'type': 'tilejson',
+                     'thumb': 'title13_inventory.png',
+                     'source': 'RLIS',
+                     'theme': 'planning',
+                     'zIndex': 70
+                 }, {
+                     'name': 'Title 13 Upland',
+                     'url': '//gis.oregonmetro.gov/services/NatureInNeighborhoods/uplandHabitat/tilejson',
+                     'type': 'tilejson',
+                     'thumb': 'title13_inventory.png',
+                     'source': 'RLIS',
+                     'theme': 'planning',
+                     'zIndex': 71
+                 }, {
+                     'name': 'Title 3 - Water Quality and Flood Mgt',
+                     'url': '//gis.oregonmetro.gov/services/Planning/title3/tilejson',
+                     'type': 'tilejson',
+                     'thumb': 'title3.png',
+                     'source': 'RLIS',
+                     'theme': 'planning',
+                     'zIndex': 71
+                 }, {
+                     'name': 'Title 4 - Industrial and Employment Areas',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/title4.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'PLAN',
+                     'thumb': 'title4.png',
+                     'source': 'RLIS',
+                     'theme': 'planning'
+                 }, {
+                     'name': 'UGB History',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/ugb_history.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'YEAR',
+                     'thumb': 'ugb_history.png',
+                     'source': 'RLIS',
+                     'theme': 'planning'
+                 },
+                 {
+                     'name': 'Arterial',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/arterial.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'TYPE',
+                     'thumb': 'arterial.png',
+                     'source': 'RLIS',
+                     'theme': 'streets'
+                 },
+                 {
+                     'name': 'Major Arterial',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/maj_art.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'TYPE',
+                     'thumb': 'maj_art.png',
+                     'source': 'RLIS',
+                     'theme': 'streets'
+                 },
+                 {
+                     'name': 'Freeway',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/fwy.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'FTYPE',
+                     'thumb': 'fwy.png',
+                     'source': 'RLIS',
+                     'theme': 'streets'
+                 },
+                 {
+                     'name': 'Taxlots',
+                     'url': '//gis.oregonmetro.gov/services/Taxlots/Taxlots/tilejson',
+                     'type': 'tilejson',
+                     'thumb': 'taxlots.png',
+                     'source': 'RLIS',
+                     'theme': 'taxlots',
+                     'zIndex': 71,
+                     'requireToken': true
+                 }, {
+                     'name': 'Townships',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/township.zip',
+                     'type': 'shapefile',
+                     'thumb': 'section.gif',
+                     'source': 'RLIS',
+                     'theme': 'taxlots'
+                 },
+                 {
+                     'name': 'Sections',
+                     'url': '//gis.oregonmetro.gov/services/Taxlots/Sectionlines/tilejson',
+                     'type': 'tilejson',
+                     'thumb': 'section.gif',
+                     'source': 'RLIS',
+                     'theme': 'taxlots',
+                     'zIndex': 72
+                 }, {
+                     'name': 'Light Rail',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/lrt_line.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'TYPE',
+                     'thumb': 'lrt_line.png',
+                     'source': 'RLIS',
+                     'theme': 'transit'
+                 }, {
+                     'name': 'Light Rail Lines and Stops Tiles',
+                     'url': '//gis.oregonmetro.gov/services/Transit/LRT/tilejson',
+                     'type': 'tilejson',
+                     'thumb': 'lrt_line.png',
+                     'source': 'RLIS',
+                     'theme': 'transit',
+                     'zIndex': 85
+                 }, {
+                     'name': 'Light Rail Stops',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/lrt_stop.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'TYPE',
+                     'thumb': 'lrt_stop.png',
+                     'source': 'RLIS',
+                     'theme': 'transit'
+                 }, {
+                     'name': 'Park and Rides',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/parkride.zip',
+                     'type': 'shapefile',
+                     'symbolField': 'STATUS',
+                     'thumb': 'parkride.png',
+                     'source': 'RLIS',
+                     'theme': 'transit'
+                 },
+                  {
+                      'name': 'Railroad',
+                      'url': '//library.oregonmetro.gov/rlisdiscovery/railroad.zip',
+                      'type': 'shapefile',
+                      'symbolField': 'OWNER',
+                      'thumb': 'railroad.png',
+                      'source': 'RLIS',
+                      'theme': 'transit'
+                  },
+                  {
+                      'name': 'Railyards',
+                      'url': '//library.oregonmetro.gov/rlisdiscovery/railyards.zip',
+                      'type': 'shapefile',
+                      'symbolField': 'OWNER',
+                      'thumb': 'railyards.png',
+                      'source': 'RLIS',
+                      'theme': 'transit'
+                  },
+                  {
+                      'name': 'Trails - Existing',
+                      'url': '//gis.oregonmetro.gov/services/Transit/trailsExisting/tilejson',
+                      'type': 'tilejson',
+                      'thumb': 'trails.png',
+                      'source': 'RLIS',
+                      'theme': 'transit',
+                      'zIndex': 85
+                  },
+                  {
+                      'name': 'Transit Centers',
+                      'url': '//library.oregonmetro.gov/rlisdiscovery/tran_cen.zip',
+                      'type': 'shapefile',
+                      'symbolField': 'NAME',
+                      'thumb': 'tran_cen.png',
+                      'source': 'RLIS',
+                      'theme': 'transit'
+                  },
+                   {
+                       'name': '100 Yr Flood Plain',
+                       'url': '//gis.oregonmetro.gov/services/water/floodPlain/tilejson',
+                       'type': 'tilejson',
+                       'thumb': 'flood96metro.png',
+                       'source': 'RLIS',
+                       'theme': 'water',
+                       'zIndex': 75
+                   },
+                   {
+                       'name': 'Wetlands',
+                       'url': '//gis.oregonmetro.gov/services/water/wetlands/tilejson',
+                       'type': 'tilejson',
+                       'thumb': 'wetland.png',
+                       'source': 'RLIS',
+                       'theme': 'water',
+                       'zIndex': 75
+                   },
+                    {
+                        'name': 'RISE Points',
+                        'url':'./data/points.json',
+                        'type':'geojson',
+                        'source': 'RISE',
+                        'icon': './img/metro_logo.png',
+                        'thumb': 'zoning.png',
+                        'symbolField': 'type',
+                        'theme':'General'
+                    },
+                    {
+                        'name': 'TOD Revitalization Projects',
+                        'url': 'data/TOD_revitalization_projects.zip',
+                        'type': 'shapefile',
+                        'thumb': 'placeholder.png',
+                        'source': 'RISE',
+                        'theme': 'TOD'
+                    },
+                    {
+                        'name': 'Local Share',
+                        'url': 'data/parks_and_natural_areas_local_share.zip',
+                        'type': 'shapefile',
+                        'thumb': 'placeholder.png',
+                        'source': 'RISE',
+                        'theme': 'Parks and Natural Areas'
+                    },
+                    {
+                        'name': 'Sites and Bond Acquisitions',
+                        'url': 'data/parks_and_natural_areas_sites_bond_acquisitions.zip',
+                        'type': 'shapefile',
+                        'thumb': 'placeholder.png',
+                        'source': 'RISE',
+                        'theme': 'Parks and Natural Areas'
+                    },
+                    {
+                         'name': 'Planned Trails',
+                         'url': '//gis.oregonmetro.gov/services/transit/trailsPlanned/tilejson',
+                         'type': 'tilejson',
+                         'thumb': 'trails.png',
+                         'source': 'RISE',
+                         'theme': 'Transportation',
+                         'zIndex': 75
+                    },
+                    {
+                        'name': 'Existing Trails on Land',
+                        'url': '//gis.oregonmetro.gov/services/transit/trailsExisting/tilejson',
+                        'type': 'tilejson',
+                        'thumb': 'trails.png',
+                        'source': 'RISE',
+                        'theme': 'Transportation',
+                        'zIndex': 75
+                    },
+                    {
+                        'name': 'Conceptual Trails',
+                        'url': '//gis.oregonmetro.gov/services/transit/trailsConceptual/tilejson',
+                        'type': 'tilejson',
+                        'thumb': 'trails.png',
+                        'source': 'RISE',
+                        'theme': 'Transportation',
+                        'zIndex': 75
+                    },
+                    {
+                        'name': 'Bond Identified Trails',
+                        'url': '//gis.oregonmetro.gov/services/transit/bondIdentified/tilejson',
+                        'type': 'tilejson',
+                        'thumb': 'trails.png',
+                        'source': 'RISE',
+                        'theme': 'Transportation',
+                        'zIndex': 75
+                    },
+                    {
+                        'name': 'MTIP Feb 2005 Buffer',
+                        'url': 'data/mtip_buffer_02_05.zip',
+                        'type': 'shapefile',
+                        'thumb': 'placeholder.png',
+                        'source': 'RISE',
+                        'theme': 'Transportation'
+                    },
+                    {
+                        'name': 'MTIP Apr 2007 Buffer',
+                        'url': 'data/mtip_buffer_04_07.zip',
+                        'type': 'shapefile',
+                        'thumb': 'placeholder.png',
+                        'source': 'RISE',
+                        'theme': 'Transportation'
+                    },
+                    {
+                        'name': 'MTIP Jun 2009 Buffer',
+                        'url': 'data/mtip_buffer_06_09.zip',
+                        'type': 'shapefile',
+                        'thumb': 'placeholder.png',
+                        'source': 'RISE',
+                        'theme': 'Transportation'
+                    },
+                    {
+                        'name': 'MTIP Aug 2011 Buffer',
+                        'url': 'data/mtip_buffer_08_11.zip',
+                        'type': 'shapefile',
+                        'thumb': 'placeholder.png',
+                        'source': 'RISE',
+                        'theme': 'Transportation'
+                    },
+                    {
+                        'name': 'RFFA',
+                        'url': 'data/rffa.zip',
+                        'type': 'shapefile',
+                        'thumb': 'placeholder.png',
+                        'source': 'RISE',
+                        'theme': 'Transportation'
+                    },
+                    {
+                        'name': 'RFFA Buffer',
+                        'url': 'data/rffa_buffer.zip',
+                        'type': 'shapefile',
+                        'thumb': 'placeholder.png',
+                        'source': 'RISE',
+                        'theme': 'Transportation'
+                    },
+                    {
+                        'name': 'Commmunity Development Grants',
+                        'url': 'data/community_development_grants.zip',
+                        'type': 'shapefile',
+                        'thumb': 'placeholder.png',
+                        'source': 'RISE',
+                        'theme': 'General'
+                    },
+                    {
+                        'name': 'Commmunity Enhancement Grants',
+                        'url': 'data/community_enhancement_grants.zip',
+                        'type': 'shapefile',
+                        'thumb': 'placeholder.png',
+                        'source': 'RISE',
+                        'theme': 'General'
+                    },
+                    {
+                        'name': 'Industrial Lands Study',
+                        'url': 'data/industrial_lands_study.zip',
+                        'type': 'shapefile',
+                        'thumb': 'placeholder.png',
+                        'source': 'RISE',
+                        'theme': 'Major Studies'
+                    },
+                    {
+                        'name': 'SW Corridor Data Collection',
+                        'url': 'data/SW_Corridor_data_collection.zip',
+                        'type': 'shapefile',
+                        'thumb': 'placeholder.png',
+                        'source': 'RISE',
+                        'theme': 'Major Studies'
+                    },
+                   {
+                       'name': 'Trimet Boundary',
+                       'url': '//developer.trimet.org/gis/data/tm_boundary.zip',
+                       'type': 'shapefile',
+                       'metadataUrl':'http://developer.trimet.org/gis/meta_tm_boundary.shtml',
+                       'thumb': 'placeholder.png',
+                       'source': 'TriMet',
+                       'icon':'//ben/allegro/img/trimet_logo.png',
+                       'theme': '',
+                       'zIndex': 75
+                   },
+                   {
+                       'name': 'Trimet Park and Rides',
+                       'url': '//developer.trimet.org/gis/data/tm_parkride.zip',
+                       'type': 'shapefile',
+                       'thumb': 'placeholder.png',
+                       'source': 'TriMet',
+                       'theme': '',
+                       'zIndex': 75
+                   },
+                   {
+                       'name': 'Trimet Rail Lines',
+                       'url': '//developer.trimet.org/gis/data/tm_rail_lines.zip',
+                       'type': 'shapefile',
+                       'thumb': 'placeholder.png',
+                       'source': 'TriMet',
+                       'theme': '',
+                       'zIndex': 75
+                   },
+                   {
+                       'name': 'Trimet Rail Stops',
+                       'url': '//developer.trimet.org/gis/data/tm_rail_stops.zip',
+                       'type': 'shapefile',
+                       'thumb': 'placeholder.png',
+                       'source': 'TriMet',
+                       'theme': '',
+                       'zIndex': 75
+                   },
+                   {
+                       'name': 'Trimet Transit Centers',
+                       'url': '//developer.trimet.org/gis/data/tm_tran_cen.zip',
+                       'type': 'shapefile',
+                       'thumb': 'placeholder.png',
+                       'source': 'TriMet',
+                       'theme': '',
+                       'zIndex': 75
+                   }
 
     ],
 }

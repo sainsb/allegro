@@ -35,6 +35,15 @@ $(document).ready(function () {
         $('#basemapModal').modal('show');
     });
 
+    $('#sliBasemap').on('input', function() {
+        //get active basemap
+        for (var b in config.basemaps) {
+            if (config.basemaps[b].active == true) {
+                config.basemaps[b].mapLayer.setOpacity($(this).val() / 100);
+            }
+        }
+    });
+
     //Attach behavior to legend checkboxes
     $('body').on('click', '.legend-check', function () {
         var id = $(this).attr('id').replace('chk', '');
@@ -71,20 +80,13 @@ $(document).ready(function () {
         }
     });
 
+    initMap();
+
     populateLayers();
 
     populateBasemaps();
     
     populatePalettes();
-
-    //$(document).on('click', '.legend-item', function(){
-    //  console.log($(this))  
-    //  var color = $(this).data('data-color');
-    //  console.log(color);
-
-    //  //$('#colorpicker').colorpicker('setValue', color);
-    //  //$('#colorModal').modal('show');
-    //});
 
     $('#btnAerial').click(function () {
         $(this).addClass('active');
@@ -126,22 +128,15 @@ $(document).ready(function () {
         map.setView([result[0].lat, result[0].lng], 15);
     });
 
-    initMap();
-
 });
 
 function initMap() {
-
-    baseAll = new L.TileLayer('//{s}.oregonmetro.gov/ArcGIS/rest/services/metromap/baseAll/MapServer/tile/{z}/{y}/{x}/?token=' + RLIS.token, { zIndex: 10, subdomains: SUBDOMAINS });
-    baseAnno = new L.TileLayer('//{s}.oregonmetro.gov/ArcGIS/rest/services/metromap/baseAnno/MapServer/tile/{z}/{y}/{x}/?token=' + RLIS.token, { zIndex: 9100, subdomains: SUBDOMAINS });
-    photo = new L.TileLayer('//{s}.oregonmetro.gov/ArcGIS/rest/services/photo/2013aerialphoto/MapServer/tile/{z}/{y}/{x}/?token=' + RLIS.token, { maxZoom: 19, zIndex: 10, subdomains: SUBDOMAINS });
 
     map = new L.Map('map', {
         center: new L.LatLng(45.44944, -122.67599),
         zoom: 10,
         minZoom: 9,
         maxZoom: 19,
-        layers: [baseAll],
         fullscreenControl: true
     });
 
@@ -199,38 +194,59 @@ function loadTileJSON(layer) {
 
         applyContextMenu('#lbl' + id, LAYER_TYPES.tilejson);
 
-        layer.mapLayer = new L.TileLayer(data.canonicalURL + '?token=' + RLIS.token, { subdomains: data.subdomains, zIndex: (typeof layer.zIndex != 'undefined') ? layer.zIndex : 70});
+        var url = data.canonicalURL;
+
+        if (typeof(layer.requireToken) != 'undefined') {
+            url += '?token=' + config.token;
+        }
+
+        layer.mapLayer = new L.TileLayer(url, { subdomains: data.subdomains, zIndex: (typeof layer.zIndex != 'undefined') ? layer.zIndex : 70, maxZoom:19});
 
         layer.mapLayer.addTo(map);
 
     });
 }
 
-function parseGeoJSON(data, layer) {
+function loadBasemap(basemap) {
+    var zIndex = (typeof (basemap.zIndex) != 'undefined') ? basemap.zIndex : 70;
+    var attribution = (typeof (basemap.source) != 'undefined') ? basemap.source : '';
+    var url = (typeof (basemap.requireToken) != 'undefined') ? basemap.url + '?token=' + config.token : basemap.url;
+    var maxZoom = (typeof(basemap.maxZoom) != 'undefined') ? basemap.maxZoom : 19;
+    basemap.mapLayer = new L.TileLayer(url, { zIndex: zIndex, attribution: attribution, subdomains: SUBDOMAINS, maxZoom:maxZoom });
+    map.addLayer(basemap.mapLayer);
+}
 
+function parseGeoJSON(data, layer) {
+ 
     var geoJson = {};
 
     // take legend def in config over data legend
-    if (typeof (layer.legend) === 'undefined') {
+    if (typeof (layer.legend) == 'undefined') {
         if (typeof (data.legend) === 'undefined') {
             layer.ramp = DEFAULT_RAMP;
             layer.legend = { "symbols": [], "title": layer.name };
 
-            var values = [];
-            
-            for (var i = 0; i < data.features.length; i++) {
-                if ($.inArray(data.features[i].properties[layer.symbolField], values) === -1) {
-                    values.push(data.features[i].properties[layer.symbolField]);
+            if (typeof(layer.symbolField) != 'undefined') {
+
+                var values = [];
+
+                for (var i = 0; i < data.features.length; i++) {
+                    if ($.inArray(data.features[i].properties[layer.symbolField], values) === -1) {
+                        values.push(data.features[i].properties[layer.symbolField]);
+                    }
                 }
+
+                layer.scale = chroma.scale(DEFAULT_RAMP).domain([1, (values.length > 1) ? values.length : 2]).out('hex');
+
+                for (var val in values.sort(myComparator)) {
+                    layer.legend.symbols.push(createJSONLegend(values[val], layer.scale));
+                }
+            } else { //single symbol legend
+                layer.legend.symbols.push({
+                    "value": "*",
+                    "fillColor": getRandomColor(), 'color': DEFAULT_COLOR, 'weight': DEFAULT_WEIGHT
+                });
             }
-
-            layer.scale = chroma.scale(DEFAULT_RAMP).domain([1, values.length]).out('hex');
-
-            for (var val in values.sort(myComparator)) {
-                values[val] = values[val];
-                createJSONLegend(values[val], layer.scale, layer.legend.symbols);
-            }
-
         } else {
             layer.legend = data.legend;
         }
@@ -289,14 +305,20 @@ function parseGeoJSON(data, layer) {
     for (var field in data.features[0].properties) {
         var fieldType = isNaN(data.features[0].properties[field]) ? 'string' : 'number';
         layer.fields.push({ name: field, type: fieldType});
-        
     }
 
     //create the HTMLLegend from the jsonLegend property of the layer.
     var legend = createHTMLLegend(layer);
 
     $('#legend').prepend(legend);
+ 
     applyContextMenu('#lbl' + id);
+
+    //Gettuing too fancy
+    //$('#lbl' + id).on('dblclick', function() {
+    //    changeSymbolHandler(id);
+    //});
+
     layer.HTMLLegend = legend;
     layer.mapLayer = geoJson.addTo(map);
 }
@@ -371,8 +393,11 @@ function createHTMLLegend(layer) {
    
     var id = layer.name.replace(/\s/g, '_');
 
+    var title = (typeof(layer.legend.title) != 'undefined') ? layer.legend.title : layer.name;
+
     var HTMLLegend = '<div class="legend" id="leg' + id + '">';
-    HTMLLegend += '<label id="lbl' + id + '""><input type="checkbox" id="chk' + id + '" style="clear:both;float:left;" checked="checked" class="legend-check"/>&nbsp;&nbsp;<b>' + layer.legend.title + '</b></label>';
+
+    HTMLLegend += '<label id="lbl' + id + '""><input type="checkbox" id="chk' + id + '" style="clear:both;float:left;" checked="checked" class="legend-check"/>&nbsp;&nbsp;<b>' + title + '</b></label>';
 
     HTMLLegend += HTMLLegendFactory(layer);
 
@@ -399,25 +424,25 @@ function HTMLLegendFactory(layer) {
 */
 function createHTMLLegendItem(geom, symbol) {
     var legendItem = null;
-
+    var symVal = (symbol.value == '*') ? '' : symbol.value;
     switch (geom) {
         case "Point":
-            legendItem = '<div class="legend-item" data-color="' + symbol.fillColor + '" id="' + symbol.value + '"><svg width="16" height="14">'
+            legendItem = '<div class="legend-item" data-color="' + symbol.fillColor + '" id="' + symVal + '"><svg width="16" height="14">'
                     + '<circle cx="6.5" cy="8" r="5.8" stroke="'+symbol.color+'" stroke-width="'+symbol.weight+'" fill="' + symbol.fillColor + '" />'
-                    + '</svg> ' + symbol.value + '</div>';
+                    + '</svg> ' + symVal + '</div>';
             break;
         case "Polygon":
         case "MultiPolygon":
-            legendItem = '<div class="legend-item" data-color="' + symbol.fillColor + '" id="' + symbol.value + '">'
+            legendItem = '<div class="legend-item" data-color="' + symbol.fillColor + '" id="' + symVal + '">'
                 + '<svg width="16" height="14">'
                 + '<rect width="12" height="12" fill=' + symbol.fillColor + ' stroke-width="'+symbol.weight+'" stroke="'+symbol.color+'">'
-                + '</svg> ' + symbol.value + '</div>';
+                + '</svg> ' + symVal + '</div>';
             break;
         case "LineString":
-            legendItem = '<div class="legend-item" data-color="' + symbol.fillColor + '" id="' + symbol.value + '">'
+            legendItem = '<div class="legend-item" data-color="' + symbol.fillColor + '" id="' + symVal + '">'
                 + '<svg width="16" height="14">'
                 + '<rect width="12" height="4" fill=' + symbol.fillColor + ' stroke-width="'+symbol.weight+'" stroke="'+symbol.color+'">'
-                + '</svg> ' + symbol.value + '</div>';
+                + '</svg> ' + symVal + '</div>';
     }
 
     return legendItem;
@@ -432,6 +457,13 @@ function styleFromLegend(feature, layer) {
     //value will always be found in legend.
     for (var i = 0; i < layer.legend.symbols.length; i++) {
         var sym = layer.legend.symbols[i];
+        if (sym.value == '*') {
+            color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
+            weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
+            fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777';
+            break;
+        }
+
         if (isNaN(value)) {
             if (sym.value.toUpperCase() == value.toUpperCase()) {
                 color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
@@ -460,19 +492,18 @@ function styleFromLegend(feature, layer) {
     if (feature.geometry.type == 'Point') {
         style.radius = 5;
     }
-
     return style;
 };
 
-function createJSONLegend(value, scale, symbols, color, weight) {
+function createJSONLegend(value, scale,  color, weight) {
 
     color = (typeof (color) !== 'undefined') ? color : DEFAULT_COLOR;
     weight = (typeof (weight) !== 'undefined') ? weight : DEFAULT_WEIGHT;
 
-    symbols.push({
+    return{
         "value": value,
         "fillColor": getColorFromRamp(scale), 'color': color, 'weight': weight
-    });
+    };
 }
 
 function populateLayers() {
@@ -490,7 +521,14 @@ function populateLayers() {
                 sourceTabString += 'class="active"';
             }
 
-            sourceTabString += '><a href="#' + layer.source + '" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;' + layer.source + '</a></li>';
+            sourceTabString += '><a href="#' + layer.source + '" data-toggle="tab">';
+
+            if (typeof (layer.icon) != 'undefined') {
+                sourceTabString += '<img src="' + layer.icon + '" align="left" style="margin-top:3px;"/>&nbsp;';
+            } else{
+                sourceTabString += '<i class="fa fa-check-circle-o"></i>&nbsp;';
+            }
+            sourceTabString += layer.source + '</a></li>';
 
             $('#layerSourceTabs').append(sourceTabString);
 
@@ -507,16 +545,14 @@ function populateLayers() {
 
         //If the layers theme section doesn't exist in the source tab content,
         //create it.
-        if (typeof layer.theme == 'undefined') {
-            layer.theme = '';
-        }
+        var theme = (typeof layer.theme == 'undefined') ? '' : layer.theme.replace(/\s/g, '_');
 
-        if (!$('#' + layer.source + '_' + layer.theme).length) {
-                $('#' + layer.source).append('<div style="clear:both;" id="' + layer.source + '_' + layer.theme + '"><h4 style="margin:0;">' + layer.theme.toProperCase() + '</h4><hr style="margin:0;padding:0;"/></div');
+        if (!$('#' + layer.source + '_' + theme).length) {
+                $('#' + layer.source).append('<div style="clear:both;" id="' + layer.source + '_' + theme + '"><h4 style="margin:0;">' + layer.theme + '</h4><hr style="margin:0;padding:0;"/></div');
         }
 
         var thumb = GRAPHIC_PREFIX + layer.thumb;
-        $('#' + layer.source + '_' + layer.theme).append("<div class='img-block layer'><div class='caption'>" + layer.name + "</div><img class='idata' src='" + thumb + "' alt='" + layer.name + "' id='img" + id + "'/></div>");
+        $('#' + layer.source + '_' + theme).append("<div class='img-block layer "+layer.type+"'><div class='caption'>" + layer.name + "</div><img class='idata' src='" + thumb + "' alt='" + layer.name + "' id='img" + id + "'/></div>");
     }
     
     $('.img-block.layer').on('click', function () {
@@ -551,25 +587,33 @@ function populateLayers() {
 }
 
 function populateBasemaps() {
+
+    var madeFirstActiveTab = false;
+
     for (_basemap in config.basemaps) {
 
         var basemap = config.basemaps[_basemap];
         var id = basemap.name.replace(/\s/g, '_');
 
-        var madeFirstActiveTab = false;
 
         var source = basemap.source;
         var theme = basemap.theme.replace(/\s/g, '_');
 
         //If the layers source tab doesn't exist, create it.
         if (!$('#' + source).length) {
-            
             var sourceTabString = '<li ';
             if (!madeFirstActiveTab) {
                 sourceTabString += 'class="active"';
             }
 
-            sourceTabString += '><a href="#' +  + '" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;' + source + '</a></li>';
+            sourceTabString += '><a href="#' + basemap.source + '" data-toggle="tab">';
+
+            if (typeof (basemap.icon) != 'undefined') {
+                sourceTabString += '<img src="' + basemap.icon + '" align="left" style="margin-top:3px;"/>&nbsp;';
+            } else {
+                sourceTabString += '<i class="fa fa-check-circle-o"></i>&nbsp;';
+            }
+            sourceTabString += basemap.source + '</a></li>';
 
             $('#basemapSourceTabs').append(sourceTabString);
 
@@ -584,12 +628,22 @@ function populateBasemaps() {
             $('#basemapSourceTabs').next().append(tabstring);
         }
 
-        if (!$('#' + source + '_' + basemap.theme).length) {
+        if (!$('#' + source + '_' + theme).length) {
             $('#' + source).append('<div style="clear:both;" id="' + source + '_' + theme + '"><h4 style="margin:0;">' + basemap.theme + '</h4><hr style="margin:0;padding:0;"/></div');
         }
 
         var thumb = GRAPHIC_PREFIX + basemap.thumb;
-        $('#' + source + '_' + theme).append("<div class='img-block basemap'><div class='caption'>" + basemap.name + "</div><img class='idata' src='" + thumb + "' alt='" + basemap.name + "' id='img" + id + "'/></div>");
+
+        var imgBlockText = "<div class='img-block basemap";
+
+        if (basemap.active == true) {
+            imgBlockText += ' active';
+            loadBasemap(basemap);
+        }
+
+        imgBlockText += "'><div class='caption'>" + basemap.name + "</div><img class='idata' src='" + thumb + "' alt='" + basemap.name + "' id='img" + id + "'/></div>";
+
+        $('#' + source + '_' + theme).append(imgBlockText);
     }
 
     $('.img-block.basemap').on('click', function () {
@@ -600,19 +654,20 @@ function populateBasemaps() {
         //remove previous basemap
         //handle multi-ply layers etc. etc.
 
-        if ($(this).hasClass('active')) {
-            $(this).removeClass('active');
-            map.removeLayer(basemap.mapLayer);
+        //get existing basemap
+        var oldBasemap = $($('.img-block.basemap.active')[0]).removeClass('active').find('img').attr('id').replace('img','');
+        oldBasemap = getBasemapById(oldBasemap);
+        oldBasemap.active = false;
+        map.removeLayer(oldBasemap.mapLayer);
+      
+        $(this).addClass('active');
+        if (typeof (basemap.mapLayer) != 'undefined') {
+            map.addLayer(basemap.mapLayer);
         }
         else {
-            $(this).addClass('active');
-            if (typeof (layer.mapLayer) != 'undefined') {
-                map.addLayer(basemap.mapLayer);
-            }
-            else {
-                addTileLayer(basemap.url);
-            }
+            loadBasemap(basemap);
         }
+        basemap.active = true;
     });
 
     $('.img-block.basemap').hover(
@@ -623,8 +678,6 @@ function populateBasemaps() {
             $(this).find('.caption').removeClass('hover');
         }
       );
-
-
 }
 
 function populatePalettes() {
@@ -674,6 +727,8 @@ function changeSymbolHandler(id) {
         }
 
         $('#selGradient').prepend($span);
+    } else {
+        //we're dealing with a custom legend here... no ramp...
     }
 
     $('#selCatField').off('change.core');
@@ -733,16 +788,35 @@ function changeSymbolHandler(id) {
     });
 
     //recreate the legend in the dialog???
-
     $('#rendererLegend').empty().append(HTMLLegendFactory(layer));
+
+    //Set to correct tab
+    if (layer.legend.symbols[0].value == '*') {
+        //change to single symbol tab
+        //APPARENTLY THIS IS HARD>...
+        //if ($($('#symbolTabs').children()[1]).hasClass('active')) {
+        //        $('#symbolTabs li.active')
+        //        .prev()
+        //        .find('a[data-toggle="tab"]')
+        //        .click();
+
+        //        $('#uniqueValues').removeClass('active in');
+        //        $('#singleFill').addClass('active in');
+        //}
+
+        //set single symbol to match fillColor, weight and color
+    }
+
     $('#symbolModal').modal('show');
 }
 
 function resymbolize(layer) {
-    console.log('yo');
 
     //get ramp, 
     var ramp= $($('#selGradient').children()[0]).attr('title');
+    
+    //if ramp==undefined then we have a custom color set...
+    //test if layer.ramp==ramp?
 
     //get field
     var symbolField = $('#selCatField').val();
@@ -773,11 +847,22 @@ function resymbolize(layer) {
             values.push(layer.legend.symbols[i].value);
         }
     }
+    
+    if (typeof(ramp) != 'undefined' || layer.ramp != ramp) {
+        var scale = chroma.scale(ramp).domain([1, values.length]).out('hex');
 
-    var scale = chroma.scale(ramp).domain([1, values.length]).out('hex');
-
-    for (var val in values.sort(myComparator)) {
-        createJSONLegend(values[val], scale, phantomSymbols, color, weight);
+        for (var val in values.sort(myComparator)) {
+            phantomSymbols.push(
+                createJSONLegend(values[val], scale, color, weight)
+            );
+        }
+    } else {
+        //get colors from existing legend.
+        //keep fillcolor the same here but alter weight and color....
+        for (var s in layer.legend.symbols) {
+            var sym = layer.legend.symbols[s];
+            phantomSymbols.push({ value: sym.value, fillColor: sym.fillColor, color: color, weight: weight });
+        }
     }
 
     var legendItems = HTMLLegendFactory({name : layer.name,geom: layer.geom, legend: {symbols: phantomSymbols }});
@@ -818,20 +903,20 @@ function applyContextMenu(id) {
         compress: false
     });
 
-    context.attach(id, [
+    var contents = [
         { header: 'Options' },
         {
             text: 'Change Color...',
-            action: function () { changeSymbolHandler(id); }
+            action: function() { changeSymbolHandler(id); }
         },
         {
             text: 'Remove',
-            action: function (e) {
+            action: function(e) {
                 id = id.replace('#lbl', '');
                 var layer = getLayerById(id);
                 map.removeLayer(layer.mapLayer);
                 $('#leg' + id).remove();
-                $('.img-block.active').each(function (index) {
+                $('.img-block.active').each(function(index) {
                     if ($(this).find('img').attr('id').replace('img', '') == id) {
                         $(this).removeClass('active');
                     }
@@ -841,29 +926,53 @@ function applyContextMenu(id) {
         {
             text: "Download...",
             subMenu: [
-                { text: 'Shapefile',  target: '_blank' },
-                { text: 'GeoJSON',  target: '_blank' }
+                { text: 'Shapefile', target: '_blank' },
+                { text: 'GeoJSON', target: '_blank' }
             ]
         },
-         { header: 'Opacity' },
-         {
-             value: function() {
-                 id = id.replace('#lbl', '');
-                 var layer = getLayerById(id);
-                 return (typeof layer.opacity !== 'undefined') ? layer.opacity :
-                 100;
-             },
-             id: id.replace('#lbl', '')
-         },
-         { header: 'Developer' },
-            {
-                text: 'Export Symbology',
-                action: function (e) {
-                    id = id.replace('#lbl', '');
-                    var layer = getLayerById(id);
-                }
+        {
+            text: 'Zoom To',
+            action: function(e) {
+                id = id.replace('#lbl', '');
+                var layer = getLayerById(id);
+                map.fitBounds(layer.mapLayer.getBounds());
             }
-    ]);
+        }
+    ];
+
+    var layer = getLayerById(id.replace('#lbl', ''));
+
+    if (typeof(layer.metadataUrl) != 'undefined') {
+        contents.push(
+        {
+            text: 'View Metadata...',
+            action: function (e) {
+                id = id.replace('#lbl', '');
+                var layer = getLayerById(id);
+                window.open(layer.metadataUrl, '_blank');
+            }
+        });
+    }
+
+    contents.push({ header: 'Opacity' }, {
+        value: function() {
+            id = id.replace('#lbl', '');
+            var layer = getLayerById(id);
+            return (typeof layer.opacity !== 'undefined') ? layer.opacity :
+                100;
+        },
+        id: id.replace('#lbl', '')
+        },
+    { header: 'Developer' },
+    {
+        text: 'Export Symbology',
+        action: function(e) {
+            id = id.replace('#lbl', '');
+            var layer = getLayerById(id);
+        }
+    });
+
+    context.attach(id, contents);
 }
 
 Storage.prototype.setObject = function (key, value) {
@@ -898,9 +1007,9 @@ function getLayerById(id) {
 }
 
 function getBasemapById(id) {
-    for (var layer in config.layers) {
-        if (config.layers[layer].name.replace(/\s/g, '_') == id) {
-            return config.layers[layer];
+    for (var basemap in config.basemaps) {
+        if (config.basemaps[basemap].name.replace(/\s/g, '_') == id) {
+            return config.basemaps[basemap];
         }
     }
     return null;
@@ -922,6 +1031,10 @@ function myComparator(a, b) {
         }
     }
     return 0;
+}
+
+function getRandomColor() {
+    return "#" + ((1 << 24) * Math.random() | 0).toString(16);
 }
 
 function compare(a, b) {
