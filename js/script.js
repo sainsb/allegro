@@ -792,21 +792,11 @@ function changeSymbolHandler(id) {
 
     //Set to correct tab
     if (layer.legend.symbols[0].value == '*') {
-        //change to single symbol tab
-        //APPARENTLY THIS IS HARD>...
-        //if ($($('#symbolTabs').children()[1]).hasClass('active')) {
-        //        $('#symbolTabs li.active')
-        //        .prev()
-        //        .find('a[data-toggle="tab"]')
-        //        .click();
-
-        //        $('#uniqueValues').removeClass('active in');
-        //        $('#singleFill').addClass('active in');
-        //}
-
-        //set single symbol to match fillColor, weight and color
+        //haxxor - bootstrap tabs don't work right...
+        //the uniqueValues tab is still active.. I can't make it not active w/out breaking this thing...
+        $('#symbolTabs > li > a').first().tab('show');
+        $('#singleFill').addClass('active in');
     }
-
     $('#symbolModal').modal('show');
 }
 
