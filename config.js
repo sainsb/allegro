@@ -212,7 +212,7 @@
                 'source': 'RLIS',
                 'theme':'boundary'
             },{
-                'name': 'Fire District Alt',
+                'name': 'Fire District Tile Layer',
                 'url': '//gis.oregonmetro.gov/services/Boundary/fireDistricts/tilejson',
                 'type': 'tilejson',
                 'thumb': 'fire_dst.png',

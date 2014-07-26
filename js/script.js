@@ -13,6 +13,7 @@ var GRAPHIC_PREFIX = 'http://library.oregonmetro.gov/rlisdiscovery/browse_graphi
 
 var DEFAULT_RAMP = 'RdYlBu';
 var DEFAULT_COLOR = '#444';
+var DEFAULT_FILLCOLOR = '#444';
 var DEFAULT_WEIGHT = 1;
 
 var scaleCounter = 0;
@@ -61,7 +62,7 @@ $(document).ready(function () {
     });
     
     //Attach behavior to opacity sliders
-    $('body').on('input', '.slider', function (e) {
+    $('body').on('input', '.sliderFillOpacity', function (e) {
         var id = $(this).attr('id').replace('sli', '');
         var layer = getLayerById(id);
         layer.opacity = $(this).val() / 100;
@@ -71,13 +72,21 @@ $(document).ready(function () {
                 layer.mapLayer.setStyle
             ({
                 fillOpacity: layer.opacity,
-                opacity: layer.opacity
             });
                 break;
             case "tilejson":
                 layer.mapLayer.setOpacity(layer.opacity);
                 break;
         }
+    });
+
+    $('body').on('input', '.sliderStrokeOpacity', function (e) {
+        var id = $(this).attr('id').replace('sli', '');
+        var layer = getLayerById(id);
+        layer.opacity = $(this).val() / 100;
+        layer.mapLayer.setStyle({
+                opacity: layer.opacity
+            });
     });
 
     initMap();
@@ -223,6 +232,7 @@ function parseGeoJSON(data, layer) {
     // take legend def in config over data legend
     if (typeof (layer.legend) == 'undefined') {
         if (typeof (data.legend) === 'undefined') {
+
             layer.ramp = DEFAULT_RAMP;
             layer.legend = { "symbols": [], "title": layer.name };
 
@@ -231,8 +241,14 @@ function parseGeoJSON(data, layer) {
                 var values = [];
 
                 for (var i = 0; i < data.features.length; i++) {
-                    if ($.inArray(data.features[i].properties[layer.symbolField], values) === -1) {
-                        values.push(data.features[i].properties[layer.symbolField]);
+                    var value = data.features[i].properties[layer.symbolField];
+
+                    if (value != value) {
+                        value='null';
+                    }
+
+                    if ($.inArray(value, values) === -1) {
+                        values.push(value);
                     }
                 }
 
@@ -312,15 +328,22 @@ function parseGeoJSON(data, layer) {
 
     $('#legend').prepend(legend);
  
-    applyContextMenu('#lbl' + id);
-
     //Gettuing too fancy
     //$('#lbl' + id).on('dblclick', function() {
     //    changeSymbolHandler(id);
     //});
 
     layer.HTMLLegend = legend;
+
     layer.mapLayer = geoJson.addTo(map);
+    //_(layer.mapLayer);
+    //layer.mapLayer.on('add', function () {
+      //  _('yay');
+        applyContextMenu('#lbl' + id);
+    //});
+
+    //map.addLayer(layer.mapLayer);
+
 }
 
 function loadShapefile(options) {
@@ -395,15 +418,19 @@ function createHTMLLegend(layer) {
 
     var title = (typeof(layer.legend.title) != 'undefined') ? layer.legend.title : layer.name;
 
-    var HTMLLegend = '<div class="legend" id="leg' + id + '">';
+    var HTMLLegend = '<div class="legend panelyr collapsed" data-toggle="collapse" data-target="#legItems'+id+'" id="leg' + id + '"><span class="accordion-toggle"></span>';
 
-    HTMLLegend += '<label id="lbl' + id + '""><input type="checkbox" id="chk' + id + '" style="clear:both;float:left;" checked="checked" class="legend-check"/>&nbsp;&nbsp;<b>' + title + '</b></label>';
+    HTMLLegend += '<label id="lbl' + id + '""><input type="checkbox" id="chk' + id + '" style="float:left;margin-right:5px;margin-left:3px;" checked="checked" class="legend-check"/>&nbsp;&nbsp;<b>' + title + '</b></label>';
 
     HTMLLegend += HTMLLegendFactory(layer);
 
-    HTMLLegend += '</div>';
+    HTMLLegend += '</div><div id="legItems' + id + '"></div>';
 
     return HTMLLegend;
+}
+
+function _(msg) {
+    console.log(msg);
 }
 
 function HTMLLegendFactory(layer) {
@@ -450,49 +477,56 @@ function createHTMLLegendItem(geom, symbol) {
 
 function styleFromLegend(feature, layer) {
     
-    var color, weight, fillColor;
-
     var value = feature.properties[layer.symbolField];
 
-    //value will always be found in legend.
-    for (var i = 0; i < layer.legend.symbols.length; i++) {
-        var sym = layer.legend.symbols[i];
-        if (sym.value == '*') {
-            color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
-            weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
-            fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777';
-            break;
-        }
-
-        if (isNaN(value)) {
-            if (sym.value.toUpperCase() == value.toUpperCase()) {
-                color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
-                weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
-                fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777';
-                break;
-            }
-        }
-        else if (layer.legend.symbols[i].value == value) {
-            color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
-            weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
-            fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777';
-            break;
-        }
-    }
-
-    var style=  {
-            fillColor: fillColor,
-            fillOpacity: layer.opacity,
-            stroke: (weight>0) ? true: false,
-            weight: weight,
-            opacity: layer.opacity,
-            color: color
+    var style = {
+        fillColor: DEFAULT_FILLCOLOR,
+        fillOpacity: layer.opacity,
+        stroke: true,
+        weight: DEFAULT_WEIGHT,
+        opacity: layer.opacity,
+        color: DEFAULT_COLOR
     };
 
     if (feature.geometry.type == 'Point') {
         style.radius = 5;
     }
-    return style;
+
+    //NaN is the only value in javascript that does not equal itself
+    if (value !== value) {
+        return style;
+    }
+
+    //value will always be found in legend.
+    for (var i = 0; i < layer.legend.symbols.length; i++) {
+        var sym = layer.legend.symbols[i];
+
+        if (sym.value == '*') {
+            style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
+            style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
+            style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777';
+
+            return style;
+        }
+
+        if (isNaN(value) && isNaN(sym.value)) {
+
+            if (sym.value.toUpperCase() == value.toUpperCase()) {
+                style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
+                style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
+                style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777';
+
+                return style;
+            }
+        } else if (layer.legend.symbols[i].value == value) {
+            style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
+            style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
+            style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777';
+
+            return style;
+        }
+    }
+
 };
 
 function createJSONLegend(value, scale,  color, weight) {
@@ -500,9 +534,19 @@ function createJSONLegend(value, scale,  color, weight) {
     color = (typeof (color) !== 'undefined') ? color : DEFAULT_COLOR;
     weight = (typeof (weight) !== 'undefined') ? weight : DEFAULT_WEIGHT;
 
+    var fillColor;
+
+    if (value == 'null') {
+        fillColor = DEFAULT_FILLCOLOR;
+        scaleCounter += 1;
+
+    } else {
+        fillColor = getColorFromRamp(scale);
+    }
+
     return{
         "value": value,
-        "fillColor": getColorFromRamp(scale), 'color': color, 'weight': weight
+        "fillColor": fillColor, 'color': color, 'weight': weight
     };
 }
 
@@ -731,6 +775,7 @@ function changeSymbolHandler(id) {
         //we're dealing with a custom legend here... no ramp...
     }
 
+    //populate field select control
     $('#selCatField').off('change.core');
 
     $('#selCatField').empty();
@@ -743,29 +788,48 @@ function changeSymbolHandler(id) {
     });
 
     $('#selCatField').selectpicker('val', layer.symbolField);
-
-    //match with exisint layer.symbolField;
-
+    
     $('.selectpicker').selectpicker('refresh');
 
-    //setup event handlers for single color
-    $('#_colSingleFill').off('changeColor').on('changeColor', function (ev) {
-        layer.mapLayer.setStyle({ fillColor: ev.color.toHex() });
-    });
+    //remove event handlers for single color before changing their values
+    $('#_colSingleFill, #_colSingleStroke').off('changeColor');
 
-    $('#_colSingleStroke').off('changeColor').on('changeColor', function (ev) {
-        layer.mapLayer.setStyle({ color: ev.color.toHex() });
-    });
+    $('#rngSingleWeight').off('change');
 
-    $('#rngSingleStroke').off('change').on('change', function(e) {
-        layer.mapLayer.setStyle({ weight: $(this).val() });
-    });
+    var legend = HTMLLegendFactory(layer);
 
-     $('#_colCatStroke').off('changeColor').on('changeColor', function (ev) {
-        resymbolize(layer);
+    //Set to correct tab
+    if (layer.legend.symbols[0].value == '*') {
+        //haxxor - bootstrap tabs don't work right...
+        //the uniqueValues tab is still active.. I can't make it not active w/out breaking this thing...
+        $('#symbolTabs > li > a').first().tab('show');
+        $('#singleFill').addClass('active in');
+
+        //match colors and stroke
+        $('#_colSingleFillColor').colorpicker('setValue', layer.legend.symbols[0].fillColor);
+        $('#_colSingleColor').colorpicker('setValue', layer.legend.symbols[0].color);
+        $('#rngSingleWeight').val(layer.legend.symbols[0].weight);
+
+        //show the legend item
+        $('#singleLegend').empty().append(legend);
+    } else {
+        //recreate the legend in the dialog???
+        $('#catLegend').empty().append(legend);
+    }
+
+    $('#_colSingleFillColor, #_colSingleColor').on('changeColor', function (ev) {
+        singleFillResymbolize(layer);
+    });
+    
+    $('#rngSingleWeight').on('change', function (e) {
+        singleFillResymbolize(layer);
     });
 
     //event handlers for categories
+    $('#_colCatStroke').off('changeColor').on('changeColor', function (ev) {
+        resymbolize(layer);
+    });
+
     $('#rngCatWeight').on('change', function(){
        resymbolize(layer);
     });
@@ -787,17 +851,36 @@ function changeSymbolHandler(id) {
         resymbolize(layer);
     });
 
-    //recreate the legend in the dialog???
-    $('#rendererLegend').empty().append(HTMLLegendFactory(layer));
-
-    //Set to correct tab
-    if (layer.legend.symbols[0].value == '*') {
-        //haxxor - bootstrap tabs don't work right...
-        //the uniqueValues tab is still active.. I can't make it not active w/out breaking this thing...
-        $('#symbolTabs > li > a').first().tab('show');
-        $('#singleFill').addClass('active in');
-    }
     $('#symbolModal').modal('show');
+}
+
+function singleFillResymbolize(layer) {
+    var phantomSymbol = { value: '*', fillColor: $('#colSingleFillColor').val(), color: $('#colSingleColor').val(), weight: $('#rngSingleWeight').val() };
+
+    var legendItem = createHTMLLegendItem(layer.geom, phantomSymbol);
+
+    $('#singleLegend').empty().html(legendItem);
+
+    $('#btnApplySymbol').off().on('click', function () {
+
+        //use the new jsonlegend
+        layer.legend.symbols = [phantomSymbol];
+
+        layer.mapLayer.setStyle(function (feature) {
+            return styleFromLegend(feature, layer);
+        });
+
+        var id = layer.name.replace(/\s/g, '_');
+
+        layer.ramp = ramp;
+        $('#leg' + id + ' .legend-item').remove();
+        $('#leg' + id).append(legendItem);
+
+        var HTMLLegend = $('#leg' + id).clone().html();
+        layer.HTMLLegend = '<div class="legend" id="leg' + id + '">' + HTMLLegend + '</div';
+    });
+
+    $('#catLegend').empty();
 }
 
 function resymbolize(layer) {
@@ -817,18 +900,20 @@ function resymbolize(layer) {
     //get whatever color we're not sourcing from the ramp.
     var color = $('#colCatStroke').val();
 
-    //! only if the symbolField has changed do we need to iterate the features again
+    //! only if the symbolField has changed, or we have a single, asterix
+    //value in the symbols do we need to iterate the features again
     //take the ramp, reparse the JSON features and build a fake JSON legend
     var phantomSymbols = [];
 
     var values = [];
 
-    if (symbolField != layer.symbolField) {
+    if (symbolField != layer.symbolField || layer.legend.symbols[0].value=='*') {
         for (var feature in layer.mapLayer._layers) {
             if ($.inArray(layer.mapLayer._layers[feature].feature.properties[symbolField], values) === -1) {
                 values.push(layer.mapLayer._layers[feature].feature.properties[symbolField]);
             }
         }
+        values.sort(myComparator);
     }
     else
     {
@@ -857,7 +942,8 @@ function resymbolize(layer) {
 
     var legendItems = HTMLLegendFactory({name : layer.name,geom: layer.geom, legend: {symbols: phantomSymbols }});
 
-    $('#rendererLegend').empty().html(legendItems);
+    $('#singleLegend').empty()
+    $('#catLegend').empty().html(legendItems);
 
     $('#btnApplySymbol').off().on('click', function () {
 
@@ -885,6 +971,8 @@ function resymbolize(layer) {
 
 function applyContextMenu(id) {
 
+    var layer = getLayerById(id.replace('#lbl', ''));
+
     context.init({
         fadeSpeed: 100,
         filter: function ($obj) { },
@@ -894,43 +982,91 @@ function applyContextMenu(id) {
     });
 
     var contents = [
-        { header: 'Options' },
-        {
+        { header: 'Options' }
+    ];
+
+    if (layer.type == 'shapefile' || layer.type == 'geojson') {
+        contents.push({
             text: 'Change Color...',
-            action: function() { changeSymbolHandler(id); }
-        },
+            action:
+                function() { changeSymbolHandler(id); }
+        });
+    }
+
+    contents.push(
         {
             text: 'Remove',
-            action: function(e) {
-                id = id.replace('#lbl', '');
-                var layer = getLayerById(id);
-                map.removeLayer(layer.mapLayer);
-                $('#leg' + id).remove();
-                $('.img-block.active').each(function(index) {
-                    if ($(this).find('img').attr('id').replace('img', '') == id) {
-                        $(this).removeClass('active');
-                    }
-                });
-            }
+            action:
+                function(e) {
+                    id = id.replace('#lbl', '');
+                    var layer = getLayerById(id);
+                    map.removeLayer(layer.mapLayer);
+                    $('#leg' + id).remove();
+                    $('.img-block.active').each(function(index) {
+                        if ($(this).find('img').attr('id').replace('img', '') == id) {
+                            $(this).removeClass('active');
+                        }
+                    });
+                }
         },
         {
             text: "Download...",
-            subMenu: [
-                { text: 'Shapefile', target: '_blank' },
-                { text: 'GeoJSON', target: '_blank' }
+            subMenu:
+            [
+                {
+                    text: 'Shapefile', action: function () {
+                    window.open(layer.url);
+                } },
+                {
+                    text: 'GeoJSON', action: function () {
+                        window.open("data:text/plain;charset=utf-8," + JSON.stringify(layer.mapLayer.toGeoJSON()));
+                } },
+                {text: 'CSV', action: function() {
+                    var str = export2CSV(layer.mapLayer._layers, true);
+                    //DBF files are generally in the ISO8859-1
+                    //http://gis.stackexchange.com/questions/3529/which-character-encoding-is-used-by-the-dbf-file-in-shapefiles
+                    window.open("data:text/plain;charset=iso-8859-1," + escape(str));
+                    }
+                }
             ]
         },
         {
             text: 'Zoom To',
-            action: function(e) {
-                id = id.replace('#lbl', '');
-                var layer = getLayerById(id);
-                map.fitBounds(layer.mapLayer.getBounds());
-            }
+            action:
+                function(e) {
+                    id = id.replace('#lbl', '');
+                    var layer = getLayerById(id);
+                    map.fitBounds(layer.mapLayer.getBounds());
+                }
         }
-    ];
+    );
 
-    var layer = getLayerById(id.replace('#lbl', ''));
+    if (layer.type == 'shapefile' || layer.type == 'geojson') {
+        contents.push({
+            text: 'View Table...',
+            action:
+                function () {
+                    var str = export2CSV(layer.mapLayer._layers);
+                    $('#tableDiv').CSVToTable(str);
+                    $('#tableModalHeader').html(layer.name + ' Table');
+                    $.bootstrapSortable();
+
+                    $('#btnExportToCSV').off('click').on('click', function () {
+                        var str = export2CSV(layer.mapLayer._layers, true);
+                        //DBF files are generally in the ISO8859-1
+                        //http://gis.stackexchange.com/questions/3529/which-character-encoding-is-used-by-the-dbf-file-in-shapefiles
+                        window.open("data:text/plain;charset=iso-8859-1," + escape(str));
+
+                    });
+
+                    //console.log(str);
+                    //$('#tableModal').on('shown', function() {
+                    //    $.bootstrapSortable();
+                    //});
+                    $('#tableModal').modal('show');
+                }
+        });
+    }
 
     if (typeof(layer.metadataUrl) != 'undefined') {
         contents.push(
@@ -944,21 +1080,54 @@ function applyContextMenu(id) {
         });
     }
 
-    contents.push({ header: 'Opacity' }, {
-        value: function() {
-            id = id.replace('#lbl', '');
-            var layer = getLayerById(id);
-            return (typeof layer.opacity !== 'undefined') ? layer.opacity :
-                100;
-        },
-        id: id.replace('#lbl', '')
-        },
-    { header: 'Developer' },
+    switch (layer.type) {
+    case "shapefile":
+    case "geojson":
+        contents.push({ header: 'Fill Opacity' }, {
+            class: 'sliderFillOpacity',
+            id : id.replace('#lbl', ''),
+            value: function() {
+                id = id.replace('#lbl', '');
+                return 100;
+               // var foo = layer.mapLayer._layers[Object.keys(layer.mapLayer._layers)[0]];
+               // _(foo._layers['29'])
+               // return (typeof (foo.options.fillOpacity) !== 'undefined') ? foo.options.fillOpacity :
+               //     100;
+            }
+        }, { header: 'Stroke Opacity' }, {
+            class: 'sliderStrokeOpacity',
+            id: id.replace('#lbl', ''),
+            value: function() {
+                id = id.replace('#lbl', '');
+                var layer = getLayerById(id);
+                return 100;
+                //return (typeof (layer.mapLayer._layers[Object.keys(layer.mapLayer._layers)[0]].options.opacity) !== 'undefined') ? layer.mapLayer._layers[Object.keys(layer.mapLayer._layers)[0]].options.opacity :
+                //    100;
+            }
+        });
+        break;
+    case "tilejson":
+    case "tilelayer":
+        contents.push({ header: 'Opacity' }, {
+            class: 'sliderFillOpacity',
+            id: id.replace('#lbl', ''),
+            value: function() {
+                id = id.replace('#lbl', '');
+                var layer = getLayerById(id);
+                return (typeof layer.opacity !== 'undefined') ? layer.opacity :
+                    100;
+            }
+        });
+        break;
+    }
+
+
+    contents.push({ header: 'Developer' },
     {
         text: 'Export Symbology',
         action: function(e) {
-            id = id.replace('#lbl', '');
-            var layer = getLayerById(id);
+            //id = id.replace('#lbl', '');
+            //var layer = getLayerById(id);
         }
     });
 
@@ -1005,6 +1174,56 @@ function getBasemapById(id) {
     return null;
 }
 
+function export2CSV(data, quote) {
+    var str = '';
+
+    //construct head
+    var f = data[Object.keys(data)[0]].feature.properties;
+    var line = '';
+
+    for (var value in f) {
+        if (typeof(quote) !== undefined && quote==true) {
+            line += '"' + value.replace(/["]/g, '""').replace(/,/g,'') + '",';
+        } else {
+            line += value + ',';
+        }
+    }
+           
+    line = line.slice(0, -1);
+    str += line + '\r\n';
+
+    for (var feature in data) {
+       var array = data[feature].feature.properties;
+        
+       array = $.map(array, function (value) {
+            return [value];
+       });
+        //console.log(array);
+        var line = '';
+        for (var i = 0; i < array.length; i++) {
+            if (typeof(array[i]) == 'undefined') {
+                line += '"",';
+            }
+            if (typeof (array[i]) == 'string') {
+                if (typeof (quote) !== undefined && quote == true) {
+                    line += '"' + array[i].replace(/"/g, '""').replace(/,/g, '') + '",';
+                } else {
+                    line += array[i].replace(/"/g, '""').replace(/,/g, '') + ',';
+                }
+            } else {
+                line += array[i]+',';
+            }
+        }
+        line = line.slice(0, -1);
+        str += line + '\r\n';
+    }
+
+    return str;
+    
+    //add a new tab and activate it. give it an x also 
+   
+}
+
 function isNumeric(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
@@ -1034,3 +1253,24 @@ function compare(a, b) {
         return 1;
     return 0;
 }
+
+// implement JSON.stringify serialization
+JSON.stringify = JSON.stringify || function (obj) {
+    var t = typeof (obj);
+    if (t != "object" || obj === null) {
+        // simple data type
+        if (t == "string") obj = '"' + obj + '"';
+        return String(obj);
+    }
+    else {
+        // recurse array or object
+        var n, v, json = [], arr = (obj && obj.constructor == Array);
+        for (n in obj) {
+            v = obj[n]; t = typeof (v);
+            if (t == "string") v = '"' + v + '"';
+            else if (t == "object" && v !== null) v = JSON.stringify(v);
+            json.push((arr ? "" : '"' + n + '":') + String(v));
+        }
+        return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+    }
+};

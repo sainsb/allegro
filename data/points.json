@@ -77,7 +77,6 @@
 { "type": "Feature", "properties": { "type": "Nature in neighborhood grants", "investment": 69935 }, "geometry": { "type": "Point", "coordinates": [ -122.6619312020739, 45.545514620532913 ] } },
 { "type": "Feature", "properties": { "type": "Nature in neighborhood grants", "investment": 70920 }, "geometry": { "type": "Point", "coordinates": [ -122.72314043109468, 45.476235954919481 ] } },
 { "type": "Feature", "properties": { "type": "Nature in neighborhood grants", "investment": 71905 }, "geometry": { "type": "Point", "coordinates": [ -122.73597454963878, 45.451378202143253 ] } },
-{ "type": "Feature", "properties": { "type": null, "investment": 72890 }, "geometry": { "type": "Point", "coordinates": [ 176.04697226303037, -90.0 ] } },
 { "type": "Feature", "properties": { "type": "Nature in neighborhood grants", "investment": 73875 }, "geometry": { "type": "Point", "coordinates": [ -122.84149941675196, 45.357023871250618 ] } },
 { "type": "Feature", "properties": { "type": "Nature in neighborhood grants", "investment": 74860 }, "geometry": { "type": "Point", "coordinates": [ -122.85967231669026, 45.35564843865199 ] } },
 { "type": "Feature", "properties": { "type": "Nature in neighborhood grants", "investment": 75845 }, "geometry": { "type": "Point", "coordinates": [ -122.44899078183512, 45.542878538995069 ] } },
