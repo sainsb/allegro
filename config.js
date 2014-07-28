@@ -269,6 +269,14 @@
                 'theme':'boundary'
             },{
                 'name': 'School Districts',
+                'url': '//library.oregonmetro.gov/rlisdiscovery/school_district.zip',
+                'type': 'shapefile',
+                'symbolField': 'DISTNAME',
+                'thumb': 'school_district.png',
+                'source': 'RLIS',
+                'theme':'boundary'
+            },{
+                'name': 'School Districts Tile Layer',
                 'url': '//gis.oregonmetro.gov/services/Boundary/schoolDistricts/tilejson',
                 'type': 'tilejson',
                 'thumb': 'school_district.png',
@@ -372,6 +380,13 @@
                 'type': 'shapefile',
                 'symbolField': 'TRACT',
                 'thumb': 'tract.png',
+                'source': 'RLIS',
+                'theme': 'census'
+            },{
+                'name': '2000 Census Block Groups',
+                'url': '//library.oregonmetro.gov/rlisdiscovery/blockgrp2000.zip',
+                'type': 'shapefile',
+                'thumb': 'blockgrp.png',
                 'source': 'RLIS',
                 'theme': 'census'
             },
@@ -983,7 +998,7 @@
                        'metadataUrl':'http://developer.trimet.org/gis/meta_tm_boundary.shtml',
                        'thumb': 'placeholder.png',
                        'source': 'TriMet',
-                       'icon':'//ben/allegro/img/trimet_logo.png',
+                       'icon':'img/trimet_logo.png',
                        'theme': '',
                        'zIndex': 75
                    },

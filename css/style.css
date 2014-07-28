@@ -1,31 +1,6 @@
 ﻿body {
 }
-  .btn{ padding: 5px 10px;margin: 2px;opacity: .9;background-color: #fff;font-size: 12px;width: 110px;border-radius: 6px;}
-           .btn.active {
-               border: 1px solid #999;
-               color: #FEFEFE;
-               background-color:#555;
-                text-shadow:none;
-           }
-           .btn:hover {
-               border: #888 1px solid;
-           }
-          
-           .btn.active:hover {
-               border: 1px solid #CCC;
-               color: #FEFEFE;
-           }
-           
-           #maps > button > div {
-               vertical-align: middle;
-               background-position: 0% 100%;
-               float:left;
-               margin-right: 5px;
-           }
-       
-           #maps > button.active > div{
-            background-position: 0% 0%;
-            }
+  
 
 #labels{
   float: left;
@@ -42,9 +17,7 @@
   margin:2px;
 }
 #legend{
- border:1px solid #CCC;
- border-radius:5px;
-padding:5px;
+padding:0px;
 height:542px;
 overflow-y:auto;
 }
@@ -62,15 +35,21 @@ margin-left:5px;
  transition-duration: .2s;
   transition-timing-function: linear;
   border-radius: 12px;
-     border: 2px solid #eee;
+  border: 2px solid #eee;
   padding:7px;
   margin:5px;
-  width:100px;
-  height:110px;
+  width:99px;
+  height:124px;
   position: relative;
   cursor:pointer;
   float:left;
   }
+
+.idata{
+
+  width:82px;
+  height:62px;
+}
 
  /*.img-block.shapefile {
      border: 2px solid #C59497
@@ -99,8 +78,8 @@ margin-left:5px;
   border-bottom-right-radius: 9px;
   border-bottom-left-radius: 9px;
   background-color:#FFF;
-  width: 108px;
-  height: 35px;
+  width: 95px;
+  height: 45px;
   padding-left:6px;
   font-size:11px;
   line-height:13px;
@@ -151,11 +130,7 @@ height: 12px;
 width: 100px;
 }
 
-.btn {
-    padding: 1px;
-    margin: 1px;
 
-}
 
 .bootstrap-select.btn-group {
 margin-bottom: 0 !important;
@@ -249,3 +224,25 @@ table.sortable thead th:hover:not([data-defaultsort=disabled]) {
 table.sortable thead th div.mozilla {
     position: relative;
 }
+/*
+ * Sidebar
+ */
+
+/* Hide for mobile, show later */
+
+@media (min-width: 768px) {
+  .sidebar {
+    z-index: 1000;
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    border-right: 1px solid #eee;
+  }
+}
+
+
+
+/*
+ * Main content
+ */
+

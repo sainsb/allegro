@@ -28,10 +28,6 @@ $(document).ready(function () {
         $('#dataModal').modal('show');
     });
 
-    $('#btnTouchMe').click(function () {
-        $('#colorModal').modal('show');
-    });
-
     $('#btnBasemap').click(function() {
         $('#basemapModal').modal('show');
     });
@@ -97,37 +93,6 @@ $(document).ready(function () {
     
     populatePalettes();
 
-    $('#btnAerial').click(function () {
-        $(this).addClass('active');
-        $('#btnRoads').removeClass('active');
-        map.addLayer(photo);
-        map.removeLayer(baseAll);
-        $('#lblLabels').removeClass('muted');
-        if ($('#chkLabels').is(':checked')) {
-            map.addLayer(baseAnno);
-        }
-
-        $('#chkLabels').removeAttr('disabled');
-    });
-
-    $('#btnRoads').click(function () {
-        $(this).addClass('active');
-        $('#btnAerial').removeClass('active');
-        map.removeLayer(photo);
-        map.removeLayer(baseAnno);
-        map.addLayer(baseAll)
-        $('#chkLabels').attr('disabled', 'disabled');
-        $('#lblLabels').addClass('muted');
-    });
-
-    $('#chkLabels').click(function () {
-        if ($(this).is(':checked')) {
-            map.addLayer(baseAnno);
-        } else {
-            map.removeLayer(baseAnno);
-        }
-    });
-
     var x = new RLIS.Autosuggest("bikeTo", { "mode": 'locate', 'entries': 7 }, function (result, error) {
         if (error) {
             alert(error);
@@ -136,7 +101,6 @@ $(document).ready(function () {
 
         map.setView([result[0].lat, result[0].lng], 15);
     });
-
 });
 
 function initMap() {
@@ -162,10 +126,13 @@ function addData(layerObject) {
         case "geojson":
             loadGeoJSON(layerObject);
             break;
+        case "dynamiclayer":
+            loadGeoJSON(layerObject);
+            break;
         case "tilejson":
             loadTileJSON(layerObject);
             break;
-        case "AGSTiles":
+        case "tilelayer":
             layerObject.mapOptions = layerObject.mapOptions || {};
             layerObject.mapLayer = new L.TileLayer(layerObject.url + '?token=' + RLIS.token, layerObject.mapOptions).addTo(map);
             break;
@@ -343,7 +310,6 @@ function parseGeoJSON(data, layer) {
     //});
 
     //map.addLayer(layer.mapLayer);
-
 }
 
 function loadShapefile(options) {
