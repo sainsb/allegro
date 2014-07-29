@@ -115,6 +115,38 @@ function initMap() {
 
     L.control.scale().addTo(map);
     var hash = new L.Hash(map);
+
+    var BoxSelect = L.Map.BoxZoom.extend({
+        
+        _onMouseUp: function (e) {
+            this._pane.removeChild(this._box);
+            this._container.style.cursor = '';
+
+            L.DomUtil.enableTextSelection();
+
+            L.DomEvent
+                .off(document, 'mousemove', this._onMouseMove)
+                .off(document, 'mouseup', this._onMouseUp);
+
+            var map = this._map,
+                layerPoint = map.mouseEventToLayerPoint(e);
+
+            if (this._startLayerPoint.equals(layerPoint)) { return; }
+
+            var bounds = new L.LatLngBounds(
+                    map.layerPointToLatLng(this._startLayerPoint),
+                    map.layerPointToLatLng(layerPoint));
+
+            map.fire("boxselectend", {
+                boxSelectBounds: [[bounds.getSouthWest().lng,bounds.getSouthWest().lat],[bounds.getNorthEast().lng,bounds.getNorthEast().lat]]
+            });
+        }
+    });
+
+    map.boxZoom.disable();//turn off  the default behavior
+    var boxSelect = new BoxSelect(map);//new box select
+    boxSelect.enable();//add it
+
 }
 
 function addData(layerObject) {
@@ -195,121 +227,133 @@ function loadBasemap(basemap) {
 function parseGeoJSON(data, layer) {
  
     var geoJson = {};
+    var rt = RTree();
+    //_(data);
+    var goo = rt.geoJSON(data);
+    var myObjects = goo.search({x:10, y:10, w:10, h:10});
+    _(myObjects)
+    rt.geoJSON(data,function(err,success){
+        _(success);
+        _(err)
+        if(!err){
+            console.log('boo');
+            //showAll(data, layer);
+    
+            // take legend def in config over data legend
+            if (typeof (layer.legend) == 'undefined') {
+                if (typeof (data.legend) === 'undefined') {
 
-    // take legend def in config over data legend
-    if (typeof (layer.legend) == 'undefined') {
-        if (typeof (data.legend) === 'undefined') {
+                    layer.ramp = DEFAULT_RAMP;
+                    layer.legend = { "symbols": [], "title": layer.name };
 
-            layer.ramp = DEFAULT_RAMP;
-            layer.legend = { "symbols": [], "title": layer.name };
+                    if (typeof(layer.symbolField) != 'undefined') {
 
-            if (typeof(layer.symbolField) != 'undefined') {
+                        var values = [];
 
-                var values = [];
+                        for (var i = 0; i < data.features.length; i++) {
+                            var value = data.features[i].properties[layer.symbolField];
 
-                for (var i = 0; i < data.features.length; i++) {
-                    var value = data.features[i].properties[layer.symbolField];
+                            if (value != value) {
+                                value='null';
+                            }
 
-                    if (value != value) {
-                        value='null';
+                            if ($.inArray(value, values) === -1) {
+                                values.push(value);
+                            }
+                        }
+
+                        layer.scale = chroma.scale(DEFAULT_RAMP).domain([1, (values.length > 1) ? values.length : 2]).out('hex');
+
+                        for (var val in values.sort(myComparator)) {
+                            layer.legend.symbols.push(createJSONLegend(values[val], layer.scale));
+                        }
+                    } else { //single symbol legend
+                        layer.legend.symbols.push({
+                            "value": "*",
+                            "fillColor": getRandomColor(), 'color': DEFAULT_COLOR, 'weight': DEFAULT_WEIGHT
+                        });
                     }
-
-                    if ($.inArray(value, values) === -1) {
-                        values.push(value);
-                    }
+                } else {
+                    layer.legend = data.legend;
                 }
-
-                layer.scale = chroma.scale(DEFAULT_RAMP).domain([1, (values.length > 1) ? values.length : 2]).out('hex');
-
-                for (var val in values.sort(myComparator)) {
-                    layer.legend.symbols.push(createJSONLegend(values[val], layer.scale));
-                }
-            } else { //single symbol legend
-                layer.legend.symbols.push({
-                    "value": "*",
-                    "fillColor": getRandomColor(), 'color': DEFAULT_COLOR, 'weight': DEFAULT_WEIGHT
-                });
             }
-        } else {
-            layer.legend = data.legend;
-        }
-    }
 
-    var _onEachFeature = function (feature, slayer) {
-        if (feature.properties) {
-            slayer.bindPopup(Object.keys(feature.properties).map(function (k) {
-                if ($.inArray(k, STYLE_KEYWORDS) == -1) {
-                    return '<b>' + k + "</b>: " + feature.properties[k] + '<br/>';
+            var _onEachFeature = function (feature, slayer) {
+                if (feature.properties) {
+                    slayer.bindPopup(Object.keys(feature.properties).map(function (k) {
+                        if ($.inArray(k, STYLE_KEYWORDS) == -1) {
+                            return '<strong>' + k + "</strong>: " + feature.properties[k] + '<br/>';
+                        }
+                    }).join(""), { maxHeight: 200 });
                 }
-            }).join(""), { maxHeight: 200 });
-        }
-    };
+            };
 
-    //does it have simpleStyle defined?
-    //https://github.com/mapbox/simplestyle-spec/tree/master/1.1.0
-    //Nothing more to do here, handle it with the mapbox style api
-    if (hasSimpleStyle(data.features[0].properties)) {
-        geoJson = L.geoJson(data, {
-            style: L.mapbox.simplestyle.style,
-            onEachFeature: _onEachFeature
-        });
-
-        //create legend....
-    }
-    else {
-        switch (data.features[0].geometry.type) {
-            case "Point":
+            //does it have simpleStyle defined?
+            //https://github.com/mapbox/simplestyle-spec/tree/master/1.1.0
+            //Nothing more to do here, handle it with the mapbox style api
+            if (hasSimpleStyle(data.features[0].properties)) {
                 geoJson = L.geoJson(data, {
-                    pointToLayer: 
-                        function (feature, latlng) {
-                            return L.circleMarker(latlng, styleFromLegend(feature, layer));
-                        },
+                    style: L.mapbox.simplestyle.style,
                     onEachFeature: _onEachFeature
                 });
-                break;
-            case "LineString":
-            case "Polygon":
-            case "MultiPolygon":
-                geoJson = L.geoJson(data, {
-                    style: (typeof (layer.style) != 'undefined') ?
-                        layer.style : function(feature) {return styleFromLegend(feature, layer); },
-                    onEachFeature: _onEachFeature,
-                    clickable: (typeof (layer.clickable) == 'undefined' || layer.clickable == true)
-                });
-        }
-    }
 
-    var id = layer.name.replace(/\s/g, '_');
+                //create legend....
+            }
+            else {
+                switch (data.features[0].geometry.type) {
+                    case "Point":
+                        geoJson = L.geoJson(data, {
+                            pointToLayer: 
+                                function (feature, latlng) {
+                                    return L.circleMarker(latlng, styleFromLegend(feature, layer));
+                                },
+                            onEachFeature: _onEachFeature
+                        });
+                        break;
+                    case "LineString":
+                    case "Polygon":
+                    case "MultiPolygon":
+                        geoJson = L.geoJson(data, {
+                            style: (typeof (layer.style) != 'undefined') ?
+                                layer.style : function(feature) {return styleFromLegend(feature, layer); },
+                            onEachFeature: _onEachFeature,
+                            clickable: (typeof (layer.clickable) == 'undefined' || layer.clickable == true)
+                        });
+                }
+            }
 
-    layer.geom = data.features[0].geometry.type;
+            var id = layer.name.replace(/\s/g, '_');
 
-    //parse fields and add to layer object
-    layer.fields = [];
-    for (var field in data.features[0].properties) {
-        var fieldType = isNaN(data.features[0].properties[field]) ? 'string' : 'number';
-        layer.fields.push({ name: field, type: fieldType});
-    }
+            layer.geom = data.features[0].geometry.type;
 
-    //create the HTMLLegend from the jsonLegend property of the layer.
-    var legend = createHTMLLegend(layer);
+            //parse fields and add to layer object
+            layer.fields = [];
+            for (var field in data.features[0].properties) {
+                var fieldType = isNaN(data.features[0].properties[field]) ? 'string' : 'number';
+                layer.fields.push({ name: field, type: fieldType});
+            }
 
-    $('#legend').prepend(legend);
+            //create the HTMLLegend from the jsonLegend property of the layer.
+            var legend = createHTMLLegend(layer);
+
+            $('#legend').prepend(legend);
+         
+            //Gettuing too fancy
+            //$('#lbl' + id).on('dblclick', function() {
+            //    changeSymbolHandler(id);
+            //});
+
+            layer.HTMLLegend = legend;
+
+            m.on("boxselectend",function(e){geoJson.clearLayers();
+                geoJson.addData(layer.rt.bbox(e.boxSelectBounds));});
+
+            console.log('yay');
+            layer.mapLayer = geoJson.addTo(map);
  
-    //Gettuing too fancy
-    //$('#lbl' + id).on('dblclick', function() {
-    //    changeSymbolHandler(id);
-    //});
-
-    layer.HTMLLegend = legend;
-
-    layer.mapLayer = geoJson.addTo(map);
-    //_(layer.mapLayer);
-    //layer.mapLayer.on('add', function () {
-      //  _('yay');
-        applyContextMenu('#lbl' + id);
-    //});
-
-    //map.addLayer(layer.mapLayer);
+            applyContextMenu('#lbl' + id);
+        }  
+    });
 }
 
 function loadShapefile(options) {
@@ -540,7 +584,7 @@ function populateLayers() {
             }
             sourceTabString += layer.source + '</a></li>';
 
-            $('#layerSourceTabs').append(sourceTabString);
+            $('#layerSourceTabs').prepend(sourceTabString);
 
             var tabstring = '<div class="tab-pane fade ';
             
@@ -1004,6 +1048,20 @@ function applyContextMenu(id) {
                     var layer = getLayerById(id);
                     map.fitBounds(layer.mapLayer.getBounds());
                 }
+        },
+        {
+            text: "Select...",
+            subMenu:
+            [
+                {
+                    text: 'By Attributes', action: function () {
+                    window.open(layer.url);
+                } },
+                {
+                    text: 'By Location', action: function () {
+                        window.open("data:text/plain;charset=utf-8," + JSON.stringify(layer.mapLayer.toGeoJSON()));
+                } },
+            ]
         }
     );
 
@@ -1070,7 +1128,10 @@ function applyContextMenu(id) {
                 //return (typeof (layer.mapLayer._layers[Object.keys(layer.mapLayer._layers)[0]].options.opacity) !== 'undefined') ? layer.mapLayer._layers[Object.keys(layer.mapLayer._layers)[0]].options.opacity :
                 //    100;
             }
-        });
+        }
+
+
+        );
         break;
     case "tilejson":
     case "tilelayer":

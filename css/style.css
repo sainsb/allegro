@@ -246,3 +246,10 @@ table.sortable thead th div.mozilla {
  * Main content
  */
 
+.nav-header {
+cursor: default;
+font-size: 10px;
+text-transform: uppercase;
+color: #888;
+margin-left: 9px;
+}

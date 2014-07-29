@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/bootstrap-context/context.bootstrap.css" />
       <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css" />
       <link rel="stylesheet" href="./css/style.css" />
-      <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/bootstrap-select/1.3.1/css/bootstrap-select.min.css" />
+      <link rel="stylesheet" href="css/bootstrap-select.min.css" />
 
   
    <!--  <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/leaflet.draw/leaflet.draw.css" /> -->
@@ -46,6 +46,26 @@
           .navbar-inner{
           border-left: 12px solid transparent !important;
         }
+
+
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu > .dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  -webkit-border-radius: 0 6px 6px 6px;
+  -moz-border-radius: 0 6px 6px 6px;
+  border-radius: 0 6px 6px 6px;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 1px 20px;
+}
+
       </style>
     </head>
 <body>
@@ -68,8 +88,8 @@
         </div>
         <div>
         <ul class="breadcrumb" style='height:auto;'>
-        <li><a href="//www.oregonmetro.gov/">Metro</a> <span class="divider">&gt;</span></li>
-        <li><a href="//gis.oregonmetro.gov/">GIS</a> <span class="divider">&gt;</span></li>
+        <li><a href="//www.oregonmetro.gov/">Metro</a></li>
+        <li><a href="//gis.oregonmetro.gov/">GIS</a></li>
         <li class='active'>RISE Map</li>
         </ul>
       </div>
@@ -99,8 +119,7 @@
       </div>
     </div>
 
-
-    <div class="modal fade" id="dataModal">
+    <div class="modal" id="dataModal">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -108,10 +127,19 @@
                     <h4 class="modal-title">Add Data</h4>
                 </div>
                 <div class="modal-body" style='overflow:hidden;'>
-                    <ul id="layerSourceTabs" class="nav nav-tabs" >
+                    <ul id="layerSourceTabs" class="nav nav-tabs">
+                    <li><a href="#customData" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Custom</a></li>
                     </ul>
-                    <div class="tab-content" style="max-height:350px;overflow-y:scroll;">
-               
+                    <div class="tab-content" style="min-height:350px;max-height:350px;overflow-y:scroll;padding-top:10px;">
+                      <div class='tab-pane fade' id='customData' >
+                            Data Source: &nbsp;
+                            <select class="selectpicker" id='selCustomData' data-style="btn-default" data-width='180'>
+                                <option value="0">GeoJSON</option>
+                                <option value="1">ArcGIS Server</option>
+                                <option value='2'>Tile Layer</option>
+                                <option value='3'>Shapefile</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                  <div class="modal-footer">
@@ -142,6 +170,27 @@
         </div>
     </div>
     
+    <div class="modal fade" id="selectModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 id='selectModalHeader' class="modal-title">Select Features</h4>
+                </div>
+                <div class="modal-body" style='overflow:hidden;'>
+                    <ul id="tableTabs" class="nav nav-tabs"></ul>
+                    <div class="tab-content" style="max-height:350px;overflow-y:scroll;" id='tableDiv'>
+
+                    </div>
+                </div>
+                 <div class="modal-footer">
+                <button type="button" class="btn btn-info" id="btnExportToCSV" data-dismiss="modal">Export to CSV</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="basemapModal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -178,7 +227,7 @@
                         <li class="active"><a href="#uniqueValues" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Categories</a></li>
                         <li><a href="#classes" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Classes</a></li>
                     </ul>
-                    <div class="tab-content" style="max-height:300px;overflow:hidden;">
+                    <div class="tab-content" style="max-height:300px;overflow:hidden;padding:10px;">
                         <div class="tab-pane fade" id="singleFill">
                             Fill:
                             <div class="input-append color" id='_colSingleFillColor' data-color="rgb(255, 146, 180)" data-color-format="rgb">
@@ -198,7 +247,7 @@
                         <div class="tab-pane fade active in" id="uniqueValues" style='height:242px'>
                             Color Ramp: &nbsp;
                             <div class="dropdown" style='display:inline-block;margin-bottom:10px;'>
-                                <button class='btn' data-target="#" data-toggle="dropdown" class="dropdown-toggle" id='selGradient' style='width:173px;'> <b class="caret"></b></button>
+                                <button class='btn btn-default' data-target="#" data-toggle="dropdown" class="dropdown-toggle" id='selGradient' style='width:173px;'> <b class="caret"></b></button>
                                 <ul class="dropdown-menu" id='lstRamps' style='height:190px;overflow-y:scroll;'></ul>
                             </div>
                             &nbsp;Field: &nbsp;<select data-width='150' data-size="5" class="selectpicker" id='selCatField' style="display:inline-block;"></select>
@@ -215,7 +264,7 @@
                         </div>
                         <div class='tab-pane fade' id='classes'>
                             Classification method: &nbsp;
-                            <select class="selectpicker" id='selMethod' data-width='180'>
+                            <select class="selectpicker" id='selMethod' data-width='180' data-style="btn-default">
                                 <option>Unique Values</option>
                                 <option value="1">Equal Interval</option>
                                 <option value='2'>Standard Deviations</option>
@@ -252,12 +301,14 @@
         <script type="text/javascript" src="//library.oregonmetro.gov/libraries/colorbrewer/colorbrewer.js"></script>
         <script type="text/javascript" src="//library.oregonmetro.gov/libraries/metro/bootstrap-context/context.js"></script>
     <script type="text/javascript" src="//library.oregonmetro.gov/libraries/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
-        <script type="text/javascript" src="//library.oregonmetro.gov/libraries/bootstrap-select/1.3.1/js/bootstrap-select.min.js"></script>
+        <script type="text/javascript" src="js/bootstrap-select.min.js"></script>
     <script type="text/javascript" src="//library.oregonmetro.gov/libraries/chroma/chroma.min.js" ></script> 
     <script type="text/javascript" src="./js/bootstrap-sortable.js"></script>
     <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-pip/v0.0.2/leaflet-pip.js'></script>
     <script type="text/javascript" src="./js/jquery.csvToTable.js"></script>
+    <script type="text/javascript" src="./js/rTree.js"></script>
     <script type="text/javascript" src="./js/script.js"></script>
+
     <script type="text/javascript" src="./config.js"></script>
    </body>
 </html>
