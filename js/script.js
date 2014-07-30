@@ -20,6 +20,25 @@ var scaleCounter = 0;
 
 $(document).ready(function () {
 
+    var mapmargin = parseInt($("#map").css("margin-bottom"), 10)+258;
+    $('#map,#legend').css("height", ($(window).height() - mapmargin));
+
+    $(window).on("resize", function(e) {
+
+        $('#map,#legend').css("height", ($(window).height() - mapmargin));
+        if ($(window).width() >= 980) {
+            $('#map,#legend').css("margin-bottom", 10);
+        } else {
+            $('#map,#legend').css("margin-bottom", -20);
+        }
+    });
+
+    if($(window).width()>=980){
+        $('#map,#legend').css("margin-bottom",10);
+    }else{
+        $('#map,#legend').css("margin-bottom",-20);
+    }
+
     $('.color').colorpicker();
 
     $('.selectpicker').selectpicker();
@@ -41,8 +60,22 @@ $(document).ready(function () {
         }
     });
 
+    $('#selOptions').on('change.core', function(ev) {
+        var opts = $('#selOptions').val();
+        if ($.inArray('Show Coordinates', opts) > -1) {
+            if (typeof(map.coordControl) == 'undefined') {
+                map.coordControl = L.control.coordinates().addTo(map);
+            }
+        } else {
+            if (typeof (map.coordControl) != 'undefined') {
+                map.coordControl.removeFrom(map);
+                map.coordControl = undefined;
+            }
+        }
+    });
+
     //Attach behavior to legend checkboxes
-    $('body').on('click', '.legend-check', function () {
+    $('body').on('click', '.legend-check', function (evt) {
         var id = $(this).attr('id').replace('chk', '');
         var layer = getLayerById(id);
         if ($(this).is(':checked')) {
@@ -55,6 +88,39 @@ $(document).ready(function () {
         } else {
             map.removeLayer(layer.mapLayer);
         }
+
+        if (evt.stopPropagation) {
+            evt.stopPropagation();
+        }
+        if (evt.cancelBubble != null) {
+            evt.cancelBubble = true;
+        }
+        return;
+
+        console.log($('#leg' + id).hasClass('in'));
+
+        if (!this.checked && $('#leg' + id).hasClass('in')) {
+            //how do we close the legend.
+            //$('#leg' + id).addClass('in');
+
+            if (evt.stopPropagation) {
+                evt.stopPropagation();
+            }
+            if (evt.cancelBubble != null) {
+                evt.cancelBubble = true;
+            }
+
+        } else if //clicking should ever only open the legend
+        ($('#leg' + id).hasClass('in') || (!this.checked && !$('#leg' + id).hasClass('in'))) {
+
+            if (evt.stopPropagation) {
+                evt.stopPropagation();
+            }
+            if (evt.cancelBubble != null) {
+                evt.cancelBubble = true;
+            }
+        }
+
     });
     
     //Attach behavior to opacity sliders
@@ -114,38 +180,45 @@ function initMap() {
     });
 
     L.control.scale().addTo(map);
-    var hash = new L.Hash(map);
+    new L.Hash(map);
 
-    var BoxSelect = L.Map.BoxZoom.extend({
+    //var BoxSelect = L.Map.BoxZoom.extend({
         
-        _onMouseUp: function (e) {
-            this._pane.removeChild(this._box);
-            this._container.style.cursor = '';
+    //    _onMouseUp: function (e) {
+    //        this._pane.removeChild(this._box);
+    //        this._container.style.cursor = '';
 
-            L.DomUtil.enableTextSelection();
+    //        L.DomUtil.enableTextSelection();
 
-            L.DomEvent
-                .off(document, 'mousemove', this._onMouseMove)
-                .off(document, 'mouseup', this._onMouseUp);
+    //        L.DomEvent
+    //            .off(document, 'mousemove', this._onMouseMove)
+    //            .off(document, 'mouseup', this._onMouseUp);
 
-            var map = this._map,
-                layerPoint = map.mouseEventToLayerPoint(e);
+    //        var map = this._map,
+    //            layerPoint = map.mouseEventToLayerPoint(e);
 
-            if (this._startLayerPoint.equals(layerPoint)) { return; }
+    //        if (this._startLayerPoint.equals(layerPoint)) { return; }
 
-            var bounds = new L.LatLngBounds(
-                    map.layerPointToLatLng(this._startLayerPoint),
-                    map.layerPointToLatLng(layerPoint));
+    //        var bounds = new L.LatLngBounds(
+    //                map.layerPointToLatLng(this._startLayerPoint),
+    //                map.layerPointToLatLng(layerPoint));
 
-            map.fire("boxselectend", {
-                boxSelectBounds: [[bounds.getSouthWest().lng,bounds.getSouthWest().lat],[bounds.getNorthEast().lng,bounds.getNorthEast().lat]]
-            });
-        }
-    });
+    //        map.fire("boxselectend", {
+    //            boxSelectBounds: [[bounds.getSouthWest().lng,bounds.getSouthWest().lat],[bounds.getNorthEast().lng,bounds.getNorthEast().lat]]
+    //        });
+    //    }
+    //});
 
-    map.boxZoom.disable();//turn off  the default behavior
-    var boxSelect = new BoxSelect(map);//new box select
-    boxSelect.enable();//add it
+    //map.boxZoom.disable();//turn off  the default behavior
+    //var boxSelect = new BoxSelect(map);//new box select
+    //boxSelect.enable();//add it
+
+    //selLayer = L.geoJson(undefined, {
+    //    style: { opacity:1, color: '#02D8FA', weight: 2, fillColor: '#02D8FA' },
+    //    onEachFeature:function(feature, layer){
+    //        layer.bindPopup('yay');
+    //    }
+    //}).addTo(map);
 
 }
 
@@ -179,7 +252,6 @@ function addData(layerObject) {
 
 function loadGeoJSON(options) {
     $.getJSON(options.url, function (data) {
-
         parseGeoJSON(data, options);
     });
 }
@@ -190,17 +262,20 @@ function loadTileJSON(layer) {
         //Add to legend
 
         var id = layer.name.replace(/\s/g, '_');
-        var legend = '<div class="legend" id="leg' + id + '">';
-        legend += '<label id="lbl' + id + '""><input type="checkbox" id="chk' + id + '" style="clear:both;float:left;" checked="checked" class="legend-check"/>&nbsp;&nbsp;<b>' + layer.name + '</b></label>';
+
+        var str = "<li style='clear:both;' id='li" + id + "' class='liTileLegend'><div class='panelyr' data-toggle='collapse' data-target='#leg" + id + "'><span class='accordion-toggle'></span><input type='checkbox' class='legend-check' id='chk" + id + "' checked style='float:left;margin-right:5px;margin-left:3px;'/>" + layer.name + "</div><div style='clear:both;margin-left:15px;float:left;' id='leg" + id + "' class='collapse in'>";
+
         if (typeof (data.legend) != 'undefined') {
-            legend += data.legend;
+            str += data.legend;
         }
-        legend += '</div>';
-        $('#legend').prepend(legend);
+
+        str += "</div></li>";
+
+        $('#ulTileLegend').prepend(str);
 
         layer.HTMLLegend = legend;
 
-        applyContextMenu('#lbl' + id, LAYER_TYPES.tilejson);
+        applyContextMenu(id);
 
         var url = data.canonicalURL;
 
@@ -227,133 +302,128 @@ function loadBasemap(basemap) {
 function parseGeoJSON(data, layer) {
  
     var geoJson = {};
-    var rt = RTree();
-    //_(data);
-    var goo = rt.geoJSON(data);
-    var myObjects = goo.search({x:10, y:10, w:10, h:10});
-    _(myObjects)
-    rt.geoJSON(data,function(err,success){
-        _(success);
-        _(err)
-        if(!err){
-            console.log('boo');
-            //showAll(data, layer);
+    //layer.rt = RTree();
+    //layer.rt.geoJSON(data);
     
-            // take legend def in config over data legend
-            if (typeof (layer.legend) == 'undefined') {
-                if (typeof (data.legend) === 'undefined') {
+    // take legend def in config over data legend
+    if (typeof (layer.legend) == 'undefined') {
+        if (typeof (data.legend) === 'undefined') {
 
-                    layer.ramp = DEFAULT_RAMP;
-                    layer.legend = { "symbols": [], "title": layer.name };
+            layer.ramp = DEFAULT_RAMP;
+            layer.legend = { "symbols": [], "title": layer.name };
 
-                    if (typeof(layer.symbolField) != 'undefined') {
+            if (typeof(layer.symbolField) != 'undefined') {
 
-                        var values = [];
+                var values = [];
 
-                        for (var i = 0; i < data.features.length; i++) {
-                            var value = data.features[i].properties[layer.symbolField];
+                for (var i = 0; i < data.features.length; i++) {
+                    var value = data.features[i].properties[layer.symbolField];
 
-                            if (value != value) {
-                                value='null';
-                            }
-
-                            if ($.inArray(value, values) === -1) {
-                                values.push(value);
-                            }
-                        }
-
-                        layer.scale = chroma.scale(DEFAULT_RAMP).domain([1, (values.length > 1) ? values.length : 2]).out('hex');
-
-                        for (var val in values.sort(myComparator)) {
-                            layer.legend.symbols.push(createJSONLegend(values[val], layer.scale));
-                        }
-                    } else { //single symbol legend
-                        layer.legend.symbols.push({
-                            "value": "*",
-                            "fillColor": getRandomColor(), 'color': DEFAULT_COLOR, 'weight': DEFAULT_WEIGHT
-                        });
+                    if (value != value) {
+                        value='null';
                     }
-                } else {
-                    layer.legend = data.legend;
+
+                    if ($.inArray(value, values) === -1) {
+                        values.push(value);
+                    }
                 }
+
+                layer.scale = chroma.scale(DEFAULT_RAMP).domain([1, (values.length > 1) ? values.length : 2]).out('hex');
+
+                for (var val in values.sort(myComparator)) {
+                    layer.legend.symbols.push(createJSONLegend(values[val], layer.scale));
+                }
+            } else { //single symbol legend
+                layer.legend.symbols.push({
+                    "value": "*",
+                    "fillColor": getRandomColor(), 'color': DEFAULT_COLOR, 'weight': DEFAULT_WEIGHT
+                });
             }
+        } else {
+            layer.legend = data.legend;
+        }
+    }
 
-            var _onEachFeature = function (feature, slayer) {
-                if (feature.properties) {
-                    slayer.bindPopup(Object.keys(feature.properties).map(function (k) {
-                        if ($.inArray(k, STYLE_KEYWORDS) == -1) {
-                            return '<strong>' + k + "</strong>: " + feature.properties[k] + '<br/>';
-                        }
-                    }).join(""), { maxHeight: 200 });
+    var _onEachFeature = function (feature, slayer) {
+        if (feature.properties) {
+            slayer.bindPopup(Object.keys(feature.properties).map(function (k) {
+                if ($.inArray(k, STYLE_KEYWORDS) == -1) {
+                    return '<strong>' + k + "</strong>: " + feature.properties[k] + '<br/>';
                 }
-            };
+            }).join(""), { maxHeight: 200 });
+        }
+    };
 
-            //does it have simpleStyle defined?
-            //https://github.com/mapbox/simplestyle-spec/tree/master/1.1.0
-            //Nothing more to do here, handle it with the mapbox style api
-            if (hasSimpleStyle(data.features[0].properties)) {
+    //does it have simpleStyle defined?
+    //https://github.com/mapbox/simplestyle-spec/tree/master/1.1.0
+    //Nothing more to do here, handle it with the mapbox style api
+    if (hasSimpleStyle(data.features[0].properties)) {
+        geoJson = L.geoJson(data, {
+            style: L.mapbox.simplestyle.style,
+            onEachFeature: _onEachFeature
+        });
+
+        //create legend....
+    }
+    else {
+        switch (data.features[0].geometry.type) {
+            case "Point":
                 geoJson = L.geoJson(data, {
-                    style: L.mapbox.simplestyle.style,
+                    pointToLayer: 
+                        function (feature, latlng) {
+                            return L.circleMarker(latlng, styleFromLegend(feature, layer));
+                        },
                     onEachFeature: _onEachFeature
                 });
+                break;
+            case "LineString":
+            case "Polygon":
+            case "MultiPolygon":
+                geoJson = L.geoJson(data, {
+                    style: (typeof (layer.style) != 'undefined') ?
+                        layer.style : function(feature) {return styleFromLegend(feature, layer); },
+                    onEachFeature: _onEachFeature,
+                    clickable: (typeof (layer.clickable) == 'undefined' || layer.clickable == true)
+                });
+        }
+    }
 
-                //create legend....
-            }
-            else {
-                switch (data.features[0].geometry.type) {
-                    case "Point":
-                        geoJson = L.geoJson(data, {
-                            pointToLayer: 
-                                function (feature, latlng) {
-                                    return L.circleMarker(latlng, styleFromLegend(feature, layer));
-                                },
-                            onEachFeature: _onEachFeature
-                        });
-                        break;
-                    case "LineString":
-                    case "Polygon":
-                    case "MultiPolygon":
-                        geoJson = L.geoJson(data, {
-                            style: (typeof (layer.style) != 'undefined') ?
-                                layer.style : function(feature) {return styleFromLegend(feature, layer); },
-                            onEachFeature: _onEachFeature,
-                            clickable: (typeof (layer.clickable) == 'undefined' || layer.clickable == true)
-                        });
-                }
-            }
+    var id = layer.name.replace(/\s/g, '_');
 
-            var id = layer.name.replace(/\s/g, '_');
+    layer.geom = data.features[0].geometry.type;
 
-            layer.geom = data.features[0].geometry.type;
+    //parse fields and add to layer object
+    layer.fields = [];
+    for (var field in data.features[0].properties) {
+        var fieldType = isNaN(data.features[0].properties[field]) ? 'string' : 'number';
+        layer.fields.push({ name: field, type: fieldType});
+    }
 
-            //parse fields and add to layer object
-            layer.fields = [];
-            for (var field in data.features[0].properties) {
-                var fieldType = isNaN(data.features[0].properties[field]) ? 'string' : 'number';
-                layer.fields.push({ name: field, type: fieldType});
-            }
+    //create the HTMLLegend from the jsonLegend property of the layer.
+    var legend = createHTMLLegend(layer);
 
-            //create the HTMLLegend from the jsonLegend property of the layer.
-            var legend = createHTMLLegend(layer);
+    $('#ulVectorLegend').prepend(legend);
 
-            $('#legend').prepend(legend);
-         
-            //Gettuing too fancy
-            //$('#lbl' + id).on('dblclick', function() {
-            //    changeSymbolHandler(id);
-            //});
+    layer.HTMLLegend = legend;
 
-            layer.HTMLLegend = legend;
-
-            m.on("boxselectend",function(e){geoJson.clearLayers();
-                geoJson.addData(layer.rt.bbox(e.boxSelectBounds));});
-
-            console.log('yay');
-            layer.mapLayer = geoJson.addTo(map);
- 
-            applyContextMenu('#lbl' + id);
-        }  
+    $('.sortable').sortable().bind('sortupdate', function(e, ui) {
+        //return false;
+        handleSort(e, ui);
     });
+
+    //map.on("boxselectend", function (e) {
+
+    //    //order of operations
+    //    //Get first layer in TOC that is turned on
+
+    //    selLayer.clearLayers();
+    //    selLayer.addData(layer.rt.bbox(e.boxSelectBounds));
+    //});
+
+    layer.mapLayer = geoJson.addTo(map);
+    _(id)
+    applyContextMenu(id);
+
 }
 
 function loadShapefile(options) {
@@ -428,15 +498,23 @@ function createHTMLLegend(layer) {
 
     var title = (typeof(layer.legend.title) != 'undefined') ? layer.legend.title : layer.name;
 
-    var HTMLLegend = '<div class="legend panelyr collapsed" data-toggle="collapse" data-target="#legItems'+id+'" id="leg' + id + '"><span class="accordion-toggle"></span>';
+    var str = "<li style='clear:both;' id='li" + id + "' class='liVectorLegend'><div class='panelyr' data-toggle='collapse' data-target='#leg" + id + "'><span class='accordion-toggle'></span><input type='checkbox' class='legend-check' id='chk" + id + "' checked style='float:left;margin-right:5px;margin-left:3px;'/>" + title + "</div><div style='clear:both;margin-left:15px;float:left;padding-top:6px;' id='leg" + id + "' class='collapse in'>";
 
-    HTMLLegend += '<label id="lbl' + id + '""><input type="checkbox" id="chk' + id + '" style="float:left;margin-right:5px;margin-left:3px;" checked="checked" class="legend-check"/>&nbsp;&nbsp;<b>' + title + '</b></label>';
+    str += HTMLLegendFactory(layer);
+    
+    str += "</div></li>";
 
-    HTMLLegend += HTMLLegendFactory(layer);
+    //var HTMLLegend = '<li style="clear:both" draggable="true" id="li'+id+'"><div class="legend panelyr collapsed" data-toggle="collapse" data-target="#legItems'+id+'" id="leg' + id + '"><span class="accordion-toggle"></span>';
 
-    HTMLLegend += '</div><div id="legItems' + id + '"></div>';
+    //HTMLLegend += '<input type="checkbox" id="chk' + id + '" style="float:left;margin-right:5px;margin-left:3px;" checked="checked" class="legend-check"/><div style="float:left;vertical-align: -2px;" class="layername">'+title+"</div></div></div>";
 
-    return HTMLLegend;
+    //HTMLLegend += '<div style="clear:both;margin-left:15px;float:left;" class="collapse" id="leg'+id+'">'
+
+    
+
+    //HTMLLegend += '</div><div id="legItems' + id + '"></div>';
+
+    return str;
 }
 
 function _(msg) {
@@ -764,7 +842,6 @@ function getColorFromRamp(scale) {
 
 function changeSymbolHandler(id) {
 
-    id = id.replace('#lbl', '');
     var layer = getLayerById(id);
 
     if (typeof (layer.ramp) != 'undefined') {
@@ -981,7 +1058,7 @@ function resymbolize(layer) {
 
 function applyContextMenu(id) {
 
-    var layer = getLayerById(id.replace('#lbl', ''));
+    var layer = getLayerById(id);
 
     context.init({
         fadeSpeed: 100,
@@ -1008,10 +1085,8 @@ function applyContextMenu(id) {
             text: 'Remove',
             action:
                 function(e) {
-                    id = id.replace('#lbl', '');
-                    var layer = getLayerById(id);
                     map.removeLayer(layer.mapLayer);
-                    $('#leg' + id).remove();
+                    $('#li' + id).remove();
                     $('.img-block.active').each(function(index) {
                         if ($(this).find('img').attr('id').replace('img', '') == id) {
                             $(this).removeClass('active');
@@ -1044,8 +1119,6 @@ function applyContextMenu(id) {
             text: 'Zoom To',
             action:
                 function(e) {
-                    id = id.replace('#lbl', '');
-                    var layer = getLayerById(id);
                     map.fitBounds(layer.mapLayer.getBounds());
                 }
         },
@@ -1097,7 +1170,7 @@ function applyContextMenu(id) {
         {
             text: 'View Metadata...',
             action: function (e) {
-                id = id.replace('#lbl', '');
+                id = id.replace('#li', '');
                 var layer = getLayerById(id);
                 window.open(layer.metadataUrl, '_blank');
             }
@@ -1109,27 +1182,13 @@ function applyContextMenu(id) {
     case "geojson":
         contents.push({ header: 'Fill Opacity' }, {
             class: 'sliderFillOpacity',
-            id : id.replace('#lbl', ''),
-            value: function() {
-                id = id.replace('#lbl', '');
-                return 100;
-               // var foo = layer.mapLayer._layers[Object.keys(layer.mapLayer._layers)[0]];
-               // _(foo._layers['29'])
-               // return (typeof (foo.options.fillOpacity) !== 'undefined') ? foo.options.fillOpacity :
-               //     100;
-            }
+            id : id,
+            value: 100
         }, { header: 'Stroke Opacity' }, {
             class: 'sliderStrokeOpacity',
-            id: id.replace('#lbl', ''),
-            value: function() {
-                id = id.replace('#lbl', '');
-                var layer = getLayerById(id);
-                return 100;
-                //return (typeof (layer.mapLayer._layers[Object.keys(layer.mapLayer._layers)[0]].options.opacity) !== 'undefined') ? layer.mapLayer._layers[Object.keys(layer.mapLayer._layers)[0]].options.opacity :
-                //    100;
-            }
+            id: id,
+            value: 100
         }
-
 
         );
         break;
@@ -1137,13 +1196,8 @@ function applyContextMenu(id) {
     case "tilelayer":
         contents.push({ header: 'Opacity' }, {
             class: 'sliderFillOpacity',
-            id: id.replace('#lbl', ''),
-            value: function() {
-                id = id.replace('#lbl', '');
-                var layer = getLayerById(id);
-                return (typeof layer.opacity !== 'undefined') ? layer.opacity :
-                    100;
-            }
+            id: id,
+            value: 100
         });
         break;
     }
@@ -1158,8 +1212,10 @@ function applyContextMenu(id) {
         }
     });
 
-    context.attach(id, contents);
+    context.attach('#li'+id, contents);
 }
+
+/* Util */
 
 Storage.prototype.setObject = function (key, value) {
     this.setItem(key, JSON.stringify(value));
@@ -1301,3 +1357,52 @@ JSON.stringify = JSON.stringify || function (obj) {
         return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
     }
 };
+
+
+function handleSort(e, ui) {
+    var dropped = ui.item;
+
+    var trgid = dropped[0].id;
+    var id = trgid.replace('li', '');
+    var layer = getLayerById(id);
+    layer.mapLayer.bringToFront();
+    //var trgkey = trgid.substring(2, trgid.length);
+
+    //if (dropped[0].previousSibling == null) { //At top
+    //    var srcid = dropped[0].nextSibling.id;
+    //    var srckey = srcid.substring(2, srcid.length);
+    //    var srcz = maplayers.layers[srckey].source.options.zIndex;
+    //    var newz = srcz + 1;
+    //} else if (dropped[0].nextSibling == null) {
+    //    srcid = dropped[0].previousSibling.id;
+    //    srckey = srcid.substring(2, srcid.length);
+    //    srcz = maplayers.layers[srckey].source.options.zIndex;
+    //    newz = srcz - 1;
+    //} else {
+    //    //somehow iterate all the zindex values for this group.
+
+
+    //    var topsrcid = dropped[0].previousSibling.id;
+    //    var topsrckey = topsrcid.substring(2, topsrcid.length);
+    //    var topsrcz = maplayers.layers[topsrckey].source.options.zIndex;
+    //    var botsrcid = dropped[0].nextSibling.id;
+    //    var botsrckey = botsrcid.substring(2, botsrcid.length);
+    //    var botsrcz = maplayers.layers[botsrckey].source.options.zIndex;
+    //    newz = botsrcz + (Math.abs(topsrcz - botsrcz) / 2);
+    //}
+
+    //maplayers.layers[trgkey].source.options.zIndex = newz;
+
+    //if (map.hasLayer(maplayers.layers[trgkey].source)) {
+    //    map.removeLayer(maplayers.layers[trgkey].source);
+    //    map.addLayer(maplayers.layers[trgkey].source);
+    //}
+
+    //map._resetView(map.getCenter(), map.getZoom(), true);
+    //if prev element is null then at top
+
+    //if nextsibling element is null then at bottom.
+
+    //get prev element id, zIndex increment 1;
+
+}
