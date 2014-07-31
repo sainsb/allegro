@@ -9,8 +9,6 @@ var FIELD_TYPES = { 'number': 1, 'string': 2 };
 
 var SUBDOMAINS = ['gistiles1', 'gistiles2', 'gistiles3', 'gistiles4'];
 
-var GRAPHIC_PREFIX = 'http://library.oregonmetro.gov/rlisdiscovery/browse_graphic/';
-
 var DEFAULT_RAMP = 'RdYlBu';
 var DEFAULT_COLOR = '#444';
 var DEFAULT_FILLCOLOR = '#444';
@@ -44,6 +42,7 @@ $(document).ready(function () {
     $('.selectpicker').selectpicker();
 
     $('#btnAddData').click(function () {
+
         $('#dataModal').modal('show');
     });
 
@@ -257,7 +256,9 @@ function loadGeoJSON(options) {
 }
 
 function loadTileJSON(layer) {
-    $.getJSON(layer.url, function (data) {
+    var url = layer.url + ((layer.requireToken == true) ? "?token=" + config.token : "");
+
+    $.getJSON(url, function (data) {
 
         //Add to legend
 
@@ -283,7 +284,7 @@ function loadTileJSON(layer) {
             url += '?token=' + config.token;
         }
 
-        layer.mapLayer = new L.TileLayer(url, { subdomains: data.subdomains, zIndex: (typeof layer.zIndex != 'undefined') ? layer.zIndex : 70, maxZoom:19});
+        layer.mapLayer = new L.TileLayer(url, { subdomains: data.subdomains, zIndex: (typeof layer.zIndex != 'undefined') ? layer.zIndex : 70, maxZoom:19, reuseTiles:true});
 
         layer.mapLayer.addTo(map);
 
@@ -291,11 +292,11 @@ function loadTileJSON(layer) {
 }
 
 function loadBasemap(basemap) {
-    var zIndex = (typeof (basemap.zIndex) != 'undefined') ? basemap.zIndex : 70;
+    var zIndex = (typeof (basemap.zIndex) != 'undefined') ? basemap.zIndex : 0;
     var attribution = (typeof (basemap.source) != 'undefined') ? basemap.source : '';
     var url = (typeof (basemap.requireToken) != 'undefined') ? basemap.url + '?token=' + config.token : basemap.url;
     var maxZoom = (typeof(basemap.maxZoom) != 'undefined') ? basemap.maxZoom : 19;
-    basemap.mapLayer = new L.TileLayer(url, { zIndex: zIndex, attribution: attribution, subdomains: SUBDOMAINS, maxZoom:maxZoom });
+    basemap.mapLayer = new L.TileLayer(url, { zIndex: 0, attribution: attribution, subdomains: SUBDOMAINS, maxZoom:maxZoom });
     map.addLayer(basemap.mapLayer);
 }
 
@@ -526,7 +527,7 @@ function HTMLLegendFactory(layer) {
     var HTMLLegend = "";
     layer.legend.symbols.sort(compare);
     layer.legend.symbols.forEach(function (symbol) {
-        HTMLLegend += createHTMLLegendItem(layer.geom, symbol);
+        HTMLLegend += createSVGLegendItem(layer.geom, symbol);
     });
 
     return HTMLLegend;
@@ -537,7 +538,7 @@ function HTMLLegendFactory(layer) {
 @value - string/number, the value of the legend item
 @color - Hexadecimal color #FFCC00
 */
-function createHTMLLegendItem(geom, symbol) {
+function createSVGLegendItem(geom, symbol) {
     var legendItem = null;
     var symVal = (symbol.value == '*') ? '' : symbol.value;
     switch (geom) {
@@ -556,7 +557,7 @@ function createHTMLLegendItem(geom, symbol) {
         case "LineString":
             legendItem = '<div class="legend-item" data-color="' + symbol.fillColor + '" id="' + symVal + '">'
                 + '<svg width="16" height="14">'
-                + '<rect width="12" height="4" fill=' + symbol.fillColor + ' stroke-width="'+symbol.weight+'" stroke="'+symbol.color+'">'
+                + '<rect width="12" height="4" fill=' + symbol.color + ' stroke-width="0" >'
                 + '</svg> ' + symVal + '</div>';
     }
 
@@ -640,6 +641,7 @@ function createJSONLegend(value, scale,  color, weight) {
 
 function populateLayers() {
     var madeFirstActiveTab = false;
+
     for (var _layer in config.layers) {
 
         var layer = config.layers[_layer];
@@ -662,7 +664,7 @@ function populateLayers() {
             }
             sourceTabString += layer.source + '</a></li>';
 
-            $('#layerSourceTabs').prepend(sourceTabString);
+            $('#layerSourceTabs').append(sourceTabString);
 
             var tabstring = '<div class="tab-pane fade ';
             
@@ -683,8 +685,36 @@ function populateLayers() {
                 $('#' + layer.source).append('<div style="clear:both;" id="' + layer.source + '_' + theme + '"><h4 style="margin:0;">' + layer.theme + '</h4><hr style="margin:0;padding:0;"/></div');
         }
 
-        var thumb = GRAPHIC_PREFIX + layer.thumb;
-        $('#' + layer.source + '_' + theme).append("<div class='img-block layer "+layer.type+"'><div class='caption'>" + layer.name + "</div><img class='idata' src='" + thumb + "' alt='" + layer.name + "' id='img" + id + "'/></div>");
+        var thumb = layer.thumb;
+        var elem = "<div class='layer img-block ";
+        
+        if (layer.level == 2) {
+            elem += "img-block-m";
+        }
+
+        if (layer.level == 3) {
+            elem += "img-block-lg";
+        }
+
+        elem += "'><div class='caption ";
+
+        if (layer.level == 2) {
+            elem += "caption-m";
+        }
+
+        if (layer.level == 3) {
+            elem += "caption-lg";
+        }
+
+        elem += "'>" + layer.name + "</div><img class='idata ";
+        
+        if (layer.level == 2 || layer.level==3) {
+            elem += "idata-lg";
+        }
+        
+        elem+="' src='" + thumb + "' alt='" + layer.name + "' id='img" + id + "'/></div>";
+
+        $('#'+layer.source+ '_' + theme).append(elem);
     }
     
     $('.img-block.layer').on('click', function () {
@@ -694,7 +724,7 @@ function populateLayers() {
         if ($(this).hasClass('active')) {
             $(this).removeClass('active');
             map.removeLayer(layer.mapLayer);
-            $('#leg' + id).remove();
+            $('#li' + id).remove();
         }
         else {
             $(this).addClass('active');
@@ -716,11 +746,12 @@ function populateLayers() {
             $(this).find('.caption').removeClass('hover');
         }
       );
+
 }
 
 function populateBasemaps() {
 
-    var madeFirstActiveTab = false;
+    //var madeFirstActiveTab = false;
 
     for (_basemap in config.basemaps) {
 
@@ -728,54 +759,54 @@ function populateBasemaps() {
         var id = basemap.name.replace(/\s/g, '_');
 
 
-        var source = basemap.source;
+        //var source = basemap.source;
         var theme = basemap.theme.replace(/\s/g, '_');
 
         //If the layers source tab doesn't exist, create it.
-        if (!$('#' + source).length) {
-            var sourceTabString = '<li ';
-            if (!madeFirstActiveTab) {
-                sourceTabString += 'class="active"';
-            }
+        //if (!$('#' + source).length) {
+        //    var sourceTabString = '<li ';
+        //    if (!madeFirstActiveTab) {
+        //        sourceTabString += 'class="active"';
+        //    }
 
-            sourceTabString += '><a href="#' + basemap.source + '" data-toggle="tab">';
+        //    sourceTabString += '><a href="#' + basemap.source + '" data-toggle="tab">';
 
-            if (typeof (basemap.icon) != 'undefined') {
-                sourceTabString += '<img src="' + basemap.icon + '" align="left" style="margin-top:3px;"/>&nbsp;';
-            } else {
-                sourceTabString += '<i class="fa fa-check-circle-o"></i>&nbsp;';
-            }
-            sourceTabString += basemap.source + '</a></li>';
+        //    if (typeof (basemap.icon) != 'undefined') {
+        //        sourceTabString += '<img src="' + basemap.icon + '" align="left" style="margin-top:3px;"/>&nbsp;';
+        //    } else {
+        //        sourceTabString += '<i class="fa fa-check-circle-o"></i>&nbsp;';
+        //    }
+        //    sourceTabString += basemap.source + '</a></li>';
 
-            $('#basemapSourceTabs').append(sourceTabString);
+        //    $('#basemapSourceTabs').append(sourceTabString);
 
-            var tabstring = '<div class="tab-pane fade ';
+        //    var tabstring = '<div class="tab-pane fade ';
 
-            if (!madeFirstActiveTab) {
-                tabstring += 'active in';
-                madeFirstActiveTab = true;
-            }
-            tabstring += '" id="' + source + '"></div>';
+        //    if (!madeFirstActiveTab) {
+        //        tabstring += 'active in';
+        //        madeFirstActiveTab = true;
+        //    }
+        //    tabstring += '" id="' + source + '"></div>';
 
-            $('#basemapSourceTabs').next().append(tabstring);
+        //    $('#basemapSourceTabs').next().append(tabstring);
+        //}
+
+        if (!$('#' + theme).length) {
+            $('#basemapContent').append('<div style="clear:both;" id="' + theme + '"><h4 style="margin:0;">' + basemap.theme + '</h4><hr style="margin:0;padding:0;"/></div');
         }
 
-        if (!$('#' + source + '_' + theme).length) {
-            $('#' + source).append('<div style="clear:both;" id="' + source + '_' + theme + '"><h4 style="margin:0;">' + basemap.theme + '</h4><hr style="margin:0;padding:0;"/></div');
-        }
+        var thumb = basemap.thumb;
 
-        var thumb = GRAPHIC_PREFIX + basemap.thumb;
-
-        var imgBlockText = "<div class='img-block basemap";
+        var imgBlockText = "<div class='img-block img-block-sm basemap";
 
         if (basemap.active == true) {
             imgBlockText += ' active';
             loadBasemap(basemap);
         }
 
-        imgBlockText += "'><div class='caption'>" + basemap.name + "</div><img class='idata' src='" + thumb + "' alt='" + basemap.name + "' id='img" + id + "'/></div>";
+        imgBlockText += "'><div class='caption caption-sm'>" + basemap.name + "</div><img class='idata' src='" + thumb + "' alt='" + basemap.name + "' id='img" + id + "'/></div>";
 
-        $('#' + source + '_' + theme).append(imgBlockText);
+        $('#' + theme).append(imgBlockText);
     }
 
     $('.img-block.basemap').on('click', function () {
@@ -944,7 +975,7 @@ function changeSymbolHandler(id) {
 function singleFillResymbolize(layer) {
     var phantomSymbol = { value: '*', fillColor: $('#colSingleFillColor').val(), color: $('#colSingleColor').val(), weight: $('#rngSingleWeight').val() };
 
-    var legendItem = createHTMLLegendItem(layer.geom, phantomSymbol);
+    var legendItem = createSVGLegendItem(layer.geom, phantomSymbol);
 
     $('#singleLegend').empty().html(legendItem);
 
