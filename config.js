@@ -32,7 +32,7 @@
             'name': '2011 Air Photos',
             'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2011aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
             'type': 'photo',
-            'thumb': 'img/photo2013.png',
+            'thumb': 'img/photo2011.jpg',
             'source': 'Metro',
             'theme': 'Air Photo',
             'requireToken': true
@@ -41,7 +41,7 @@
               'name': '2010 Air Photos',
               'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2010aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
               'type': 'photo',
-              'thumb': 'img/photo2013.png',
+              'thumb': 'img/photo2010.jpg',
               'source': 'Metro',
               'theme': 'Air Photo',
               'requireToken': true
@@ -50,7 +50,7 @@
             'name': '2009 Air Photos',
             'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2009aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
             'type': 'photo',
-            'thumb': 'img/photo2013.png',
+            'thumb': 'img/photo2009.jpg',
             'source': 'Metro',
             'theme': 'Air Photo',
             'requireToken': true
@@ -59,7 +59,7 @@
                 'name': '2008 Air Photos',
                 'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2008aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
                 'type': 'photo',
-                'thumb': 'img/photo2013.png',
+                'thumb': 'img/photo2008.jpg',
                 'source': 'Metro',
                 'theme': 'Air Photo',
                 'requireToken': true
@@ -139,6 +139,7 @@
                 'source': 'RLIS',
                 'theme': 'Boundary',
                 "legend": {
+                    "type":"uniqueValue",
                     "symbols": [
                         {
                             "value": 1,
@@ -787,8 +788,18 @@
                      'symbolField': 'TYPE',
                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/lrt_line.png',
                      'source': 'RLIS',
-                     'theme': 'transit'
+                     'theme': 'Transit'
                  }, {
+                     'name': 'Bike There',
+                     'url': '//gis.oregonmetro.gov/arcgis/rest/services/transit/BikeThere2014/MapServer/tile/{z}/{y}/{x}/',
+                     'type': 'tilelayer',
+                     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/bike_routes.png',
+                     'source': 'RLIS',
+                     'theme': 'Transit',
+                     'level':2,
+                     'requireToken': true
+                 },
+                                  {
                      'name': 'Light Rail Lines and Stops Tiles',
                      'url': '//gis.oregonmetro.gov/services/Transit/LRT/tilejson',
                      'type': 'tilejson',

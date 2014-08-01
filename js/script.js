@@ -7,6 +7,8 @@ var LAYER_TYPES = { 'geojson': 1, 'shapefile': 2, 'tilejson':3 };
 
 var FIELD_TYPES = { 'number': 1, 'string': 2 };
 
+var RENDERER = { 'UNIQUE_VALUE': 'uniqueValue', 'CLASS_BREAKS': 'classBreaks', 'SINGLE_SYMBOL': 'singleSymbol' };
+
 var SUBDOMAINS = ['gistiles1', 'gistiles2', 'gistiles3', 'gistiles4'];
 
 var DEFAULT_RAMP = 'RdYlBu';
@@ -38,8 +40,6 @@ $(document).ready(function () {
     }
 
     $('.color').colorpicker();
-
-    $('.selectpicker').selectpicker();
 
     $('#btnAddData').click(function () {
 
@@ -126,7 +126,7 @@ $(document).ready(function () {
     $('body').on('input', '.sliderFillOpacity', function (e) {
         var id = $(this).attr('id').replace('sli', '');
         var layer = getLayerById(id);
-        layer.opacity = $(this).val() / 100;
+        layer.fillOpacity = $(this).val() / 100;
         switch(layer.type) {
             case "geojson":
             case "shapefile":
@@ -144,10 +144,30 @@ $(document).ready(function () {
     $('body').on('input', '.sliderStrokeOpacity', function (e) {
         var id = $(this).attr('id').replace('sli', '');
         var layer = getLayerById(id);
-        layer.opacity = $(this).val() / 100;
+        layer.strokeOpacity = $(this).val() / 100;
         layer.mapLayer.setStyle({
                 opacity: layer.opacity
             });
+    });
+
+    $('body').on('click','.img-block.layer', function () {
+        var id = $(this).find('img').attr('id').replace('img', '');
+        layer = getLayerById(id);
+        if ($(this).hasClass('active')) {
+            $(this).removeClass('active');
+            map.removeLayer(layer.mapLayer);
+            $('#li' + id).remove();
+        }
+        else {
+            $(this).addClass('active');
+            if (typeof (layer.mapLayer) != 'undefined') {
+                map.addLayer(layer.mapLayer);
+                $('#legend').prepend(layer.HTMLLegend);
+            }
+            else {
+                addData(layer);
+            }
+        }
     });
 
     initMap();
@@ -158,14 +178,17 @@ $(document).ready(function () {
     
     populatePalettes();
 
-    var x = new RLIS.Autosuggest("bikeTo", { "mode": 'locate', 'entries': 7 }, function (result, error) {
-        if (error) {
-            alert(error);
+    $('.selectpicker').selectpicker();
+
+    var x = new RLIS.Autosuggest("txtLocSearch", { "mode": 'locate', 'entries': 7 }, function (result, error) {
+        if (result.error == true || result[0].status == 'failure') {
+            $('#frmLocSearch').addClass('has-error');
             return;
         }
-
+        $('#frmLocSearch').removeClass('has-error');
         map.setView([result[0].lat, result[0].lng], 15);
     });
+
 });
 
 function initMap() {
@@ -311,7 +334,7 @@ function parseGeoJSON(data, layer) {
         if (typeof (data.legend) === 'undefined') {
 
             layer.ramp = DEFAULT_RAMP;
-            layer.legend = { "symbols": [], "title": layer.name };
+            layer.legend = { "symbols": [], "title": layer.name, 'type': 'uniqueValue' };
 
             if (typeof(layer.symbolField) != 'undefined') {
 
@@ -422,7 +445,6 @@ function parseGeoJSON(data, layer) {
     //});
 
     layer.mapLayer = geoJson.addTo(map);
-    _(id)
     applyContextMenu(id);
 
 }
@@ -586,37 +608,70 @@ function styleFromLegend(feature, layer) {
         return style;
     }
 
-    //value will always be found in legend.
+    //SingleSymbol renderer
+    //For wahtever reason it wasn't set...
+    if (layer.legend.symbols.length == 1) { layer.legend.type = RENDERER.SINGLE_SYMBOL; }
+
+    if (layer.legend.type==RENDERER.SINGLE_SYMBOL ) { //can assume that the value is *
+        var fillColor = (typeof layer.legend.symbols[0].fillColor != 'undefined') ? layer.legend.symbols[0].fillColor : DEFAULT_FILLCOLOR;
+
+        return styleFromSingleSymbolRenderer(fillColor);
+    }
+
     for (var i = 0; i < layer.legend.symbols.length; i++) {
         var sym = layer.legend.symbols[i];
+        if (layer.legend.type == RENDERER.UNIQUE_VALUE) {
 
-        if (sym.value == '*') {
-            style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
-            style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
-            style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777';
+            if (isNaN(value) && isNaN(sym.value)) {
+                //Alphanumeric symbol
+                if (sym.value.toUpperCase() == value.toUpperCase()) {
+                    style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
+                    style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
+                    style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : DEFAULT_FILLCOLOR;
 
-            return style;
-        }
-
-        if (isNaN(value) && isNaN(sym.value)) {
-
-            if (sym.value.toUpperCase() == value.toUpperCase()) {
+                    return style;
+                }
+            }
+                //Numeric symbol
+            else if (layer.legend.symbols[i].value == value) {
                 style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
                 style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
                 style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777';
 
                 return style;
             }
-        } else if (layer.legend.symbols[i].value == value) {
-            style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
-            style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
-            style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777';
-
-            return style;
+        } else if (layer.legend.type == RENDERER.CLASS_BREAKS) {
+            //must be numeric value
+            //if is not numeric then kick it back...
+            if (!isNaN(value) && (value >= sym.minVal && value <= sym.maxVal)) {
+                style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
+                style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
+                style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : DEFAULT_FILLCOLOR;
+                return style;
+            }
         }
     }
-
+    return style;
 };
+
+function styleFromSingleSymbolRenderer(fillColor) {
+   
+    return {
+        fillColor: fillColor,
+        fillOpacity: layer.fillOpacity,
+        stroke: true,
+        weight: DEFAULT_WEIGHT,
+        opacity: layer.strokeOpacity,
+        color: DEFAULT_COLOR
+    };
+}
+
+function styleFromUniqueValueRenderer() {
+}
+
+function styleFromClassBreaksRenderer() {
+
+}
 
 function createJSONLegend(value, scale,  color, weight) {
 
@@ -633,7 +688,7 @@ function createJSONLegend(value, scale,  color, weight) {
         fillColor = getColorFromRamp(scale);
     }
 
-    return{
+    return {
         "value": value,
         "fillColor": fillColor, 'color': color, 'weight': weight
     };
@@ -648,20 +703,23 @@ function populateLayers() {
         var id = layer.name.replace(/\s/g, '_');
 
         //If the layers source tab doesn't exist, create it.
-        if (!$('#' + layer.source).length) {
+        var source = layer.source.replace(/\s/g, '_');
 
+        if (!$('#' + source).length) {
             var sourceTabString = '<li ';
+
             if (!madeFirstActiveTab) {
                 sourceTabString += 'class="active"';
             }
 
-            sourceTabString += '><a href="#' + layer.source + '" data-toggle="tab">';
+            sourceTabString += '><a href="#' + source + '" data-toggle="tab">';
 
             if (typeof (layer.icon) != 'undefined') {
                 sourceTabString += '<img src="' + layer.icon + '" align="left" style="margin-top:3px;"/>&nbsp;';
             } else{
                 sourceTabString += '<i class="fa fa-check-circle-o"></i>&nbsp;';
             }
+
             sourceTabString += layer.source + '</a></li>';
 
             $('#layerSourceTabs').append(sourceTabString);
@@ -672,7 +730,7 @@ function populateLayers() {
                 tabstring += 'active in';
                 madeFirstActiveTab = true;
             }
-            tabstring += '" id="' + layer.source + '"></div>';
+            tabstring += '" id="' + source + '"></div>';
 
             $('#layerSourceTabs').next().append(tabstring);
         }
@@ -681,11 +739,17 @@ function populateLayers() {
         //create it.
         var theme = (typeof layer.theme == 'undefined') ? '' : layer.theme.replace(/\s/g, '_');
 
-        if (!$('#' + layer.source + '_' + theme).length) {
-                $('#' + layer.source).append('<div style="clear:both;" id="' + layer.source + '_' + theme + '"><h4 style="margin:0;">' + layer.theme + '</h4><hr style="margin:0;padding:0;"/></div');
+        if (!$('#' + source + '_' + theme).length) {
+                $('#' + source).append('<div style="clear:both;" id="' + source + '_' + theme + '"><h4 style="margin:0;">' + layer.theme + '</h4><hr style="margin:0;padding:0;"/></div');
         }
 
-        var thumb = layer.thumb;
+        if (typeof (layer.thumb) != 'undefined') {
+            var thumb = layer.thumb;
+        }
+        else {
+            var thumb = '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png';
+        }
+
         var elem = "<div class='layer img-block ";
         
         if (layer.level == 2) {
@@ -714,38 +778,13 @@ function populateLayers() {
         
         elem+="' src='" + thumb + "' alt='" + layer.name + "' id='img" + id + "'/></div>";
 
-        $('#'+layer.source+ '_' + theme).append(elem);
+        $('#' + source + '_' + theme).append(elem);
     }
-    
-    $('.img-block.layer').on('click', function () {
-        var id = $(this).find('img').attr('id').replace('img', '');
-        layer = getLayerById(id);
 
-        if ($(this).hasClass('active')) {
-            $(this).removeClass('active');
-            map.removeLayer(layer.mapLayer);
-            $('#li' + id).remove();
-        }
-        else {
-            $(this).addClass('active');
-            if (typeof (layer.mapLayer) != 'undefined') {
-                map.addLayer(layer.mapLayer);
-                $('#legend').prepend(layer.HTMLLegend);
-            }
-            else {
-                addData(layer);
-            }
-        }
-    });
+    //I want the custom tab at the end.
+    $('#layerSourceTabs').append('  <li><a href="#customData" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Custom</a></li>')
 
-    $('.img-block').hover(
-        function () {
-            $(this).find('.caption').addClass('hover');
-        },
-        function () {
-            $(this).find('.caption').removeClass('hover');
-        }
-      );
+    $('#layerSourceTabs').next().append("<div class='tab-pane fade' id='customData'>Data Source: &nbsp;    <select class='selectpicker' id='selCustomData' data-style='btn-default' data-width='180'>       <option value='0'>GeoJSON</option><option value='1'>ArcGIS Server</option><option value='2'>Tile Layer</option><option value='3'>Shapefile</option><option value='4'>CSV</option></select></div>");
 
 }
 
@@ -983,7 +1022,7 @@ function singleFillResymbolize(layer) {
 
         //use the new jsonlegend
         layer.legend.symbols = [phantomSymbol];
-
+        layer.legend.type = RENDERER.SINGLE_SYMBOL;
         layer.mapLayer.setStyle(function (feature) {
             return styleFromLegend(feature, layer);
         });
@@ -1058,7 +1097,7 @@ function resymbolize(layer) {
         }
     }
 
-    var legendItems = HTMLLegendFactory({name : layer.name,geom: layer.geom, legend: {symbols: phantomSymbols }});
+    var legendItems = HTMLLegendFactory({ name : layer.name,geom: layer.geom, legend: {symbols: phantomSymbols }});
 
     $('#singleLegend').empty()
     $('#catLegend').empty().html(legendItems);
@@ -1071,6 +1110,7 @@ function resymbolize(layer) {
 
         //use the new jsonlegend
         layer.legend.symbols = phantomSymbols;
+        layer.legend.type = RENDERER.UNIQUE_VALUE;
         
         layer.mapLayer.setStyle(function (feature) {
             return styleFromLegend(feature, layer);
@@ -1210,18 +1250,19 @@ function applyContextMenu(id) {
 
     switch (layer.type) {
     case "shapefile":
-    case "geojson":
-        contents.push({ header: 'Fill Opacity' }, {
-            class: 'sliderFillOpacity',
-            id : id,
-            value: 100
-        }, { header: 'Stroke Opacity' }, {
+        case "geojson":
+            if (layer.geom != 'LineString') {
+                contents.push({ header: 'Fill Opacity' }, {
+                    class: 'sliderFillOpacity',
+                    id: id,
+                    value: 100
+                });
+            }
+            contents.push({ header: 'Stroke Opacity' }, {
             class: 'sliderStrokeOpacity',
             id: id,
             value: 100
-        }
-
-        );
+            });
         break;
     case "tilejson":
     case "tilelayer":
