@@ -3,7 +3,7 @@ var map, points_layer, baseAll, baseAnno, photo;
 
 var STYLE_KEYWORDS = ['marker-size', 'marker-symbol', 'marker-color', 'stroke', 'stroke-opacity', 'stroke-width', 'fill', 'fill-opacity'];
 
-var LAYER_TYPES = { 'geojson': 1, 'shapefile': 2, 'tilejson':3 };
+var LAYER_TYPES = { 'GEOJSON': 'geojson', 'SHAPEFILE':'shapefile', 'TILEJSON':'tilejson', 'TILELAYER' : 'tilelayer' };
 
 var FIELD_TYPES = { 'number': 1, 'string': 2 };
 
@@ -14,7 +14,9 @@ var SUBDOMAINS = ['gistiles1', 'gistiles2', 'gistiles3', 'gistiles4'];
 var DEFAULT_RAMP = 'RdYlBu';
 var DEFAULT_COLOR = '#444';
 var DEFAULT_FILLCOLOR = '#444';
+var DEFAULT_FILLOPACITY = 1;
 var DEFAULT_WEIGHT = 1;
+var DEFAULT_RADIUS = 7;
 
 var scaleCounter = 0;
 
@@ -88,38 +90,14 @@ $(document).ready(function () {
             map.removeLayer(layer.mapLayer);
         }
 
+        //with this logic, the layer legend is dumb to the checkbox state.
+
         if (evt.stopPropagation) {
             evt.stopPropagation();
         }
         if (evt.cancelBubble != null) {
             evt.cancelBubble = true;
         }
-        return;
-
-        console.log($('#leg' + id).hasClass('in'));
-
-        if (!this.checked && $('#leg' + id).hasClass('in')) {
-            //how do we close the legend.
-            //$('#leg' + id).addClass('in');
-
-            if (evt.stopPropagation) {
-                evt.stopPropagation();
-            }
-            if (evt.cancelBubble != null) {
-                evt.cancelBubble = true;
-            }
-
-        } else if //clicking should ever only open the legend
-        ($('#leg' + id).hasClass('in') || (!this.checked && !$('#leg' + id).hasClass('in'))) {
-
-            if (evt.stopPropagation) {
-                evt.stopPropagation();
-            }
-            if (evt.cancelBubble != null) {
-                evt.cancelBubble = true;
-            }
-        }
-
     });
     
     //Attach behavior to opacity sliders
@@ -132,7 +110,7 @@ $(document).ready(function () {
             case "shapefile":
                 layer.mapLayer.setStyle
             ({
-                fillOpacity: layer.opacity,
+                fillOpacity: layer.fillOpacity,
             });
                 break;
             case "tilejson":
@@ -146,7 +124,7 @@ $(document).ready(function () {
         var layer = getLayerById(id);
         layer.strokeOpacity = $(this).val() / 100;
         layer.mapLayer.setStyle({
-                opacity: layer.opacity
+                opacity: layer.strokeOpacity
             });
     });
 
@@ -162,7 +140,17 @@ $(document).ready(function () {
             $(this).addClass('active');
             if (typeof (layer.mapLayer) != 'undefined') {
                 map.addLayer(layer.mapLayer);
-                $('#legend').prepend(layer.HTMLLegend);
+                _(layer.type);
+                switch(layer.type){
+                    case LAYER_TYPES.GEOJSON:
+                    case LAYER_TYPES.SHAPEFILE:
+                        $('#ulVectorLegend').prepend(layer.HTMLLegend);
+                        break;
+                    case LAYER_TYPES.TILELAYER:
+                    case LAYER_TYPES.TILEJSON:
+                        $('#ulTileLegend').prepend(layer.HTMLLegend);
+                        break;
+                }
             }
             else {
                 addData(layer);
@@ -188,7 +176,6 @@ $(document).ready(function () {
         $('#frmLocSearch').removeClass('has-error');
         map.setView([result[0].lat, result[0].lng], 15);
     });
-
 });
 
 function initMap() {
@@ -324,100 +311,120 @@ function loadBasemap(basemap) {
 }
 
 function parseGeoJSON(data, layer) {
- 
+    _(data.features[0]);
     var geoJson = {};
-    //layer.rt = RTree();
-    //layer.rt.geoJSON(data);
     
-    // take legend def in config over data legend
+    /* in order of preference:
+        layer.legend
+            layer.style
+                data.legend
+                    symbolField
+                        simpleStyle
+    */
+
     if (typeof (layer.legend) == 'undefined') {
-        if (typeof (data.legend) === 'undefined') {
+
+        layer.legend = { "symbols": [], "title": layer.name };
+
+        if(typeof(layer.style) != 'undefined'){
+
+            layer.legend.type = RENDERER.SINGLE_SYMBOL;
+
+            layer.legend.symbols.push({
+                "value": "*",
+                "fillColor": (typeof(layer.style.fillColor) != 'undefined') ? layer.style.fillColor : DEFAULT_FILLCOLOR,
+                'color': (typeof(layer.style.color) != 'undefined') ? layer.style.color : DEFAULT_COLOR,
+                'fillOpacity' : (typeof(layer.style.fillOpacity) != 'undefined') ? layer.style.fillOpacity : DEFAULT_FILLOPACITY,
+                'weight': (typeof(layer.style.weight) != 'undefined') ? layer.style.weight: DEFAULT_WEIGHT
+            });
+
+        } else if (typeof (data.legend) != 'undefined') {
+
+            layer.legend = data.legend;
+
+        } else if (typeof(layer.symbolField) != 'undefined') {
 
             layer.ramp = DEFAULT_RAMP;
-            layer.legend = { "symbols": [], "title": layer.name, 'type': 'uniqueValue' };
 
-            if (typeof(layer.symbolField) != 'undefined') {
+            layer.legend.type = RENDERER.UNIQUE_VALUE;
+            
+            var values = [];
 
-                var values = [];
+            for (var i = 0; i < data.features.length; i++) {
+                var value = data.features[i].properties[layer.symbolField];
 
-                for (var i = 0; i < data.features.length; i++) {
-                    var value = data.features[i].properties[layer.symbolField];
-
-                    if (value != value) {
-                        value='null';
-                    }
-
-                    if ($.inArray(value, values) === -1) {
-                        values.push(value);
-                    }
+                if (value != value) {
+                    value='null';
                 }
 
-                layer.scale = chroma.scale(DEFAULT_RAMP).domain([1, (values.length > 1) ? values.length : 2]).out('hex');
-
-                for (var val in values.sort(myComparator)) {
-                    layer.legend.symbols.push(createJSONLegend(values[val], layer.scale));
+                if ($.inArray(value, values) === -1) {
+                    values.push(value);
                 }
-            } else { //single symbol legend
-                layer.legend.symbols.push({
-                    "value": "*",
-                    "fillColor": getRandomColor(), 'color': DEFAULT_COLOR, 'weight': DEFAULT_WEIGHT
-                });
             }
-        } else {
-            layer.legend = data.legend;
+
+            layer.scale = chroma.scale(DEFAULT_RAMP).domain([1, (values.length > 1) ? values.length : 2]).out('hex');
+
+            for (var val in values.sort(myComparator)) {
+                _(val);
+                layer.legend.symbols.push(createJSONLegend(values[val], layer.scale));
+            }
+
+        } else { 
+
+            layer.legend.type = RENDERER.SINGLE_SYMBOL;
+
+            layer.legend.symbols.push({
+                "value": "*",
+                "fillColor": getRandomColor(), 'color': DEFAULT_COLOR, 'weight': DEFAULT_WEIGHT
+            });
         }
     }
 
-    var _onEachFeature = function (feature, slayer) {
-        if (feature.properties) {
-            slayer.bindPopup(Object.keys(feature.properties).map(function (k) {
-                if ($.inArray(k, STYLE_KEYWORDS) == -1) {
-                    return '<strong>' + k + "</strong>: " + feature.properties[k] + '<br/>';
-                }
-            }).join(""), { maxHeight: 200 });
+    var _onEachFeature = (typeof(layer.popupTemplate) != 'undefined') ?
+         function(feature, slayer) {
+            var thm = Mustache.render(layer.popupTemplate, feature.properties);
+            slayer.bindPopup(thm);
         }
-    };
+    : function (feature, slayer) {
+            if (feature.properties) {
+                slayer.bindPopup(Object.keys(feature.properties).map(function (k) {
+                    if ($.inArray(k, STYLE_KEYWORDS) == -1) {
+                        return '<strong>' + k + "</strong>: " + feature.properties[k] + '<br/>';
+                    }
+                }).join(""), { maxHeight: 200 });
+            }
+        };
 
-    //does it have simpleStyle defined?
-    //https://github.com/mapbox/simplestyle-spec/tree/master/1.1.0
-    //Nothing more to do here, handle it with the mapbox style api
-    if (hasSimpleStyle(data.features[0].properties)) {
-        geoJson = L.geoJson(data, {
-            style: L.mapbox.simplestyle.style,
-            onEachFeature: _onEachFeature
-        });
-
-        //create legend....
-    }
-    else {
-        switch (data.features[0].geometry.type) {
-            case "Point":
-                geoJson = L.geoJson(data, {
-                    pointToLayer: 
-                        function (feature, latlng) {
-                            return L.circleMarker(latlng, styleFromLegend(feature, layer));
-                        },
-                    onEachFeature: _onEachFeature
-                });
-                break;
-            case "LineString":
-            case "Polygon":
-            case "MultiPolygon":
-                geoJson = L.geoJson(data, {
-                    style: (typeof (layer.style) != 'undefined') ?
-                        layer.style : function(feature) {return styleFromLegend(feature, layer); },
-                    onEachFeature: _onEachFeature,
-                    clickable: (typeof (layer.clickable) == 'undefined' || layer.clickable == true)
-                });
-        }
+    switch (data.features[0].geometry.type) {
+        case "Point":
+            geoJson = L.geoJson(data, {
+                pointToLayer: 
+                    function (feature, latlng) {
+                        return L.circleMarker(latlng, styleFromLegend(feature, layer));
+                    },
+                onEachFeature: _onEachFeature
+            });
+            break;
+        case "LineString":
+        case "Polygon":
+        case "MultiPolygon":
+            geoJson = L.geoJson(data, {
+                style: (typeof (layer.style) != 'undefined') ?
+                    layer.style : function(feature) {return styleFromLegend(feature, layer); },
+                onEachFeature: _onEachFeature,
+                clickable: (typeof (layer.clickable) == 'undefined' || layer.clickable == true)
+            });
     }
 
     var id = layer.name.replace(/\s/g, '_');
 
     layer.geom = data.features[0].geometry.type;
 
+
+
     //parse fields and add to layer object
     layer.fields = [];
+
     for (var field in data.features[0].properties) {
         var fieldType = isNaN(data.features[0].properties[field]) ? 'string' : 'number';
         layer.fields.push({ name: field, type: fieldType});
@@ -435,16 +442,8 @@ function parseGeoJSON(data, layer) {
         handleSort(e, ui);
     });
 
-    //map.on("boxselectend", function (e) {
-
-    //    //order of operations
-    //    //Get first layer in TOC that is turned on
-
-    //    selLayer.clearLayers();
-    //    selLayer.addData(layer.rt.bbox(e.boxSelectBounds));
-    //});
-
     layer.mapLayer = geoJson.addTo(map);
+
     applyContextMenu(id);
 
 }
@@ -527,16 +526,6 @@ function createHTMLLegend(layer) {
     
     str += "</div></li>";
 
-    //var HTMLLegend = '<li style="clear:both" draggable="true" id="li'+id+'"><div class="legend panelyr collapsed" data-toggle="collapse" data-target="#legItems'+id+'" id="leg' + id + '"><span class="accordion-toggle"></span>';
-
-    //HTMLLegend += '<input type="checkbox" id="chk' + id + '" style="float:left;margin-right:5px;margin-left:3px;" checked="checked" class="legend-check"/><div style="float:left;vertical-align: -2px;" class="layername">'+title+"</div></div></div>";
-
-    //HTMLLegend += '<div style="clear:both;margin-left:15px;float:left;" class="collapse" id="leg'+id+'">'
-
-    
-
-    //HTMLLegend += '</div><div id="legItems' + id + '"></div>';
-
     return str;
 }
 
@@ -547,7 +536,8 @@ function _(msg) {
 function HTMLLegendFactory(layer) {
 
     var HTMLLegend = "";
-    layer.legend.symbols.sort(compare);
+    layer.legend.symbols.sort(myComparator);
+
     layer.legend.symbols.forEach(function (symbol) {
         HTMLLegend += createSVGLegendItem(layer.geom, symbol);
     });
@@ -565,21 +555,22 @@ function createSVGLegendItem(geom, symbol) {
     var symVal = (symbol.value == '*') ? '' : symbol.value;
     switch (geom) {
         case "Point":
-            legendItem = '<div class="legend-item" data-color="' + symbol.fillColor + '" id="' + symVal + '"><svg width="16" height="14">'
+            legendItem = '<div class="legend-item">'
+                    + '<svg width="16" height="14">'
                     + '<circle cx="6.5" cy="8" r="5.8" stroke="'+symbol.color+'" stroke-width="'+symbol.weight+'" fill="' + symbol.fillColor + '" />'
                     + '</svg> ' + symVal + '</div>';
             break;
         case "Polygon":
         case "MultiPolygon":
-            legendItem = '<div class="legend-item" data-color="' + symbol.fillColor + '" id="' + symVal + '">'
+            legendItem = '<div class="legend-item">'
                 + '<svg width="16" height="14">'
                 + '<rect width="12" height="12" fill=' + symbol.fillColor + ' stroke-width="'+symbol.weight+'" stroke="'+symbol.color+'">'
                 + '</svg> ' + symVal + '</div>';
             break;
         case "LineString":
-            legendItem = '<div class="legend-item" data-color="' + symbol.fillColor + '" id="' + symVal + '">'
+            legendItem = '<div class="legend-item">'
                 + '<svg width="16" height="14">'
-                + '<rect width="12" height="4" fill=' + symbol.color + ' stroke-width="0" >'
+                + '<rect width="12" height="3" fill=' + symbol.color + ' stroke-width="0" >'
                 + '</svg> ' + symVal + '</div>';
     }
 
@@ -587,83 +578,65 @@ function createSVGLegendItem(geom, symbol) {
 }
 
 function styleFromLegend(feature, layer) {
-    
-    var value = feature.properties[layer.symbolField];
-
+ 
     var style = {
         fillColor: DEFAULT_FILLCOLOR,
-        fillOpacity: layer.opacity,
-        stroke: true,
-        weight: DEFAULT_WEIGHT,
-        opacity: layer.opacity,
-        color: DEFAULT_COLOR
-    };
-
-    if (feature.geometry.type == 'Point') {
-        style.radius = 5;
-    }
-
-    //NaN is the only value in javascript that does not equal itself
-    if (value !== value) {
-        return style;
-    }
-
-    //SingleSymbol renderer
-    //For wahtever reason it wasn't set...
-    if (layer.legend.symbols.length == 1) { layer.legend.type = RENDERER.SINGLE_SYMBOL; }
-
-    if (layer.legend.type==RENDERER.SINGLE_SYMBOL ) { //can assume that the value is *
-        var fillColor = (typeof layer.legend.symbols[0].fillColor != 'undefined') ? layer.legend.symbols[0].fillColor : DEFAULT_FILLCOLOR;
-
-        return styleFromSingleSymbolRenderer(fillColor);
-    }
-
-    for (var i = 0; i < layer.legend.symbols.length; i++) {
-        var sym = layer.legend.symbols[i];
-        if (layer.legend.type == RENDERER.UNIQUE_VALUE) {
-
-            if (isNaN(value) && isNaN(sym.value)) {
-                //Alphanumeric symbol
-                if (sym.value.toUpperCase() == value.toUpperCase()) {
-                    style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
-                    style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
-                    style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : DEFAULT_FILLCOLOR;
-
-                    return style;
-                }
-            }
-                //Numeric symbol
-            else if (layer.legend.symbols[i].value == value) {
-                style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
-                style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
-                style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : '#777';
-
-                return style;
-            }
-        } else if (layer.legend.type == RENDERER.CLASS_BREAKS) {
-            //must be numeric value
-            //if is not numeric then kick it back...
-            if (!isNaN(value) && (value >= sym.minVal && value <= sym.maxVal)) {
-                style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
-                style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
-                style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : DEFAULT_FILLCOLOR;
-                return style;
-            }
-        }
-    }
-    return style;
-};
-
-function styleFromSingleSymbolRenderer(fillColor) {
-   
-    return {
-        fillColor: fillColor,
         fillOpacity: layer.fillOpacity,
         stroke: true,
         weight: DEFAULT_WEIGHT,
         opacity: layer.strokeOpacity,
         color: DEFAULT_COLOR
     };
+
+    var sym ={};
+
+    if (layer.legend.type==RENDERER.SINGLE_SYMBOL ) {
+        sym = layer.legend.symbols[0];
+        return styleFromSingleSymbolRenderer(fillColor);
+    } else {
+
+        var value = feature.properties[layer.symbolField];
+
+        //NaN is the only value in javascript that does not equal itself
+        if (value !== value) {
+            return style;
+        }
+
+        for (var i = 0; i < layer.legend.symbols.length; i++) {
+            sym = layer.legend.symbols[i];
+            if (layer.legend.type == RENDERER.UNIQUE_VALUE) {
+                if (isNaN(value) && isNaN(sym.value)) {
+                    if (sym.value.toUpperCase() == value.toUpperCase()) {
+                        break;
+                    }
+                }
+                else if (layer.legend.symbols[i].value == value) {
+                    break;
+                }
+            } else if (layer.legend.type == RENDERER.CLASS_BREAKS) {
+                if (!isNaN(value) && (value >= sym.minVal && value <= sym.maxVal)) {
+                    break;
+                }
+            }
+        }
+
+        style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
+        style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
+        style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : DEFAULT_FILLCOLOR;
+        style.fillOpacity = (typeof sym.fillOpacity != 'undefined') ? sym.fillOpacity : DEFAULT_FILLOPACITY;
+
+        if (feature.geometry.type == 'Point') {
+
+            style.radius = (typeof sym.radius != 'undefined') ? sym.radius : DEFAULT_RADIUS;
+        }
+    }
+
+    return style;
+};
+
+function styleFromSingleSymbolRenderer(fillColor) {
+   
+ 
 }
 
 function styleFromUniqueValueRenderer() {

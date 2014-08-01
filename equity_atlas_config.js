@@ -34,7 +34,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Voter Registration Numbers - Block Group", 
-        "popupTemplate": "<b>FIPS: </b>{{{FIPS}}}<br/><b>Voter Registration (#): </b>{{{Registered}}}<br/><b>Voter Participation in Last 3 General Elections: </b>{{{pct_gen_3}}}<br/><b>Voter Participation in Last 3 Primary Elections: </b>{{{pct_pri_3}}}", 
+        "popupTemplate": "<b>FIPS: </b>{{FIPS}}<br/><b>Voter Registration (#): </b>{{Registered}}<br/><b>Voter Participation in Last 3 General Elections: </b>{{pct_gen_3}}<br/><b>Voter Participation in Last 3 Primary Elections: </b>{{pct_pri_3}}", 
         "source": "Equity Atlas", 
         "symbolField": "Registered", 
         "theme": "Democratic Participation", 
@@ -76,7 +76,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Voter Participation Rates voted in last 3 primaries - Block Group", 
-        "popupTemplate": "<b>FIPS: </b>{{{FIPS}}}<br/><b>Voter Registration (#): </b>{{{Registered}}}<br/><b>Voter Participation in Last 3 General Elections: </b>{{{pct_gen_3}}}<br/><b>Voter Participation in Last 3 Primary Elections: </b>{{{pct_pri_3}}}", 
+        "popupTemplate": "<b>FIPS: </b>{{FIPS}}<br/><b>Voter Registration (#): </b>{{Registered}}<br/><b>Voter Participation in Last 3 General Elections: </b>{{pct_gen_3}}<br/><b>Voter Participation in Last 3 Primary Elections: </b>{{pct_pri_3}}", 
         "source": "Equity Atlas", 
         "symbolField": "pct_pri_3", 
         "theme": "Democratic Participation", 
@@ -118,7 +118,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Voter Participation Rates voted in last 3 general elections - Block Group", 
-        "popupTemplate": "<b>FIPS: </b>{{{FIPS}}}<br/><b>Voter Registration (#): </b>{{{Registered}}}<br/><b>Voter Participation in Last 3 General Elections: </b>{{{pct_gen_3}}}<br/><b>Voter Participation in Last 3 Primary Elections: </b>{{{pct_pri_3}}}", 
+        "popupTemplate": "<b>FIPS: </b>{{FIPS}}<br/><b>Voter Registration (#): </b>{{Registered}}<br/><b>Voter Participation in Last 3 General Elections: </b>{{pct_gen_3}}<br/><b>Voter Participation in Last 3 Primary Elections: </b>{{pct_pri_3}}", 
         "source": "Equity Atlas", 
         "symbolField": "pct_gen_3", 
         "theme": "Democratic Participation", 
@@ -174,7 +174,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Change in Populations of Color 2000-2010 - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Total Population 2010: </b>{{{TOTPOP}}}<br/><b>Rate of Change (2000 - 2010): </b>{{{Rate_NWPop}}}%<br/><b>Non-white Population 2000: </b>{{{NW_2000}}}<br/><b>Non-white Population 2010: </b>{{{NW_2010}}}", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Total Population 2010: </b>{{TOTPOP}}<br/><b>Rate of Change (2000 - 2010): </b>{{Rate_NWPop}}%<br/><b>Non-white Population 2000: </b>{{NW_2000}}<br/><b>Non-white Population 2010: </b>{{NW_2010}}", 
         "source": "Equity Atlas", 
         "symbolField": "Rate_NWPop", 
         "theme": "Demographics", 
@@ -223,7 +223,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Change in Median Income 2000 to 2006-2010 estimate - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Median Income 2000: </b>{{{MEDIINC00}}}<br/><b>Median Income 2000 (adjusted): </b>{{{INC00ADJ}}}<br/><b>Median Income2010: </b>{{{MEDINC10}}}<br/><b>Median Income 2010 (MOE): </b>{{{INCMOE10}}}<br/><b>% Change (2000 - 2010): </b>{{{CHANGE}}}%", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Median Income 2000: </b>{{MEDIINC00}}<br/><b>Median Income 2000 (adjusted): </b>{{INC00ADJ}}<br/><b>Median Income2010: </b>{{MEDINC10}}<br/><b>Median Income 2010 (MOE): </b>{{INCMOE10}}<br/><b>% Change (2000 - 2010): </b>{{CHANGE}}%", 
         "source": "Equity Atlas", 
         "symbolField": "CHANGE", 
         "theme": "Demographics", 
@@ -265,7 +265,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Median Income - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Median Income: </b>{{{FAMINC}}}<br/><b>Percent Households below Poverty Level: </b>{{{PFamBelow}}}%", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Median Income: </b>{{FAMINC}}<br/><b>Percent Households below Poverty Level: </b>{{PFamBelow}}%", 
         "source": "Equity Atlas", 
         "symbolField": "FAMINC", 
         "theme": "Demographics", 
@@ -307,7 +307,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Households below Poverty Level - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Median Income: </b>{{{FAMINC}}}<br/><b>Percent Households below Poverty Level: </b>{{{PFamBelow}}}%", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Median Income: </b>{{FAMINC}}<br/><b>Percent Households below Poverty Level: </b>{{PFamBelow}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PFamBelow", 
         "theme": "Demographics", 
@@ -342,7 +342,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Veterans - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{Id2}}}<br/><b>Percent Veterans: </b>{{{PVets}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{Id2}}<br/><b>Percent Veterans: </b>{{PVets}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PVets", 
         "theme": "Demographics", 
@@ -377,7 +377,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Foreign Born - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Percent Foreign Born: </b>{{{PForBorn}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Percent Foreign Born: </b>{{PForBorn}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PForBorn", 
         "theme": "Demographics", 
@@ -412,7 +412,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Recent Immigrants 2000 and later - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Percent Recent Immigrants (2000 and later): </b>{{{PForBor00}}}%<br/><b>Number of Recent Immigrants (2000 and later): </b>{{{ForBor2000}}}", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Percent Recent Immigrants (2000 and later): </b>{{PForBor00}}%<br/><b>Number of Recent Immigrants (2000 and later): </b>{{ForBor2000}}", 
         "source": "Equity Atlas", 
         "symbolField": "PForBor00", 
         "theme": "Demographics", 
@@ -447,7 +447,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Households with Low English Proficiency - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Percent Households with Low English Proficiency: </b>{{{PLowEngl}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Percent Households with Low English Proficiency: </b>{{PLowEngl}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PLowEngl", 
         "theme": "Demographics", 
@@ -458,7 +458,7 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#C70063", 
                     "maxVal": 30, 
                     "minVal": 2, 
@@ -466,34 +466,34 @@ config.layers.push(
                     "value": "2 - 30%"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#C70063", 
                     "maxVal": 45.0, 
                     "minVal": 30.01, 
-                    "radius": 12, 
+                    "radius": 9, 
                     "value": "31 - 45%"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#C70063", 
                     "maxVal": 70.0, 
                     "minVal": 45.01, 
-                    "radius": 17, 
+                    "radius": 11, 
                     "value": "46 - 70%"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#C70063", 
                     "maxVal": 95.0, 
                     "minVal": 70.01, 
-                    "radius": 23, 
+                    "radius": 13, 
                     "value": "71 - 95%"
                 }
             ], 
             "type": "classBreaks"
         }, 
         "name": "Percent Students Eligible for Free or Reduced Price Lunch by school - Points", 
-        "popupTemplate": "<b>School Name: </b>{{{NAME}}}<br/><b>Percent Students Eligible for Free or Reduced Price Lunch (by school): </b>{{{FREELUNCHP}}}%", 
+        "popupTemplate": "<b>School Name: </b>{{NAME}}<br/><b>Percent Students Eligible for Free or Reduced Price Lunch (by school): </b>{{FREELUNCHP}}%", 
         "source": "Equity Atlas", 
         "symbolField": "FREELUNCHP", 
         "theme": "Demographics", 
@@ -518,8 +518,8 @@ config.layers.push(
                     "value": " "
                 }, 
                 {
-                    "color": "#6E6E6E", 
-                    "fillColor": "#8DB3AE", 
+                    "color": "#6E6E6E",
+                    "fillColor": "#8DB3AE",
                     "maxVal": 285856.0, 
                     "minVal": 192679.000001, 
                     "value": " "
@@ -542,7 +542,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Transportation to Jobs - 2013 TAZs", 
-        "popupTemplate": "<b>Transporation Analysis Zone (TAZ): </b>{{{TAZ}}}<br/><b>Jobs Accessible to TAZ households (weighted by distance): </b>{{{jobs2005}}}", 
+        "popupTemplate": "<b>Transporation Analysis Zone (TAZ): </b>{{TAZ}}<br/><b>Jobs Accessible to TAZ households (weighted by distance): </b>{{jobs2005}}", 
         "source": "Equity Atlas", 
         "symbolField": "jobs2005", 
         "theme": "Economic Opportunity", 
@@ -553,7 +553,7 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#E60000", 
                     "maxVal": 98962, 
                     "minVal": 97005, 
@@ -564,7 +564,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Locations of Workforce Training and Employment-Related Services - Points", 
-        "popupTemplate": "<b>Name: </b>{{{Name], Mode=OneWay}}}}<br/><b>Street Address: </b>{{{Address], Mode=OneWay}}}}<br/><b>City: </b>{{{City], Mode=OneWay}}}}<br/><b>State: </b>{{{State], Mode=OneWay}}}}<br/><b>Zip Code: </b>{{{Zip], Mode=OneWay}}}}", 
+        "popupTemplate": "<b>Name: </b>{{Name}}<br/><b>Street Address: </b>{{Address}}<br/><b>City: </b>{{City}}<br/><b>State: </b>{{State}}<br/><b>Zip Code: </b>{{Zip}}", 
         "source": "Equity Atlas", 
         "symbolField": "Zip", 
         "theme": "Economic Opportunity", 
@@ -598,8 +598,8 @@ config.layers.push(
             ], 
             "type": "classBreaks"
         }, 
-        "name": "Highest Level of Adult Educational Attainment: 9-12th Grade, No Diploma - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Highest Level of Adult Educational Attainment: 9-12th Grade, no diploma): </b>{{{P9_12}}}%", 
+        "name": "Highest Level of Adult Educational Attainment - 9-12th Grade, No Diploma - PUMA", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Highest Level of Adult Educational Attainment: 9-12th Grade, no diploma): </b>{{P9_12}}%", 
         "source": "Equity Atlas", 
         "symbolField": "P9_12", 
         "theme": "Economic Opportunity", 
@@ -634,7 +634,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Highest Level of Adult Educational Attainment: High School Diploma - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Highest Level of Adult Educational Attainment: High School Diploma: </b>{{{PHSGrad}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Highest Level of Adult Educational Attainment: High School Diploma: </b>{{PHSGrad}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PHSGrad", 
         "theme": "Economic Opportunity", 
@@ -669,7 +669,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Highest Level of Adult Educational Attainment: Some College - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Highest Level of Adult Educational Attainment: Some College: </b>{{{PSomeColl}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Highest Level of Adult Educational Attainment: Some College: </b>{{PSomeColl}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PSomeColl", 
         "theme": "Economic Opportunity", 
@@ -704,7 +704,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Highest Level of Adult Educational Attainment: BA/BS Degree - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Highest Level of Adult Educational Attainment: BA/BS Degree: </b>{{{PBA}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Highest Level of Adult Educational Attainment: BA/BS Degree: </b>{{PBA}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PBA", 
         "theme": "Economic Opportunity", 
@@ -739,7 +739,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Highest Level of Adult Educational Attainment: Professional/Graduate Degree - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Highest Level of Adult Educational Attainment: Professional/Graduate Degree: </b>{{{PProf}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Highest Level of Adult Educational Attainment: Professional/Graduate Degree: </b>{{PProf}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PProf", 
         "theme": "Economic Opportunity", 
@@ -750,42 +750,42 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#BBD4EE", 
                     "maxVal": 25, 
                     "minVal": 5, 
-                    "radius": 8, 
+                    "radius": 7, 
                     "value": "5 - 25%"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#759CC4", 
                     "maxVal": 42, 
                     "minVal": 26, 
-                    "radius": 13, 
+                    "radius": 9, 
                     "value": "26 - 42%"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#3E74AB", 
                     "maxVal": 64, 
                     "minVal": 43, 
-                    "radius": 17, 
+                    "radius": 11, 
                     "value": "43 - 64%"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#2A5077", 
                     "maxVal": 100, 
                     "minVal": 65, 
-                    "radius": 21, 
+                    "radius": 13, 
                     "value": "65 - 100%"
                 }
             ], 
             "type": "classBreaks"
         }, 
         "name": "Percent Minority Students K-12 - Points", 
-        "popupTemplate": "<b>School Name: </b>{{{NAME}}}<br/><b>Total Students (Count): </b>{{{SCHLSTUDCN}}}<br/><b>Percent White Students: </b>{{{SCHLWHITEP}}}%<br/><b>Percent Black Students: </b>{{{SCHLBLACKP}}}%<br/><b>Percent Hispanic Students: </b>{{{SCHLHISPP}}}%<br/><b>Percent Asian/Pac Island Students: </b>{{{SCHLASIANP}}}%<br/><b>Percent American Indian Students: </b>{{{SCHLAMINDP}}}%<br/><b>Students of Unknown Race:: </b>{{{SCHLUNKPC}}}%<br/><b>Students of Multiple Race/Ethnicity: </b>{{{SCHLMULTIP}}}%<br/><b>Percent Minority Students: </b>{{{SCHLMNRTYP}}}%", 
+        "popupTemplate": "<b>School Name: </b>{{NAME}}<br/><b>Total Students (Count): </b>{{SCHLSTUDCN}}<br/><b>Percent White Students: </b>{{SCHLWHITEP}}%<br/><b>Percent Black Students: </b>{{SCHLBLACKP}}%<br/><b>Percent Hispanic Students: </b>{{SCHLHISPP}}%<br/><b>Percent Asian/Pac Island Students: </b>{{SCHLASIANP}}%<br/><b>Percent American Indian Students: </b>{{SCHLAMINDP}}%<br/><b>Students of Unknown Race:: </b>{{SCHLUNKPC}}%<br/><b>Students of Multiple Race/Ethnicity: </b>{{SCHLMULTIP}}%<br/><b>Percent Minority Students: </b>{{SCHLMNRTYP}}%", 
         "source": "Equity Atlas", 
         "symbolField": "SCHLMNRTYP", 
         "theme": "Education", 
@@ -796,7 +796,7 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#C7D9BB", 
                     "maxVal": 8, 
                     "minVal": 1, 
@@ -804,34 +804,34 @@ config.layers.push(
                     "value": "1 - 8"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#9ACFA9", 
                     "maxVal": 16, 
                     "minVal": 9, 
-                    "radius": 11, 
+                    "radius": 9, 
                     "value": "9 - 16"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#5E9F5D", 
                     "maxVal": 26, 
                     "minVal": 17, 
-                    "radius": 16, 
+                    "radius": 11, 
                     "value": "17 - 26"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#056300", 
                     "maxVal": 50, 
                     "minVal": 27, 
-                    "radius": 20, 
+                    "radius": 13, 
                     "value": "27 - 50"
                 }
             ], 
             "type": "classBreaks"
         }, 
-        "name": "No. Languages Spoken K-12 Student Body - Points", 
-        "popupTemplate": "<b>School Name: </b>{{{NAME}}}<br/><b>No. Languages Spoken (K-12 Student Body): </b>{{{LANGUAGES}}}", 
+        "name": "Number of Languages Spoken K-12 Student Body - Points", 
+        "popupTemplate": "<b>School Name: </b>{{NAME}}<br/><b>No. Languages Spoken (K-12 Student Body): </b>{{LANGUAGES}}", 
         "source": "Equity Atlas", 
         "symbolField": "LANGUAGES", 
         "theme": "Education", 
@@ -842,13 +842,13 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#DE9019", 
                     "radius": 13, 
                     "value": "Not Met"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#4DB452", 
                     "radius": 13, 
                     "value": "Met"
@@ -856,8 +856,8 @@ config.layers.push(
             ], 
             "type": "uniqueValues"
         }, 
-        "name": "Schools Meeting/ Not Meeting Adequate Yearly Progress AYP  - Points", 
-        "popupTemplate": "<b>School Name: </b>{{{NAME}}}<br/><b>Annual Yearly Progress (AYP): </b>{{{AYP}}}", 
+        "name": "Schools attainment of Adequate Yearly Progress AYP  - Points", 
+        "popupTemplate": "<b>School Name: </b>{{NAME}}<br/><b>Annual Yearly Progress (AYP): </b>{{AYP}}", 
         "source": "Equity Atlas", 
         "symbolField": "AYP", 
         "theme": "Education", 
@@ -868,42 +868,42 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#ABA68E", 
                     "maxVal": 60, 
                     "minVal": 8, 
-                    "radius": 9, 
+                    "radius": 7, 
                     "value": "8 - 60%"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#EEE8AA", 
                     "maxVal": 76, 
                     "minVal": 61, 
-                    "radius": 13, 
+                    "radius": 9, 
                     "value": "61 - 76%"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#D1CF63", 
                     "maxVal": 87, 
                     "minVal": 77, 
-                    "radius": 17, 
+                    "radius": 11, 
                     "value": "77 - 87%"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#8A7C34", 
                     "maxVal": 97, 
                     "minVal": 88, 
-                    "radius": 21, 
+                    "radius": 13, 
                     "value": "88 - 97%"
                 }
             ], 
             "type": "classBreaks"
         }, 
         "name": "Percent Students Meeting State Benchmarks for 3rd Grade Reading  - Points", 
-        "popupTemplate": "<b>School Name: </b>{{{NAME}}}<br/><b>Schools Meeting/ Not Meeting State Benchmarks for 3rd Grade Reading: </b>{{{per_read}}}%", 
+        "popupTemplate": "<b>School Name: </b>{{NAME}}<br/><b>Schools Meeting or Not Meeting State Benchmarks for 3rd Grade Reading: </b>{{per_read}}%", 
         "source": "Equity Atlas", 
         "symbolField": "per_read", 
         "theme": "Education", 
@@ -914,7 +914,7 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#D5BAFF", 
                     "maxVal": 19.0, 
                     "minVal": 6.25, 
@@ -922,34 +922,34 @@ config.layers.push(
                     "value": "Under 20"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#A68FFA", 
                     "maxVal": 22, 
                     "minVal": 20, 
-                    "radius": 12, 
+                    "radius": 9, 
                     "value": "20 - 22"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#8954F9", 
                     "maxVal": 25, 
                     "minVal": 23, 
-                    "radius": 17, 
+                    "radius": 11, 
                     "value": "23 - 25"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#700CF2", 
                     "maxVal": 46, 
                     "minVal": 26, 
-                    "radius": 23, 
+                    "radius": 13, 
                     "value": "Over 25"
                 }
             ], 
             "type": "classBreaks"
         }, 
         "name": "Average Class Size Elementary - Points", 
-        "popupTemplate": "<b>School Name: </b>{{{NAME}}}<br/><b>Average Class Size (Elementary): </b>{{{ELEMCLSZ}}}", 
+        "popupTemplate": "<b>School Name: </b>{{NAME}}<br/><b>Average Class Size (Elementary): </b>{{ELEMCLSZ}}", 
         "source": "Equity Atlas", 
         "symbolField": "ELEMCLSZ", 
         "theme": "Education", 
@@ -960,7 +960,7 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#A9A9A9", 
                     "maxVal": 54.99, 
                     "minVal": 5.33, 
@@ -968,34 +968,34 @@ config.layers.push(
                     "value": "< 55%"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#808080", 
                     "maxVal": 70, 
                     "minVal": 55, 
-                    "radius": 12, 
+                    "radius": 9, 
                     "value": "55 - 70 %"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#535252", 
                     "maxVal": 85.0, 
                     "minVal": 70.01, 
-                    "radius": 17, 
+                    "radius": 11, 
                     "value": "70.1 - 85%"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#000000", 
                     "maxVal": 100.0, 
                     "minVal": 85.01, 
-                    "radius": 23, 
+                    "radius": 13, 
                     "value": "> 85%"
                 }
             ], 
             "type": "classBreaks"
         }, 
         "name": "Percent Graduation Rate High School - Points", 
-        "popupTemplate": "<b>School Name: </b>{{{NAME}}}<br/><b>Percent Graduation Rate (High School): </b>{{{PGRADRATE}}}%", 
+        "popupTemplate": "<b>School Name: </b>{{NAME}}<br/><b>Percent Graduation Rate (High School): </b>{{PGRADRATE}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PGRADRATE", 
         "theme": "Education", 
@@ -1006,7 +1006,7 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#FFFF00", 
                     "maxVal": 7.0, 
                     "minVal": 1.9, 
@@ -1014,7 +1014,7 @@ config.layers.push(
                     "value": "\u2264 7 Years"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#FFA500", 
                     "maxVal": 14.0, 
                     "minVal": 7.01, 
@@ -1022,7 +1022,7 @@ config.layers.push(
                     "value": "7.01 - 14 Years"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#800000", 
                     "maxVal": 24.0, 
                     "minVal": 14.01, 
@@ -1033,7 +1033,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Average Teacher Experience Years - Points", 
-        "popupTemplate": "<b>School Name: </b>{{{NAME}}}<br/><b>Teacher Experience (years): </b>{{{TEACHEXP}}}", 
+        "popupTemplate": "<b>School Name: </b>{{NAME}}<br/><b>Teacher Experience (years): </b>{{TEACHEXP}}", 
         "source": "Equity Atlas", 
         "symbolField": "TEACHEXP", 
         "theme": "Education", 
@@ -1044,7 +1044,7 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#191970", 
                     "maxVal": 0, 
                     "minVal": 0, 
@@ -1052,7 +1052,7 @@ config.layers.push(
                     "value": "0"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#5F9EA0", 
                     "maxVal": 30, 
                     "minVal": 1, 
@@ -1060,7 +1060,7 @@ config.layers.push(
                     "value": "1 - 30"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#E1D4AB", 
                     "maxVal": 60, 
                     "minVal": 31, 
@@ -1068,7 +1068,7 @@ config.layers.push(
                     "value": "31 - 60"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#FFFF00", 
                     "maxVal": 90, 
                     "minVal": 61, 
@@ -1076,7 +1076,7 @@ config.layers.push(
                     "value": "61 - 90"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#FFA500", 
                     "maxVal": 154, 
                     "minVal": 91, 
@@ -1087,7 +1087,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Availability of Advanced Placement/International Baccalaureate Courses per School OR only - Points", 
-        "popupTemplate": "<b>School Name: </b>{{{NAME}}}<br/><b>Availability of Advanced Placement/International Baccalaureate Courses per School (OR only): </b>{{{AP_IB}}}", 
+        "popupTemplate": "<b>School Name: </b>{{NAME}}<br/><b>Availability of Advanced Placement/International Baccalaureate Courses per School (OR only): </b>{{AP_IB}}", 
         "source": "Equity Atlas", 
         "symbolField": "AP_IB", 
         "theme": "Education", 
@@ -1098,7 +1098,7 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#8A654F", 
                     "maxVal": 0.9, 
                     "minVal": -0.9, 
@@ -1106,7 +1106,7 @@ config.layers.push(
                     "value": "0"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#9AD187", 
                     "maxVal": 5, 
                     "minVal": 1, 
@@ -1117,7 +1117,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Availability of Arts/Media Classes per School OR only - Points", 
-        "popupTemplate": "<b>School Name: </b>{{{NAME}}}<br/><b>Availability of Arts/Media Classes per School (OR only): </b>{{{ARTS}}}", 
+        "popupTemplate": "<b>School Name: </b>{{NAME}}<br/><b>Availability of Arts/Media Classes per School (OR only): </b>{{ARTS}}", 
         "source": "Equity Atlas", 
         "symbolField": "ARTS", 
         "theme": "Education", 
@@ -1128,7 +1128,7 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#00FF00", 
                     "maxVal": 98962, 
                     "minVal": 97005, 
@@ -1139,7 +1139,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Locations of Community Gardens - Points", 
-        "popupTemplate": "<b>Garden Name: </b>{{{Garden_Nam], Mode=OneWay}}}}<br/><b>Street Address: </b>{{{Street_Add], Mode=OneWay}}}}<br/><b>City: </b>{{{City_1], Mode=OneWay}}}}<br/><b>Zip Code: </b>{{{Zip_Code], Mode=OneWay}}}}", 
+        "popupTemplate": "<b>Garden Name: </b>{{Garden_Nam], Mode=OneWay}}}<br/><b>Street Address: </b>{{Street_Add], Mode=OneWay}}}<br/><b>City: </b>{{City_1], Mode=OneWay}}}<br/><b>Zip Code: </b>{{Zip_Code], Mode=OneWay}}}", 
         "source": "Equity Atlas", 
         "symbolField": "Zip_Code", 
         "theme": "Food", 
@@ -1188,7 +1188,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Health Care Providers that Accept Medicaid - Zipcode", 
-        "popupTemplate": "<b>Zipcode: </b>{{{ZIPCODE}}}<br/><b>Providers accepting OHP/Medicaid: </b>{{{OHP}}}<br/><b>Providers accepting Medicare: </b>{{{Medicare}}}<br/><b>Total providing subsidized care: </b>{{{Total_1}}}", 
+        "popupTemplate": "<b>Zipcode: </b>{{ZIPCODE}}<br/><b>Providers accepting OHP/Medicaid: </b>{{OHP}}<br/><b>Providers accepting Medicare: </b>{{Medicare}}<br/><b>Total providing subsidized care: </b>{{Total_1}}", 
         "source": "Equity Atlas", 
         "symbolField": "OHP", 
         "theme": "Health Care", 
@@ -1237,7 +1237,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Health Care Providers that Accept Medicare - Zipcode", 
-        "popupTemplate": "<b>Zipcode: </b>{{{ZIPCODE}}}<br/><b>Providers accepting OHP/Medicaid: </b>{{{OHP}}}<br/><b>Providers accepting Medicare: </b>{{{Medicare}}}<br/><b>Total providing subsidized care: </b>{{{Total_1}}}", 
+        "popupTemplate": "<b>Zipcode: </b>{{ZIPCODE}}<br/><b>Providers accepting OHP/Medicaid: </b>{{OHP}}<br/><b>Providers accepting Medicare: </b>{{Medicare}}<br/><b>Total providing subsidized care: </b>{{Total_1}}", 
         "source": "Equity Atlas", 
         "symbolField": "Medicare", 
         "theme": "Health Care", 
@@ -1248,31 +1248,31 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#FFFFFF", 
                     "radius": 12, 
                     "value": "Annual hours of operation unknown"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#A500A8", 
                     "radius": 12, 
                     "value": "156 - 416 Hours"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#A500A8", 
                     "radius": 16, 
                     "value": "468 - 2235 Hours"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#A500A8", 
                     "radius": 20, 
                     "value": "2236 - 2496 Hours"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#A500A8", 
                     "radius": 24, 
                     "value": "2600 - 3302 Hours"
@@ -1281,7 +1281,7 @@ config.layers.push(
             "type": "uniqueValues"
         }, 
         "name": "Locations of Community, Public, and School-Based Health Clinics for Uninsured and Low-Income Patients - Points", 
-        "popupTemplate": "<b>Name: </b>{{{NAME}}}<br/><b>Address: </b>{{{ADDRESSS}}}<br/><b>City: </b>{{{CITY}}}<br/><b>Annual hours of operation: </b>{{{Label}}}", 
+        "popupTemplate": "<b>Name: </b>{{NAME}}<br/><b>Address: </b>{{ADDRESSS}}<br/><b>City: </b>{{CITY}}<br/><b>Annual hours of operation: </b>{{Label}}", 
         "source": "Equity Atlas", 
         "symbolField": "Label", 
         "theme": "Health Care", 
@@ -1323,7 +1323,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Rate of First Trimester Pre-Natal Care, 2006-2010 data - 2000 Census Tracts", 
-        "popupTemplate": "<b>FIPS: </b>{{{FIPS}}}<br/><b>Year: </b>{{{PNC_YEAR}}}<br/><b>Rate of First Trimester Pre-Natal Care: </b>{{{PNC_PCT}}}%", 
+        "popupTemplate": "<b>FIPS: </b>{{FIPS}}<br/><b>Year: </b>{{PNC_YEAR}}<br/><b>Rate of First Trimester Pre-Natal Care: </b>{{PNC_PCT}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PNC_PCT", 
         "theme": "Health Care", 
@@ -1372,7 +1372,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Rate of Well-Child Visits, 3-6 yrs. - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Well-Child Visit Rate:</b>{{{p_WellChld}}}%", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Well-Child Visit Rate:</b>{{p_WellChld}}%", 
         "source": "Equity Atlas", 
         "symbolField": "p_WellChld", 
         "theme": "Health Care", 
@@ -1421,7 +1421,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Rate of Well-Child Visits, 3-6 yrs. - Neighborhoods", 
-        "popupTemplate": "<b>Neighborhood: </b>{{{ID}}}<br/><b>Well-Child Visit Rate:</b>{{{p_WellChld}}}%", 
+        "popupTemplate": "<b>Neighborhood: </b>{{ID}}<br/><b>Well-Child Visit Rate:</b>{{p_WellChld}}%", 
         "source": "Equity Atlas", 
         "symbolField": "p_WellChld", 
         "theme": "Health Care", 
@@ -1470,7 +1470,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Rate of Potentially Avoidable Emergency Department Visits by Adults - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Preventable Adult ER Visit Rate:</b>{{{p_EDVisits}}}%", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Preventable Adult ER Visit Rate:</b>{{p_EDVisits}}%", 
         "source": "Equity Atlas", 
         "symbolField": "p_EDVisits", 
         "theme": "Health Care", 
@@ -1519,7 +1519,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Rate of Potentially Avoidable Emergency Department Visits by Adults - Neighborhoods", 
-        "popupTemplate": "<b>Neighborhood: </b>{{{ID}}}<br/><b>Preventable Adult ER Visit Rate:</b>{{{p_EDVisits}}}%", 
+        "popupTemplate": "<b>Neighborhood: </b>{{ID}}<br/><b>Preventable Adult ER Visit Rate:</b>{{p_EDVisits}}%", 
         "source": "Equity Atlas", 
         "symbolField": "p_EDVisits", 
         "theme": "Health Care", 
@@ -1575,7 +1575,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Obesity Body Mass Index - Block Group - 2010", 
-        "popupTemplate": "<b>Median BMI - Female: </b>{{{med_FAll}}}<br/><b>Median BMI - Male: </b>{{{med_MAll}}}<br/><b>Median BMI - Both: </b>{{{med_BAll}}}", 
+        "popupTemplate": "<b>Median BMI - Female: </b>{{med_FAll}}<br/><b>Median BMI - Male: </b>{{med_MAll}}<br/><b>Median BMI - Both: </b>{{med_BAll}}", 
         "source": "Equity Atlas", 
         "symbolField": "med_BAll", 
         "theme": "Health Outcomes", 
@@ -1624,7 +1624,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Rate of Pre-Term Births, 2006-2010 data - 2000 Census Tracts", 
-        "popupTemplate": "<b>FIPS: </b>{{{FIPS}}}<br/><b>Year: </b>{{{PTB_YEAR}}}<br/><b>Rate of Pre-Term Births: </b>{{{PTB_PCT}}}%", 
+        "popupTemplate": "<b>FIPS: </b>{{FIPS}}<br/><b>Year: </b>{{PTB_YEAR}}<br/><b>Rate of Pre-Term Births: </b>{{PTB_PCT}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PTB_PCT", 
         "theme": "Health Outcomes", 
@@ -1673,7 +1673,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percentage of Low Weight Births, 2006-2010 data - 2000 Census Tracts", 
-        "popupTemplate": "<b>FIPS: </b>{{{FIPS}}}<br/><b>Year: </b>{{{LBW_YEAR}}}<br/><b>Percentage of Low Weight Births: </b>{{{LBW_PCT}}}%", 
+        "popupTemplate": "<b>FIPS: </b>{{FIPS}}<br/><b>Year: </b>{{LBW_YEAR}}<br/><b>Percentage of Low Weight Births: </b>{{LBW_PCT}}%", 
         "source": "Equity Atlas", 
         "symbolField": "LBW_PCT", 
         "theme": "Health Outcomes", 
@@ -1722,7 +1722,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Rate of Diabetes - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Diabetes Rate:</b>{{{p_diabetes}}}%", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Diabetes Rate:</b>{{p_diabetes}}%", 
         "source": "Equity Atlas", 
         "symbolField": "p_diabetes", 
         "theme": "Health Outcomes", 
@@ -1771,7 +1771,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Rate of Diabetes - Neighborhoods", 
-        "popupTemplate": "<b>Neighborhood: </b>{{{ID}}}<br/><b>Diabetes Rate:</b>{{{p_diabetes}}}%", 
+        "popupTemplate": "<b>Neighborhood: </b>{{ID}}<br/><b>Diabetes Rate:</b>{{p_diabetes}}%", 
         "source": "Equity Atlas", 
         "symbolField": "p_diabetes", 
         "theme": "Health Outcomes", 
@@ -1820,7 +1820,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Rate of Cardiovascular Disease - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Cardiovascular Disease Rate:</b>{{{p_HeartDis}}}%", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Cardiovascular Disease Rate:</b>{{p_HeartDis}}%", 
         "source": "Equity Atlas", 
         "symbolField": "p_HeartDis", 
         "theme": "Health Outcomes", 
@@ -1869,7 +1869,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Rate of Cardiovascular Disease - Neighborhoods", 
-        "popupTemplate": "<b>Neighborhood: </b>{{{ID}}}<br/><b>Cardiovascular Disease Rate:</b>{{{p_HeartDis}}}%", 
+        "popupTemplate": "<b>Neighborhood: </b>{{ID}}<br/><b>Cardiovascular Disease Rate:</b>{{p_HeartDis}}%", 
         "source": "Equity Atlas", 
         "symbolField": "p_HeartDis", 
         "theme": "Health Outcomes", 
@@ -1918,7 +1918,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Rate of Asthma - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Asthma Rate:</b>{{{p_Asthma}}}%", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Asthma Rate:</b>{{p_Asthma}}%", 
         "source": "Equity Atlas", 
         "symbolField": "p_Asthma", 
         "theme": "Health Outcomes", 
@@ -1967,7 +1967,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Rate of Asthma - Neighborhoods", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Asthma Rate:</b>{{{p_Asthma}}}%", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Asthma Rate:</b>{{p_Asthma}}%", 
         "source": "Equity Atlas", 
         "symbolField": "p_Asthma", 
         "theme": "Health Outcomes", 
@@ -2021,7 +2021,7 @@ config.layers.push(
             "type": "uniqueValues"
         }, 
         "name": "Air Quality: Number of Times Levels Above Benchmark - All Sources - Polygon", 
-        "popupTemplate": "<b>Times Above Benchmark: </b>{{{LAB", 
+        "popupTemplate": "<b>Times Above Benchmark: </b>{{LABEL}}", 
         "source": "Equity Atlas", 
         "symbolField": "LABEL", 
         "theme": "Healthy Environment", 
@@ -2075,7 +2075,7 @@ config.layers.push(
             "type": "uniqueValues"
         }, 
         "name": "Air Quality: Number of Times Levels Above Benchmark - Road Sources - Polygon", 
-        "popupTemplate": "<b>Times Above Benchmark: </b>{{{LAB", 
+        "popupTemplate": "<b>Times Above Benchmark: </b>{{LABEL}}", 
         "source": "Equity Atlas", 
         "symbolField": "LABEL", 
         "theme": "Healthy Environment", 
@@ -2129,7 +2129,7 @@ config.layers.push(
             "type": "uniqueValues"
         }, 
         "name": "Air Quality: Number of Times Levels Above Benchmark - Non-Road Sources - Polygon", 
-        "popupTemplate": "<b>Times Above Benchmark: </b>{{{LAB", 
+        "popupTemplate": "<b>Times Above Benchmark: </b>{{LABEL}}", 
         "source": "Equity Atlas", 
         "symbolField": "LABEL", 
         "theme": "Healthy Environment", 
@@ -2183,7 +2183,7 @@ config.layers.push(
             "type": "uniqueValues"
         }, 
         "name": "Air Quality: Number of Times Levels Above Benchmark - Residential Wood Burning - Polygon", 
-        "popupTemplate": "<b>Times Above Benchmark: </b>{{{LAB", 
+        "popupTemplate": "<b>Times Above Benchmark: </b>{{LABEL}}", 
         "source": "Equity Atlas", 
         "symbolField": "LABEL", 
         "theme": "Healthy Environment", 
@@ -2237,7 +2237,7 @@ config.layers.push(
             "type": "uniqueValues"
         }, 
         "name": "Air Quality: Number of Times Levels Above Benchmark - Point Sources - Polygon", 
-        "popupTemplate": "<b>Times Above Benchmark: </b>{{{LAB", 
+        "popupTemplate": "<b>Times Above Benchmark: </b>{{LABEL}}", 
         "source": "Equity Atlas", 
         "symbolField": "LABEL", 
         "theme": "Healthy Environment", 
@@ -2291,7 +2291,7 @@ config.layers.push(
             "type": "uniqueValues"
         }, 
         "name": "Air Quality: Number of Times Levels Above Benchmark - Area Sources - Polygon", 
-        "popupTemplate": "<b>Times Above Benchmark: </b>{{{LAB", 
+        "popupTemplate": "<b>Times Above Benchmark: </b>{{LABEL}}", 
         "source": "Equity Atlas", 
         "symbolField": "LABEL", 
         "theme": "Healthy Environment", 
@@ -2333,7 +2333,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Median Home Value Sales Price - Tract", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Current Home Value: </b>{{{CURVAL}}}", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Current Home Value: </b>{{CURVAL}}", 
         "source": "Equity Atlas", 
         "symbolField": "CURVAL", 
         "theme": "Housing", 
@@ -2389,7 +2389,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Change in Median Home Value 2000-2010 - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Median Home Value (% Change 2000 - 2011): </b>{{{VALCHG}}}<br/><b>Housing Purchasing Power (inflation adjusted): </b>{{{INFAFF}}}", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Median Home Value (% Change 2000 - 2011): </b>{{VALCHG}}<br/><b>Housing Purchasing Power (inflation adjusted): </b>{{INFAFF}}", 
         "source": "Equity Atlas", 
         "symbolField": "VALCHG", 
         "theme": "Housing", 
@@ -2438,7 +2438,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Median Rental Cost two-bedroom units - Zipcode", 
-        "popupTemplate": "<b>Zipcode: </b>{{{ZIPCODE}}}<br/><b>Minimum Rent (2 bedroom): </b>{{{Min_Rent}}}<br/><b>Maximum Rent (2 bedroom): </b>{{{Max_Rent}}}<br/><b>Median Rent (2 bedroom): </b>{{{Median_R}}}", 
+        "popupTemplate": "<b>Zipcode: </b>{{ZIPCODE}}<br/><b>Minimum Rent (2 bedroom): </b>{{Min_Rent}}<br/><b>Maximum Rent (2 bedroom): </b>{{Max_Rent}}<br/><b>Median Rent (2 bedroom): </b>{{Median_R}}", 
         "source": "Equity Atlas", 
         "symbolField": "Median_R", 
         "theme": "Housing", 
@@ -2494,7 +2494,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Minority Homeownership Gap Difference between % Minority Households and % Minority Homeowners - Block Group - 2010", 
-        "popupTemplate": "<b>FIPS: </b>{{{FIPS}}}<br/><b>Home-Ownership Gap: </b>{{{HOG100}}}%", 
+        "popupTemplate": "<b>FIPS: </b>{{FIPS}}<br/><b>Home-Ownership Gap: </b>{{HOG100}}%", 
         "source": "Equity Atlas", 
         "symbolField": "HOG100", 
         "theme": "Housing", 
@@ -2556,7 +2556,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Location of Publicly-Subsidized Affordable Housing - Points", 
-        "popupTemplate": "<b>Project: </b>{{{Proj_Name}}}<br/><b>Units: </b>{{{Units}}}", 
+        "popupTemplate": "<b>Project: </b>{{Proj_Name}}<br/><b>Units: </b>{{Units}}", 
         "source": "Equity Atlas", 
         "symbolField": "Units", 
         "theme": "Housing", 
@@ -2612,7 +2612,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Housing Purchasing Power Ratio of housing purchasing power comparing median household income with median home sales price - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Median Home Value (% Change 2000 - 2011): </b>{{{VALCHG}}}<br/><b>Housing Purchasing Power (inflation adjusted): </b>{{{INFAFF}}}", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Median Home Value (% Change 2000 - 2011): </b>{{VALCHG}}<br/><b>Housing Purchasing Power (inflation adjusted): </b>{{INFAFF}}", 
         "source": "Equity Atlas", 
         "symbolField": "INFAFF", 
         "theme": "Housing", 
@@ -2647,7 +2647,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Foreclosures Percent Notice of Transfer Sale - RealtyTrac - Zipcode", 
-        "popupTemplate": "<b>Zipcode: </b>{{{ZIPCODE}}}<br/><b>Foreclosures Notice of Transfer Sale: </b>{{{NTS}}}<br/><b>Total Households: </b>{{{Tot_hshld}}}<br/><b>% Foreclosures Notice of Transfer Sale: </b>{{{PCT_NTS}}}", 
+        "popupTemplate": "<b>Zipcode: </b>{{ZIPCODE}}<br/><b>Foreclosures Notice of Transfer Sale: </b>{{NTS}}<br/><b>Total Households: </b>{{Tot_hshld}}<br/><b>% Foreclosures Notice of Transfer Sale: </b>{{PCT_NTS}}", 
         "source": "Equity Atlas", 
         "symbolField": "PCT_NTS", 
         "theme": "Housing", 
@@ -2696,7 +2696,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Housing and Transportation Cost Burden - MetroScope Housing Needs Analysis Subareas", 
-        "popupTemplate": "<b>Housing Needs Analysis subarea: </b>{{{HNA_Name}}}<br/><b>Total Dwelling Units: </b>{{{Total_DU}}}<br/><b>Average Income: </b>${{{Avg_Inc}}}<br/><b>Average Housing Cost: </b>${{{AvgHouse}}}<br/><b>Average Transportation Cost: </b>${{{AvgTrans}}}<br/><b>Housing as Percent of Income: </b>{{{Pct_House}}}%<br/><b>Transportation as Percent of Income: </b>{{{Pct_Trans}}}%<br/><b>Housing and Transportation Percentage: </b>{{{Pct_Both}}}%", 
+        "popupTemplate": "<b>Housing Needs Analysis subarea: </b>{{HNA_Name}}<br/><b>Total Dwelling Units: </b>{{Total_DU}}<br/><b>Average Income: </b>${{Avg_Inc}}<br/><b>Average Housing Cost: </b>${{AvgHouse}}<br/><b>Average Transportation Cost: </b>${{AvgTrans}}<br/><b>Housing as Percent of Income: </b>{{Pct_House}}%<br/><b>Transportation as Percent of Income: </b>{{Pct_Trans}}%<br/><b>Housing and Transportation Percentage: </b>{{Pct_Both}}%", 
         "source": "Equity Atlas", 
         "symbolField": "Pct_Both", 
         "theme": "Housing", 
@@ -2731,7 +2731,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Renters Spending over 35% of Income on Housing - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Percent Renters Spending 35% or greater on housing costs: </b>{{{PRentC35}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Percent Renters Spending 35% or greater on housing costs: </b>{{PRentC35}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PRentC35", 
         "theme": "Housing", 
@@ -2766,7 +2766,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Owners without mortgage Spending over 35% of Income on Housing - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Percent Owners (without mortgage) Spending 35% or greater on housing costs: </b>{{{PNoMC35}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Percent Owners (without mortgage) Spending 35% or greater on housing costs: </b>{{PNoMC35}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PNoMC35", 
         "theme": "Housing", 
@@ -2801,7 +2801,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Owners with mortgage Spending over 35% of Income on Housing - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Percent Owners (with mortgage) Spending 35% or greater on housing costs: </b>{{{PMortC35}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Percent Owners (with mortgage) Spending 35% or greater on housing costs: </b>{{PMortC35}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PMortC35", 
         "theme": "Housing", 
@@ -2843,7 +2843,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Access to Home Loans: Number of applications for Conventional Loans, 2011 Data", 
-        "popupTemplate": "<b>FIPS: </b>{{{FIPS}}}<br/><b>Number of Applications for Conventional Loans: </b>{{{ToApLo1}}}", 
+        "popupTemplate": "<b>FIPS: </b>{{FIPS}}<br/><b>Number of Applications for Conventional Loans: </b>{{ToApLo1}}", 
         "source": "Equity Atlas", 
         "symbolField": "ToApLo1", 
         "theme": "Housing", 
@@ -2885,7 +2885,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Access to Home Loans: Number of Applications for FHA Loans, 2011 Data", 
-        "popupTemplate": "<b>FIPS: </b>{{{FIPS}}}<br/><b>Number of Applications for FHA Loans: </b>{{{ToApLo2}}}", 
+        "popupTemplate": "<b>FIPS: </b>{{FIPS}}<br/><b>Number of Applications for FHA Loans: </b>{{ToApLo2}}", 
         "source": "Equity Atlas", 
         "symbolField": "ToApLo2", 
         "theme": "Housing", 
@@ -2927,7 +2927,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Access to Home Loans: Home Loan Denials White, 2011 data - 2000 Census Tracts", 
-        "popupTemplate": "<b>FIPS: </b>{{{FIPS}}}<br/><b>Total Applications (White): </b>{{{TotAppW}}}<br/><b>Total Denials (White): </b>{{{TotDenW}}}<br/><b>Percent Home Loan Denials (White): </b>{{{PctDenW}}}%", 
+        "popupTemplate": "<b>FIPS: </b>{{FIPS}}<br/><b>Total Applications (White): </b>{{TotAppW}}<br/><b>Total Denials (White): </b>{{TotDenW}}<br/><b>Percent Home Loan Denials (White): </b>{{PctDenW}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PctDenW", 
         "theme": "Housing", 
@@ -2983,7 +2983,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Access to Home Loans: Home Loan Denials Non-White, 2011 data - 2000 Census Tracts", 
-        "popupTemplate": "<b>FIPS: </b>{{{FIPS}}}<br/><b>Total Applications (Non-White): </b>{{{TotAppNW}}}<br/><b>Total Denials (Non-White): </b>{{{TotDenNW}}}<br/><b>Percent Home Loan Denials (Non-White): </b>{{{PctDenNW}}}%", 
+        "popupTemplate": "<b>FIPS: </b>{{FIPS}}<br/><b>Total Applications (Non-White): </b>{{TotAppNW}}<br/><b>Total Denials (Non-White): </b>{{TotDenNW}}<br/><b>Percent Home Loan Denials (Non-White): </b>{{PctDenNW}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PctDenNW", 
         "theme": "Housing", 
@@ -3025,7 +3025,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Access to Home Loans: Home Loan Denials All, 2011 data - 2000 Census Tracts", 
-        "popupTemplate": "<b>FIPS: </b>{{{FIPS}}}<br/><b>Total Applications (All): </b>{{{Total_App}}}<br/><b>Total Denials (All): </b>{{{Tot_Den}}}<br/><b>Percent Home Loan Denials (All): </b>{{{PctDenALL}}}%", 
+        "popupTemplate": "<b>FIPS: </b>{{FIPS}}<br/><b>Total Applications (All): </b>{{Total_App}}<br/><b>Total Denials (All): </b>{{Tot_Den}}<br/><b>Percent Home Loan Denials (All): </b>{{PctDenALL}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PctDenALL", 
         "theme": "Housing", 
@@ -3053,7 +3053,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Above Regional Average % Populations of Color - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Total Population: </b>{{{TOTPOP}}}<br/><b># Population of Color: </b>{{{POPCOLOR}}}<br/><b>% Population of Color: </b>{{{PCOLOR}}}%", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Total Population: </b>{{TOTPOP}}<br/><b># Population of Color: </b>{{POPCOLOR}}<br/><b>% Population of Color: </b>{{PCOLOR}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PCOLOR", 
         "theme": "Population Overlays", 
@@ -3081,7 +3081,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Above Regional Average % Populations in Poverty - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Total Families: </b>{{{TotFam}}}<br/><b>Total Families (MOE): </b>{{{TotFamMOE}}}<br/><b># Families Below Poverty Threshold: </b>{{{FamBelow}}}<br/><b>Families Below Threshold (MOE): </b>{{{FamBelMOE}}}<br/><b>% Families Below Poverty Threshold: </b>{{{PFamBelow}}}%", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Total Families: </b>{{TotFam}}<br/><b>Total Families (MOE): </b>{{TotFamMOE}}<br/><b># Families Below Poverty Threshold: </b>{{FamBelow}}<br/><b>Families Below Threshold (MOE): </b>{{FamBelMOE}}<br/><b>% Families Below Poverty Threshold: </b>{{PFamBelow}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PFamBelow", 
         "theme": "Population Overlays", 
@@ -3109,7 +3109,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Below regional median income - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Household Income: </b>{{{HOUSEINC}}}<br/><b>Household Income (MOE): </b>{{{HOUSEINCMO}}}<br/><b>Household Income (CV): </b>{{{HOUSEINCCV}}}", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Household Income: </b>{{HOUSEINC}}<br/><b>Household Income (MOE): </b>{{HOUSEINCMO}}<br/><b>Household Income (CV): </b>{{HOUSEINCCV}}", 
         "source": "Equity Atlas", 
         "symbolField": "HOUSEINC", 
         "theme": "Population Overlays", 
@@ -3137,7 +3137,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Above Regional Average % Youth ages 0-17 - Tracts", 
-        "popupTemplate": "<b>Census Tract: = </b>{{{ID}}}<br/><b>Total Population: </b>{{{TOTPOP}}}<br/><b># Age 0-17: </b>{{{AGE_0_17}}}<br/><b>% Age 0-17: </b>{{{PAGE0_17}}}%", 
+        "popupTemplate": "<b>Census Tract: = </b>{{ID}}<br/><b>Total Population: </b>{{TOTPOP}}<br/><b># Age 0-17: </b>{{AGE_0_17}}<br/><b>% Age 0-17: </b>{{PAGE0_17}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PAGE0_17", 
         "theme": "Population Overlays", 
@@ -3165,7 +3165,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Above Regional Average % Seniors ages 65+ - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{{ID}}}<br/><b>Total Population: </b>{{{TOTPOP}}}<br/><b># Age 65 and Over: </b>{{{AGE65OV}}}<br/><b>% Age 65 and Over: </b>{{{PAGE65OV}}}%", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Total Population: </b>{{TOTPOP}}<br/><b># Age 65 and Over: </b>{{AGE65OV}}<br/><b>% Age 65 and Over: </b>{{PAGE65OV}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PAGE65OV", 
         "theme": "Population Overlays", 
@@ -3200,7 +3200,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Households with No Motorized Vehicle - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Percent Households with No Motorized Vehicle: </b>{{{PNoVeh}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Percent Households with No Motorized Vehicle: </b>{{PNoVeh}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PNoVeh", 
         "theme": "Transportation", 
@@ -3235,7 +3235,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Workers Commute by Other Means including biking - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Percent Workers Commute by Other Means (including biking): </b>{{{Pother}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Percent Workers Commute by Other Means (including biking): </b>{{Pother}}%", 
         "source": "Equity Atlas", 
         "symbolField": "Pother", 
         "theme": "Transportation", 
@@ -3270,7 +3270,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Workers Commute by Walking - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Percent Workers Commute by Walking: </b>{{{PWalk}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Percent Workers Commute by Walking: </b>{{PWalk}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PWalk", 
         "theme": "Transportation", 
@@ -3305,7 +3305,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Workers Commute by Public Transit - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Percent Workers Commute by Public Transit: </b>{{{Ppublic}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Percent Workers Commute by Public Transit: </b>{{Ppublic}}%", 
         "source": "Equity Atlas", 
         "symbolField": "Ppublic", 
         "theme": "Transportation", 
@@ -3340,7 +3340,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Percent Workers Commute by Car - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Percent Workers Commute by Car: </b>{{{PCar}}}%", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Percent Workers Commute by Car: </b>{{PCar}}%", 
         "source": "Equity Atlas", 
         "symbolField": "PCar", 
         "theme": "Transportation", 
@@ -3375,7 +3375,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Average Commute Time to Work minutes - PUMA", 
-        "popupTemplate": "<b>PUM Area ID: </b>{{{PUMA}}}<br/><b>Average Commute Time to Work (minutes): </b>{{{TravelTime}}}", 
+        "popupTemplate": "<b>PUM Area ID: </b>{{PUMA}}<br/><b>Average Commute Time to Work (minutes): </b>{{TravelTime}}", 
         "source": "Equity Atlas", 
         "symbolField": "TravelTime", 
         "theme": "Transportation", 
@@ -3386,34 +3386,34 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#FF8C00", 
-                    "radius": 13, 
+                    "radius": 7, 
                     "value": "Bus Stop"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#FF4500", 
-                    "radius": 13, 
+                    "radius": 7, 
                     "value": "Streetcar"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#6B8E23", 
-                    "radius": 13, 
+                    "radius": 7, 
                     "value": "MAX"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#6495ED", 
-                    "radius": 13, 
+                    "radius": 7, 
                     "value": "Bus & Streetcar"
                 }
             ], 
             "type": "uniqueValues"
         }, 
         "name": "Public Transit Stop Safety Amenities - Curbcuts - Points", 
-        "popupTemplate": "<b>Stop Name: </b>{{{STOP_NAME}}}<br/><b>Jurisdiction: </b>{{{JURISDIC}}}<br/><b>Stop Type: </b>{{{TYPE}}}", 
+        "popupTemplate": "<b>Stop Name: </b>{{STOP_NAME}}<br/><b>Jurisdiction: </b>{{JURISDIC}}<br/><b>Stop Type: </b>{{TYPE}}", 
         "source": "Equity Atlas", 
         "symbolField": "TYPE", 
         "theme": "Transportation", 
@@ -3424,34 +3424,34 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#00AB17", 
-                    "radius": 13, 
+                    "radius": 7, 
                     "value": "Bus Stop"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#FF4500", 
-                    "radius": 13, 
+                    "radius": 7, 
                     "value": "Streetcar"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#6B8E23", 
-                    "radius": 13, 
+                    "radius": 7, 
                     "value": "MAX"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#6495ED", 
-                    "radius": 13, 
+                    "radius": 7, 
                     "value": "Bus & Streetcar"
                 }
             ], 
             "type": "uniqueValues"
         }, 
         "name": "Public Transit Stop Safety Amenities - Sidewalks - Points", 
-        "popupTemplate": "<b>Stop Name: </b>{{{STOP_NAME}}}<br/><b>Jurisdiction: </b>{{{JURISDIC}}}<br/><b>Stop Type: </b>{{{TYPE}}}", 
+        "popupTemplate": "<b>Stop Name: </b>{{STOP_NAME}}<br/><b>Jurisdiction: </b>{{JURISDIC}}<br/><b>Stop Type: </b>{{TYPE}}", 
         "source": "Equity Atlas", 
         "symbolField": "TYPE", 
         "theme": "Transportation", 
@@ -3462,21 +3462,21 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#FF0000", 
-                    "radius": 13, 
+                    "radius": 7, 
                     "value": "Car - Pedestrian"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#4682B4", 
-                    "radius": 13, 
+                    "radius": 7, 
                     "value": "Car - Car"
                 }, 
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#008000", 
-                    "radius": 13, 
+                    "radius": 7, 
                     "value": "Car - Bicycle"
                 }
             ], 
@@ -3494,9 +3494,9 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#FF8C00", 
-                    "radius": 13, 
+                    "radius": 6, 
                     "value": "Car - Car Crash"
                 }
             ], 
@@ -3514,9 +3514,9 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#FF73DF", 
-                    "radius": 13, 
+                    "radius": 6, 
                     "value": "Car - Pedestrian Crash"
                 }
             ], 
@@ -3534,9 +3534,9 @@ config.layers.push(
         "legend": {
             "symbols": [
                 {
-                    "color": "Black", 
+                    "color": "#000", 
                     "fillColor": "#00FFC5", 
-                    "radius": 13, 
+                    "radius": 6, 
                     "value": "Car Bicycle Crash"
                 }
             ], 

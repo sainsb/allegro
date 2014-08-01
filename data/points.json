@@ -195,6 +195,7 @@
 
 "symbolField": "type",
 "legend": {
+"type": "uniqueValues",
     "symbols": [
       {
         "value": "Solid waste facilities",

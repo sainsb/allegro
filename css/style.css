@@ -32,6 +32,8 @@ margin-left: 5px;
 .legend-item{
 margin-left:5px;
 font-size:12px;
+line-height:1.2 !important;
+vertical-align: top;
 }
 
  .img-block{
