@@ -311,7 +311,17 @@ function loadBasemap(basemap) {
 }
 
 function parseGeoJSON(data, layer) {
-    _(data.features[0]);
+    
+    if($.isArray(data)){
+    
+        for (d in data){
+            if(typeof(data[d].type) != 'undefined' && data[d].type=='FeatureCollection'){
+                data = data[d];
+                break;
+            }
+        }
+    }
+    _(data);
     var geoJson = {};
     
     /* in order of preference:
@@ -420,8 +430,7 @@ function parseGeoJSON(data, layer) {
 
     layer.geom = data.features[0].geometry.type;
 
-
-
+    _(layer.geom);
     //parse fields and add to layer object
     layer.fields = [];
 
