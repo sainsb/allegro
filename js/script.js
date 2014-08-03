@@ -140,7 +140,6 @@ $(document).ready(function () {
             $(this).addClass('active');
             if (typeof (layer.mapLayer) != 'undefined') {
                 map.addLayer(layer.mapLayer);
-                _(layer.type);
                 switch(layer.type){
                     case LAYER_TYPES.GEOJSON:
                     case LAYER_TYPES.SHAPEFILE:
@@ -184,7 +183,7 @@ function initMap() {
         center: new L.LatLng(45.44944, -122.67599),
         zoom: 10,
         minZoom: 9,
-        maxZoom: 19,
+        maxZoom: 20,
         fullscreenControl: true
     });
 
@@ -321,7 +320,6 @@ function parseGeoJSON(data, layer) {
             }
         }
     }
-    _(data);
     var geoJson = {};
     
     /* in order of preference:
@@ -375,8 +373,7 @@ function parseGeoJSON(data, layer) {
             layer.scale = chroma.scale(DEFAULT_RAMP).domain([1, (values.length > 1) ? values.length : 2]).out('hex');
 
             for (var val in values.sort(myComparator)) {
-                _(val);
-                layer.legend.symbols.push(createJSONLegend(values[val], layer.scale));
+                layer.legend.symbols.push(createJSONLegend(layer.geom, values[val], layer.scale));
             }
 
         } else { 
@@ -430,7 +427,6 @@ function parseGeoJSON(data, layer) {
 
     layer.geom = data.features[0].geometry.type;
 
-    _(layer.geom);
     //parse fields and add to layer object
     layer.fields = [];
 
@@ -545,7 +541,6 @@ function _(msg) {
 function HTMLLegendFactory(layer) {
 
     var HTMLLegend = "";
-    layer.legend.symbols.sort(myComparator);
 
     layer.legend.symbols.forEach(function (symbol) {
         HTMLLegend += createSVGLegendItem(layer.geom, symbol);
@@ -601,7 +596,6 @@ function styleFromLegend(feature, layer) {
 
     if (layer.legend.type==RENDERER.SINGLE_SYMBOL ) {
         sym = layer.legend.symbols[0];
-        return styleFromSingleSymbolRenderer(fillColor);
     } else {
 
         var value = feature.properties[layer.symbolField];
@@ -628,35 +622,24 @@ function styleFromLegend(feature, layer) {
                 }
             }
         }
+    }
 
-        style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
-        style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
-        style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : DEFAULT_FILLCOLOR;
-        style.fillOpacity = (typeof sym.fillOpacity != 'undefined') ? sym.fillOpacity : DEFAULT_FILLOPACITY;
+    style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
+    style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
+    style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : DEFAULT_FILLCOLOR;
+    style.fillOpacity = (typeof sym.fillOpacity != 'undefined') ? sym.fillOpacity : DEFAULT_FILLOPACITY;
 
-        if (feature.geometry.type == 'Point') {
+    if (feature.geometry.type == 'Point') {
 
-            style.radius = (typeof sym.radius != 'undefined') ? sym.radius : DEFAULT_RADIUS;
-        }
+        style.radius = (typeof sym.radius != 'undefined') ? sym.radius : DEFAULT_RADIUS;
     }
 
     return style;
 };
 
-function styleFromSingleSymbolRenderer(fillColor) {
-   
- 
-}
+function createJSONLegend(geom, value, scale,  color, weight) {
 
-function styleFromUniqueValueRenderer() {
-}
-
-function styleFromClassBreaksRenderer() {
-
-}
-
-function createJSONLegend(value, scale,  color, weight) {
-
+    //_(value);
     color = (typeof (color) !== 'undefined') ? color : DEFAULT_COLOR;
     weight = (typeof (weight) !== 'undefined') ? weight : DEFAULT_WEIGHT;
 
@@ -670,10 +653,11 @@ function createJSONLegend(value, scale,  color, weight) {
         fillColor = getColorFromRamp(scale);
     }
 
-    return {
-        "value": value,
-        "fillColor": fillColor, 'color': color, 'weight': weight
-    };
+    if(geom=='LineString'){
+        return {"value" : value,  'color': fillColor, 'weight': weight};
+    }else{
+        return {"value" : value, "fillColor": fillColor, 'color': color, 'weight': weight};
+    }
 }
 
 function populateLayers() {
@@ -896,24 +880,28 @@ function changeSymbolHandler(id) {
 
     var layer = getLayerById(id);
 
-    if (typeof (layer.ramp) != 'undefined') {
-        var $span = $('<span class="temppalette" title="' + layer.ramp + '"></span>');
-
-        var _ramp = colorbrewer[layer.ramp]['9'];
-
-        for (var col in _ramp) {
-            $span.append('<span class="swatch" style="background-color: ' + _ramp[col] + ';"></span>');
-        }
-
-        if (!$($('#selGradient').children()[0]).is('b')) {
-            $('#selGradient span').first().remove();
-        }
-
-        $('#selGradient').prepend($span);
-    } else {
-        //we're dealing with a custom legend here... no ramp...
+    //hide stroke inputs if we're dealing with a LineString geometry
+    if(layer.geom=='LineString'){
+        $('.lblStroke').hide();
+    }else{
+        $('.lblStroke').show();
     }
 
+    var _ramp = (typeof (layer.ramp) != 'undefined') ? layer.ramp : DEFAULT_RAMP;
+
+    //set a ramp in the selGradient combobox
+    var $span = $('<span class="temppalette" title="' + _ramp + '"></span>');
+
+    for (var col in colorbrewer[_ramp]['9']) {
+        $span.append('<span class="swatch" style="background-color: ' + colorbrewer[_ramp]['9'][col] + ';"></span>');
+    }
+
+    if (!$($('#selGradient').children()[0]).is('b')) {
+        $('#selGradient span').first().remove();
+    }
+
+    $('#selGradient').prepend($span);
+    
     //populate field select control
     $('#selCatField').off('change.core');
 
@@ -926,8 +914,26 @@ function changeSymbolHandler(id) {
             .text(value.name));
     });
 
-    $('#selCatField').selectpicker('val', layer.symbolField);
-    
+    if(typeof(layer.symbolField) != 'undefined'){
+        $('#selCatField').selectpicker('val', layer.symbolField);
+    } else {
+        $('#selCatField')
+            .append($("<option></option>")
+            .attr("value", '0')
+            .text('No field Selected')).selectpicker('val', '0')
+
+            $('#selCatField').next().first().on('click.core', function(){
+               
+            $('#selCatField').find('[value=0]').remove();
+
+            $('.selectpicker').selectpicker('refresh');
+
+            $('#selCatField').next().first().off('click.core');
+
+            resymbolize(layer);
+        });
+    }
+
     $('.selectpicker').selectpicker('refresh');
 
     //remove event handlers for single color before changing their values
@@ -987,6 +993,11 @@ function changeSymbolHandler(id) {
         $('#selGradient span').first().remove();
         $('#selGradient').prepend($span);
         
+        if($('#selCatField').val()=='0'){ //no field selected
+            //add error class to field input?
+            return;
+        }
+
         resymbolize(layer);
     });
 
@@ -994,6 +1005,8 @@ function changeSymbolHandler(id) {
 }
 
 function singleFillResymbolize(layer) {
+
+    //construct the faux legend item
     var phantomSymbol = { value: '*', fillColor: $('#colSingleFillColor').val(), color: $('#colSingleColor').val(), weight: $('#rngSingleWeight').val() };
 
     var legendItem = createSVGLegendItem(layer.geom, phantomSymbol);
@@ -1005,6 +1018,7 @@ function singleFillResymbolize(layer) {
         //use the new jsonlegend
         layer.legend.symbols = [phantomSymbol];
         layer.legend.type = RENDERER.SINGLE_SYMBOL;
+
         layer.mapLayer.setStyle(function (feature) {
             return styleFromLegend(feature, layer);
         });
@@ -1042,17 +1056,16 @@ function resymbolize(layer) {
     //! only if the symbolField has changed, or we have a single, asterix
     //value in the symbols do we need to iterate the features again
     //take the ramp, reparse the JSON features and build a fake JSON legend
-    var phantomSymbols = [];
-
+  
     var values = [];
 
     if (symbolField != layer.symbolField || layer.legend.symbols[0].value=='*') {
+        
         for (var feature in layer.mapLayer._layers) {
             if ($.inArray(layer.mapLayer._layers[feature].feature.properties[symbolField], values) === -1) {
                 values.push(layer.mapLayer._layers[feature].feature.properties[symbolField]);
             }
         }
-        values.sort(myComparator);
     }
     else
     {
@@ -1062,13 +1075,13 @@ function resymbolize(layer) {
         }
     }
     
+    var phantomSymbols = [];
+
     if (typeof(ramp) != 'undefined' || layer.ramp != ramp) {
         var scale = chroma.scale(ramp).domain([1, values.length]).out('hex');
-
-        for (var val in values.sort(myComparator)) {
-            phantomSymbols.push(
-                createJSONLegend(values[val], scale, color, weight)
-            );
+        values.sort(myComparator);
+        for (var i=0;i<values.length;i++) {
+            phantomSymbols.push(createJSONLegend(layer.geom, values[i], scale, color, weight));
         }
     } else {
         //get colors from existing legend.

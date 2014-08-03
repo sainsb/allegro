@@ -25,6 +25,7 @@
           'type': 'photo',
           'thumb': 'img/photo2012.jpg',
           'source': 'Metro',
+          'maxZoom': 20,
           'theme': 'Air Photo',
           'requireToken': true
       },
