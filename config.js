@@ -16,6 +16,7 @@
         'type': 'photo',
         'thumb': 'img/photo2013.png',
         'source': 'Metro',
+          'maxZoom': 20,
         'theme': 'Air Photo',
         'requireToken': true
     },
@@ -100,6 +101,7 @@
                 'url': '//library.oregonmetro.gov/rlisdiscovery/cty_fill.zip',
                 'type': 'shapefile',
                 'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/cty_fill.png',
+                "popupTemplate": "<b>Name: </b>{{CITYNAME}}<br/><b>Area (sq.ft): </b>{{AREA}}",
                 'symbolField': 'CITYNAME',
                 'source': 'RLIS',
                 'icon' : './img/metro_logo.png',
@@ -307,6 +309,7 @@
                 'url': '//library.oregonmetro.gov/rlisdiscovery/sewerdst.zip',
                 'type': 'shapefile',
                 'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/sewerdst.png',
+                "popupTemplate": "<b>Name: </b>{{SEWER_DIST}}<br/><b>Area (sq.ft): </b>{{AREA}}",
                 'symbolField': 'SEWER_DIST',
                 'source': 'RLIS',
                 'theme': 'Boundary'
