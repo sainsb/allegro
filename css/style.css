@@ -68,21 +68,20 @@ vertical-align: top;
   font-size:11px;
   line-height:13px;
   padding-top:3px;
+  z-index:10000;
 }
 
 
  .img-block-m {
        width:209px;
  }
-
  
  .caption-m {
       width:208px;
      font-size: 18px;
      padding-top: 9px;
  }
-
-
+ 
 .idata{
   width:82px;
   height:62px;

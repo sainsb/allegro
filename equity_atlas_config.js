@@ -32,7 +32,8 @@ config.layers.push(
                 }
             ], 
             "type": "classBreaks"
-        }, 
+        },
+        'level':2,
         "name": "Voter Registration Numbers - Block Group", 
         "popupTemplate": "<b>FIPS: </b>{{FIPS}}<br/><b>Voter Registration (#): </b>{{Registered}}<br/><b>Voter Participation in Last 3 General Elections: </b>{{pct_gen_3}}<br/><b>Voter Participation in Last 3 Primary Elections: </b>{{pct_pri_3}}", 
         "source": "Equity Atlas", 
@@ -1132,14 +1133,14 @@ config.layers.push(
                     "fillColor": "#00FF00", 
                     "maxVal": 98962, 
                     "minVal": 97005, 
-                    "radius": 10, 
+                    "radius": 6, 
                     "value": "Garden Sites"
                 }
             ], 
             "type": "classBreaks"
         }, 
         "name": "Locations of Community Gardens - Points", 
-        "popupTemplate": "<b>Garden Name: </b>{{Garden_Nam], Mode=OneWay}}}<br/><b>Street Address: </b>{{Street_Add], Mode=OneWay}}}<br/><b>City: </b>{{City_1], Mode=OneWay}}}<br/><b>Zip Code: </b>{{Zip_Code], Mode=OneWay}}}", 
+        "popupTemplate": "<b>Garden Name: </b>{{Garden_Nam}}<br/><b>Street Address: </b>{{Street_Add}}<br/><b>City: </b>{{City_1}}<br/><b>Zip Code: </b>{{Zip_Code}}", 
         "source": "Equity Atlas", 
         "symbolField": "Zip_Code", 
         "theme": "Food", 

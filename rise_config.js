@@ -1,6 +1,6 @@
 config.layers.push({
     'name': 'RISE Points',
-    'url': './data/points.json',
+    'url': './data/RISE/points.json',
     'type': 'geojson',
     'source': 'RISE',
     'icon': './img/metro_logo.png',
@@ -10,7 +10,7 @@ config.layers.push({
 },
 {
     'name': 'TOD Revitalization Projects',
-    'url': 'data/TOD_revitalization_projects.zip',
+    'url': 'data/RISE/TOD_revitalization_projects.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',
@@ -18,7 +18,7 @@ config.layers.push({
 },
 {
     'name': 'Local Share',
-    'url': 'data/parks_and_natural_areas_local_share.zip',
+    'url': 'data/RISE/parks_and_natural_areas_local_share.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',
@@ -26,7 +26,7 @@ config.layers.push({
 },
 {
     'name': 'Sites and Bond Acquisitions',
-    'url': 'data/parks_and_natural_areas_sites_bond_acquisitions.zip',
+    'url': 'data/RISE/parks_and_natural_areas_sites_bond_acquisitions.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',
@@ -70,7 +70,7 @@ config.layers.push({
 },
 {
     'name': 'MTIP Feb 2005 Buffer',
-    'url': 'data/mtip_buffer_02_05.zip',
+    'url': 'data/RISE/mtip_buffer_02_05.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',
@@ -78,7 +78,7 @@ config.layers.push({
 },
 {
     'name': 'MTIP Apr 2007 Buffer',
-    'url': 'data/mtip_buffer_04_07.zip',
+    'url': 'data/RISE/mtip_buffer_04_07.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',
@@ -86,7 +86,7 @@ config.layers.push({
 },
 {
     'name': 'MTIP Jun 2009 Buffer',
-    'url': 'data/mtip_buffer_06_09.zip',
+    'url': 'data/RISE/mtip_buffer_06_09.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',
@@ -94,7 +94,7 @@ config.layers.push({
 },
 {
     'name': 'MTIP Aug 2011 Buffer',
-    'url': 'data/mtip_buffer_08_11.zip',
+    'url': 'data/RISE/mtip_buffer_08_11.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',
@@ -102,7 +102,7 @@ config.layers.push({
 },
 {
     'name': 'RFFA',
-    'url': 'data/rffa.zip',
+    'url': 'data/RISE/rffa.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',
@@ -110,7 +110,7 @@ config.layers.push({
 },
 {
     'name': 'RFFA Buffer',
-    'url': 'data/rffa_buffer.zip',
+    'url': 'data/RISE/rffa_buffer.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',
@@ -118,7 +118,7 @@ config.layers.push({
 },
 {
     'name': 'Commmunity Development Grants',
-    'url': 'data/community_development_grants.zip',
+    'url': 'data/RISE/community_development_grants.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',
@@ -126,7 +126,7 @@ config.layers.push({
 },
 {
     'name': 'Commmunity Enhancement Grants',
-    'url': 'data/community_enhancement_grants.zip',
+    'url': 'data/RISE/community_enhancement_grants.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',
@@ -134,7 +134,7 @@ config.layers.push({
 },
 {
     'name': 'Industrial Lands Study',
-    'url': 'data/industrial_lands_study.zip',
+    'url': 'data/RISE/industrial_lands_study.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',
@@ -142,7 +142,7 @@ config.layers.push({
 },
 {
     'name': 'SW Corridor Data Collection',
-    'url': 'data/SW_Corridor_data_collection.zip',
+    'url': 'data/RISE/SW_Corridor_data_collection.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',

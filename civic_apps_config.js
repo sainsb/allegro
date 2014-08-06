@@ -21,16 +21,8 @@ config.layers.push({
     'type': 'shapefile',
     'source': 'Civic Apps',
     'icon': './img/civicApps_logo.png',
-    'theme': 'General'
-},
-{
-    'name': 'Portland Bridges n stuff',
-    'url': './data/civicApps/Bridge_pdx.zip',
-    'type': 'shapefile',
-    'source': 'Civic Apps',
-    'icon': './img/civicApps_logo.png',
+    'thumb': './img/bridges.jpg',
     'theme': 'General'
 }
-
 
 );
