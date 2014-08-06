@@ -39,7 +39,8 @@ config.layers.push(
         "source": "Equity Atlas", 
         "symbolField": "Registered", 
         "theme": "Democratic Participation", 
-        "type": "shapefile", 
+        "type": "shapefile",
+        "icon":"img/clf_logo.png",
         "url": "//gis.oregonmetro.gov/equityAtlas/data/vector/blk_grp_2010.zip"
     }, 
     {

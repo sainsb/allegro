@@ -112,6 +112,7 @@
                 'name': 'Metro Council Districts 1979 to 1981',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/council1979.zip',
                 'type': 'shapefile',
+                "popupTemplate": "<b>District: </b>{{DISTRICT}}<br/><b>Area (sq.ft): </b>{{AREA}}",
                 'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/council.png',
                 "symbolField": "DISTRICT",
                 'source': 'RLIS',

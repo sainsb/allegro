@@ -1,803 +1,775 @@
 ﻿
-var map, points_layer, baseAll, baseAnno, photo;
+var map;
 
-var STYLE_KEYWORDS = ['marker-size', 'marker-symbol', 'marker-color', 'stroke', 'stroke-opacity', 'stroke-width', 'fill', 'fill-opacity'];
+var app = {
+	map:null,
+	STYLE_KEYWORDS : ['marker-size', 'marker-symbol', 'marker-color', 'stroke', 'stroke-opacity', 'stroke-width', 'fill', 'fill-opacity'],
+	LAYER_TYPES : { 'GEOJSON': 'geojson', 'SHAPEFILE':'shapefile', 'TILEJSON':'tilejson', 'TILELAYER' : 'tilelayer', 'DYNAMIC_LAYER': 'dynamicLayer' },
+	GEOM_TYPES : {'LINESTRING' : "LineString", "POINT": "Point", "POLYGON": "Polygon", "MULTIPOLYGON":"MultiPolygon"}
+	FIELD_TYPES = { 'number': 1, 'string': 2 };
+	RENDERER = { 'UNIQUE_VALUE': 'uniqueValue', 'CLASS_BREAKS': 'classBreaks', 'SINGLE_SYMBOL': 'singleSymbol' },
+	SUBDOMAINS = ['gistiles1', 'gistiles2', 'gistiles3', 'gistiles4'],
 
-var LAYER_TYPES = { 'GEOJSON': 'geojson', 'SHAPEFILE':'shapefile', 'TILEJSON':'tilejson', 'TILELAYER' : 'tilelayer' };
+	DEFAULT_RAMP = 'RdYlBu',
+	DEFAULT_COLOR = '#444',
+	DEFAULT_FILLCOLOR = '#444',
+	DEFAULT_FILLOPACITY = 1,
+	DEFAULT_OPACITY = 1,
+	DEFAULT_WEIGHT = 1,
+	DEFAULT_RADIUS = 7,
 
-var FIELD_TYPES = { 'number': 1, 'string': 2 };
+	scaleCounter = 0,
 
-var RENDERER = { 'UNIQUE_VALUE': 'uniqueValue', 'CLASS_BREAKS': 'classBreaks', 'SINGLE_SYMBOL': 'singleSymbol' };
+	init : function(){
 
-var SUBDOMAINS = ['gistiles1', 'gistiles2', 'gistiles3', 'gistiles4'];
+    	//resizes the map and legend height upon page resize
+    	//width is taken care of by the DOM.
+    	//** will probably want to disable when the site goes into responsive mode..
+    	var mapmargin = parseInt($("#map").css("margin-bottom"), 10)+258;
+    	
+    	$('#map,#legend').css("height", ($(window).height() - mapmargin));
 
-var DEFAULT_RAMP = 'RdYlBu';
-var DEFAULT_COLOR = '#444';
-var DEFAULT_FILLCOLOR = '#444';
-var DEFAULT_FILLOPACITY = 1;
-var DEFAULT_OPACITY = 1;
-var DEFAULT_WEIGHT = 1;
-var DEFAULT_RADIUS = 7;
+    	$(window).on("resize", function(e) {
+      		$('#map,#legend').css("height", ($(window).height() - mapmargin));
+       		if ($(window).width() >= 980) {
+      	    	$('#map,#legend').css("margin-bottom", 10);
+        	} else {
+            	$('#map,#legend').css("margin-bottom", -20);
+        	}
+    	});
 
-var scaleCounter = 0;
+    	//currently not using this but will want it/need it to handle responsive change
+	    if($(window).width()>=980){
+	        $('#map,#legend').css("margin-bottom",10);
+	    }else{
+	        $('#map,#legend').css("margin-bottom",-20);
+	    }
 
-$(document).ready(function () {
+	    //init colorpickers
+	    $('.color').colorpicker();
 
-    var mapmargin = parseInt($("#map").css("margin-bottom"), 10)+258;
-    $('#map,#legend').css("height", ($(window).height() - mapmargin));
+	    //assign handle to add Data button
+	    //init image lazy loader
+	    $('#btnAddData').click(function () {
 
-    $(window).on("resize", function(e) {
+	        $('#dataModal').on('shown.bs.modal', function () {
 
-        $('#map,#legend').css("height", ($(window).height() - mapmargin));
-        if ($(window).width() >= 980) {
-            $('#map,#legend').css("margin-bottom", 10);
-        } else {
-            $('#map,#legend').css("margin-bottom", -20);
-        }
-    });
+	            $("img.lazy").lazyload({
+	                container: $(".tab-content")
+	            });
 
-    if($(window).width()>=980){
-        $('#map,#legend').css("margin-bottom",10);
-    }else{
-        $('#map,#legend').css("margin-bottom",-20);
-    }
+	            // This is a fallback image lazy loader.	
+	            //var imgs = $('#dataModal').find('img');
+	            //// loop over each img
+	            //imgs.each(function () {
+	            //    var self = $(this);
+	            //    var datasrc = self.attr('data-original');
+	            //    if (datasrc) {
+	            //        self.one('load')
+	            //            .attr("src", datasrc)
+	            //            .attr('data-original', '');
+	            //    }
+	            //});
+	        });
 
-    $('.color').colorpicker();
+	        $('#dataModal').modal('show');
+	    });
 
-    $('#btnAddData').click(function () {
+	    //assign handler to Basemap button
+	    $('#btnBasemap').click(function() {
+	        $('#basemapModal').modal('show');
+	    });	
 
-        $('#dataModal').on('shown.bs.modal', function () {
+	    //assign handler to Basemap opacity slider
+	    $('#sliBasemap').on('input', function() {
+	        //get active basemap
+	        for (var b in config.basemaps) {
+	            if (config.basemaps[b].active == true) {
+	                config.basemaps[b].mapLayer.setOpacity($(this).val() / 100);
+	            }
+	        }
+	    });
 
-            $("img.lazy").lazyload({
-                container: $(".tab-content")
-            });
+	    //assign handler to options	
+	    //not sure if will be modal or not yet...
+	    $('#selOptions').on('change.core', function(ev) {
+	        // var opts = $('#selOptions').val();
+	        // if ($.inArray('Show Coordinates', opts) > -1) {
+	        //     if (typeof(map.coordControl) == 'undefined') {
+	        //         map.coordControl = L.control.coordinates().addTo(map);
+	        //     }
+	        // } else {
+	        //     if (typeof (map.coordControl) != 'undefined') {
+	        //         map.coordControl.removeFrom(map);
+	        //         map.coordControl = undefined;
+	        //     }
+	        // }
+	    });
 
-            ////var carousel = $(this).find('.carousel').hide();
-            //var deferreds = [];
-            //var imgs = $('#dataModal').find('img');
-            //// loop over each img
-            //imgs.each(function () {
-            //    var self = $(this);
-            //    var datasrc = self.attr('data-original');
-            //    if (datasrc) {
-            //        self.one('load')
-            //            .attr("src", datasrc)
-            //            .attr('data-original', '');
-            //    }
-            //});
-        });
+	    //Attach behavior to legend checkboxes
+	    $('body').on('click', '.legend-check', function (evt) {
+	        var id = $(this).attr('id').replace('chk', '');
+	        var layer = getLayerById(id);
+	        if ($(this).is(':checked')) {
+	            //we'll need to bring stuff to back and front
+	            if (layer.type == LAYER_TYPES.geojson || layer.type == LAYER_TYPES.shapefile) {
+	                layer.mapLayer.addTo(map).bringToFront();
+	            } else {
+	                layer.mapLayer.addTo(map);
+	            }
+	        } else {
+	            map.removeLayer(layer.mapLayer);
+	        }
 
-        $('#dataModal').modal('show');
-    });
+	        //with this logic, the layer legend is dumb to the checkbox state.
 
-    $('#btnBasemap').click(function() {
-        $('#basemapModal').modal('show');
-    });
-
-    $('#sliBasemap').on('input', function() {
-        //get active basemap
-        for (var b in config.basemaps) {
-            if (config.basemaps[b].active == true) {
-                config.basemaps[b].mapLayer.setOpacity($(this).val() / 100);
-            }
-        }
-    });
-
-    $('#selOptions').on('change.core', function(ev) {
-        var opts = $('#selOptions').val();
-        if ($.inArray('Show Coordinates', opts) > -1) {
-            if (typeof(map.coordControl) == 'undefined') {
-                map.coordControl = L.control.coordinates().addTo(map);
-            }
-        } else {
-            if (typeof (map.coordControl) != 'undefined') {
-                map.coordControl.removeFrom(map);
-                map.coordControl = undefined;
-            }
-        }
-    });
-
-    //Attach behavior to legend checkboxes
-    $('body').on('click', '.legend-check', function (evt) {
-        var id = $(this).attr('id').replace('chk', '');
-        var layer = getLayerById(id);
-        if ($(this).is(':checked')) {
-            //we'll need to bring stuff to back and front
-            if (layer.type == LAYER_TYPES.geojson || layer.type == LAYER_TYPES.shapefile) {
-                layer.mapLayer.addTo(map).bringToFront();
-            } else {
-                layer.mapLayer.addTo(map);
-            }
-        } else {
-            map.removeLayer(layer.mapLayer);
-        }
-
-        //with this logic, the layer legend is dumb to the checkbox state.
-
-        if (evt.stopPropagation) {
-            evt.stopPropagation();
-        }
-        if (evt.cancelBubble != null) {
-            evt.cancelBubble = true;
-        }
-    });
+	        if (evt.stopPropagation) {
+	            evt.stopPropagation();
+	        }
+	        if (evt.cancelBubble != null) {
+	            evt.cancelBubble = true;
+	        }
+	    });
     
-    //Attach behavior to opacity sliders
-    $('body').on('input', '.sliderFillOpacity', function (e) {
-        var id = $(this).attr('id').replace('sli', '');
-        var layer = getLayerById(id);
-        layer.fillOpacity = $(this).val() / 100;
-        switch(layer.type) {
-            case "geojson":
-            case "shapefile":
-                layer.mapLayer.setStyle
-            ({
-                fillOpacity: layer.fillOpacity,
-            });
-                break;
-            case "tilejson":
-            case "tilelayer":
-                layer.mapLayer.setOpacity(layer.fillOpacity);
-                break;
-        }
-    });
-
-    $('body').on('input', '.sliderStrokeOpacity', function (e) {
-        var id = $(this).attr('id').replace('sli', '');
-        var layer = getLayerById(id);
-        layer.strokeOpacity = $(this).val() / 100;
-        layer.mapLayer.setStyle({
-                opacity: layer.strokeOpacity
-            });
-    });
-
-    $('body').on('click','.img-block.layer', function () {
-        var id = $(this).find('img').attr('id').replace('img', '');
-        layer = getLayerById(id);
-        if ($(this).hasClass('active')) {
-            $(this).removeClass('active');
-            map.removeLayer(layer.mapLayer);
-            $('#li' + id).remove();
-        }
-        else {
-            $(this).addClass('active');
-            if (typeof (layer.mapLayer) != 'undefined') {
-                map.addLayer(layer.mapLayer);
-                switch(layer.type){
-                    case LAYER_TYPES.GEOJSON:
-                    case LAYER_TYPES.SHAPEFILE:
-                        $('#ulVectorLegend').prepend(layer.HTMLLegend);
-                        break;
-                    case LAYER_TYPES.TILELAYER:
-                    case LAYER_TYPES.TILEJSON:
-                        $('#ulTileLegend').prepend(layer.HTMLLegend);
-                        break;
-                }
-            }
-            else {
-                addData(layer);
-            }
-        }
-    });
-
-    initMap();
-
-    populateLayers();
-
-    populateBasemaps();
-    
-    populatePalettes();
-
-    $('.selectpicker').selectpicker();
-
-    var x = new RLIS.Autosuggest("txtLocSearch", { "mode": 'locate', 'entries': 7 }, function (result, error) {
-        if (result.error == true || result[0].status == 'failure') {
-            $('#frmLocSearch').addClass('has-error');
-            return;
-        }
-        $('#frmLocSearch').removeClass('has-error');
-        map.setView([result[0].lat, result[0].lng], 15);
-    });
-
-    if (typeof (QueryString.l) != 'undefined' && QueryString.l.trim() != '') {
-        var l = decodeURIComponent(QueryString.l).replace(/\s/g,'_');
-        _(l)
-
-        l = getLayerById(l);
-        addData(l);
-    }
-
-});
-
-function initMap() {
-
-    map = new L.Map('map', {
-        center: new L.LatLng(45.44944, -122.67599),
-        zoom: 10,
-        minZoom: 9,
-        maxZoom: 20,
-        fullscreenControl: true
-    });
-
-    L.control.scale().addTo(map);
-    new L.Hash(map);
-
-    //var BoxSelect = L.Map.BoxZoom.extend({
-        
-    //    _onMouseUp: function (e) {
-    //        this._pane.removeChild(this._box);
-    //        this._container.style.cursor = '';
+	    //Attach behavior to opacity sliders
+	    $('body').on('input', '.sliderFillOpacity', function () {
+	        var id = $(this).attr('id').replace('sli', '');
+	        var layer = getLayerById(id);
+	        layer.fillOpacity = $(this).val() / 100;
+	        switch(layer.type) {
+	            case LAYER_TYPES.GEOJSON:
+	            case LAYER_TYPES.SHAPEFILE:
+	                layer.mapLayer.setStyle ({
+	                	fillOpacity: layer.fillOpacity,
+	            	});
+	                break;
+	            case LAYER_TYPES.TILELAYER:
+	            case LAYER_TYPES.TILEJSON:
+	                layer.mapLayer.setOpacity(layer.fillOpacity);
+	                break;
+	        }
+	    });
+
+	    $('body').on('input', '.sliderStrokeOpacity', function () {
+	        var id = $(this).attr('id').replace('sli', '');
+	        var layer = getLayerById(id);
+	        layer.strokeOpacity = $(this).val() / 100;
+	        layer.mapLayer.setStyle({
+	            opacity: layer.strokeOpacity
+	        });
+	    });
+
+	    //Attach behavior to items in Add Data Modal
+	    $('body').on('click','.img-block.layer', function () {
+	        var id = $(this).find('img').attr('id').replace('img', '');
+	        layer = getLayerById(id);
+	        if ($(this).hasClass('active')) {
+	            $(this).removeClass('active');
+	            map.removeLayer(layer.mapLayer);
+	            $('#li' + id).remove();
+	        }
+	        else {
+	            $(this).addClass('active');
+	            if (typeof (layer.mapLayer) != 'undefined') {
+	                map.addLayer(layer.mapLayer);
+	                switch(layer.type){
+	                    case LAYER_TYPES.GEOJSON:
+	                    case LAYER_TYPES.SHAPEFILE:
+	                        $('#ulVectorLegend').prepend(layer.HTMLLegend);
+	                        break;
+	                    case LAYER_TYPES.TILELAYER:
+	                    case LAYER_TYPES.TILEJSON:
+	                        $('#ulTileLegend').prepend(layer.HTMLLegend);
+	                        break;
+	                }
+	            }
+	            else {
+	                addData(layer);
+	            }
+	        }
+	    });
+
+	    App.map = new L.Map('map', {
+	        center: new L.LatLng(45.44944, -122.67599),
+	        zoom: 10,
+	        minZoom: 9,
+	        maxZoom: 20,
+	        fullscreenControl: true
+    	});
+
+	    //alias the global map var so we don't have to refer to map as App.map all the time.
+	    map =App.map;
+
+	    L.control.scale().addTo(map);
+	    new L.Hash(map);
+
+	    App.populateLayers() //populateLayers();
+
+	    App.populateBasemaps(); //populateBasemaps()
+	    
+	    App.populatePalettes();
+
+	    //init bootstrap select controls
+	    $('.selectpicker').selectpicker();
+
+	    //init RLIS API autosuggest
+	    var x = new RLIS.Autosuggest("txtLocSearch", { "mode": 'locate', 'entries': 7 }, function (result, error) {
+	        if (result.error == true || result[0].status == 'failure') {
+	            $('#frmLocSearch').addClass('has-error');
+	            return;
+	        }
+	        $('#frmLocSearch').removeClass('has-error');
+	        map.setView([result[0].lat, result[0].lng], 15);
+	    });
+
+	    //Accept l param to load layers passed in querystring
+	    if (typeof (QueryString.l) != 'undefined' && QueryString.l.trim() != '') {
+	        var l = decodeURIComponent(QueryString.l).replace(/\s/g,'_');
+	        l = getLayerById(l);
+	        addData(l);
+	    }
+	},
+
+	addData : function(layer){
+
+	    //Is this a tiled layer or a JSON layer or....?
+	    //See if it already exists in the global namespace
+	    switch (layer.type) {
+	        case App.LAYER_TYPES.GEOJSON:
+	            App.loadGeoJSON(layer);
+	            break;
+	        case App.LAYER_TYPES.DYNAMIC_LAYER:
+	            //** Not implented yet
+	            App.loadGeoJSON(layer);
+	            break;
+	        case App.LAYER_TYPES.TILEJSON:
+	            App.loadTileJSON(layer);
+	            break;
+	        case App.LAYER_TYPES.TILELAYER:
+	        	App.loadTileLayer(layer);
+	            break;
+	        case App.LAYER_TYPES.SHAPEFILE:          
+	            App.loadShapefile(layer, function (data) {
+	                App.parseGeoJSON(data, layer);
+	            });
+	    }
+	},
 
-    //        L.DomUtil.enableTextSelection();
+	loadTileLayer : function(layer){
 
-    //        L.DomEvent
-    //            .off(document, 'mousemove', this._onMouseMove)
-    //            .off(document, 'mouseup', this._onMouseUp);
+		var options = {};
 
-    //        var map = this._map,
-    //            layerPoint = map.mouseEventToLayerPoint(e);
+		options.zIndex = (typeof (layer.zIndex) != 'undefined') ? layer.zIndex : 70;
+	    options.attribution = (typeof (layer.source) != 'undefined') ? layer.source : '';
+	    options.maxZoom = (typeof(layer.maxZoom) != 'undefined') ? layer.maxZoom : 19;
+	    options.minZoom = (typeof(layer.maxZoom) != 'undefined') ? layer.maxZoom : 19;
+	    options.opacity = (typeof(layer.fillOpacity) != 'undefined') ? layer.fillOpacity : (typeof(layer.opacity) != 'undefined') ? layer.opacity : 1;
 
-    //        if (this._startLayerPoint.equals(layerPoint)) { return; }
+		if (typeof(layer.subdomains) != 'undefined') {
+	       	options.subdomains = layer.subdomains;
+	    }
 
-    //        var bounds = new L.LatLngBounds(
-    //                map.layerPointToLatLng(this._startLayerPoint),
-    //                map.layerPointToLatLng(layerPoint));
+	    //** will need some sort of legend created.
 
-    //        map.fire("boxselectend", {
-    //            boxSelectBounds: [[bounds.getSouthWest().lng,bounds.getSouthWest().lat],[bounds.getNorthEast().lng,bounds.getNorthEast().lat]]
-    //        });
-    //    }
-    //});
-
-    //map.boxZoom.disable();//turn off  the default behavior
-    //var boxSelect = new BoxSelect(map);//new box select
-    //boxSelect.enable();//add it
-
-    //selLayer = L.geoJson(undefined, {
-    //    style: { opacity:1, color: '#02D8FA', weight: 2, fillColor: '#02D8FA' },
-    //    onEachFeature:function(feature, layer){
-    //        layer.bindPopup('yay');
-    //    }
-    //}).addTo(map);
-
-}
-
-function addData(layerObject) {
-
-    //Is this a tiled layer or a JSON layer or....?
-    //See if it already exists in the global namespace
-    switch (layerObject.type) {
-
-        case "geojson":
-            loadGeoJSON(layerObject);
-            break;
-        case "dynamiclayer":
-            loadGeoJSON(layerObject);
-            break;
-        case "tilejson":
-            loadTileJSON(layerObject);
-            break;
-        case "tilelayer":
-            layerObject.mapOptions = layerObject.mapOptions || {};
-            layerObject.mapLayer = new L.TileLayer(layerObject.url + '?token=' + RLIS.token, layerObject.mapOptions).addTo(map);
-            break;
-        case "shapefile":
-            layerObject.callback = function (data) {
-                parseGeoJSON(data, layerObject);
-            };
-
-            loadShapefile(layerObject);
-    }
-}
-
-function loadGeoJSON(options) {
-    $.getJSON(options.url, function (data) {
-        parseGeoJSON(data, options);
-    });
-}
-
-function loadTileJSON(layer) {
-    var url = layer.url + ((layer.requireToken == true) ? "?token=" + config.token : "");
+	    layer.mapLayer = new L.TileLayer(layer.url, options);
+	    layer.mapLayer.addTo(map);
+	},
 
-    $.getJSON(url, function (data) {
-
-        //Add to legend
+	loadGeoJSON : function(layer) {
+	    $.getJSON(layer.url, function (data) {
+	        parseGeoJSON(data, layer);
+	    });
+	},	
 
-        var id = layer.name.replace(/\s/g, '_');
+	loadTileJSON: function(layer) {
+	    var url = layer.url + ((layer.requireToken == true) ? "?token=" + config.token : "");
 
-        var str = "<li style='clear:both;' id='li" + id + "' class='liTileLegend'><div class='panelyr' data-toggle='collapse' data-target='#leg" + id + "'><span class='accordion-toggle'></span><input type='checkbox' class='legend-check' id='chk" + id + "' checked style='float:left;margin-right:5px;margin-left:3px;'/>" + layer.name + "<div onclick='removeLayer(\"" + id + "\")' style='float:right;cursor:pointer;' class='btnRemove'>×</div></div><div style='clear:both;margin-left:15px;float:left;' id='leg" + id + "' class='collapse in'>";
+	    $.getJSON(url, function (data) {
 
-        if (typeof (data.legend) != 'undefined') {
-            str += data.legend;
-        }
+	        //Add to legend
 
-        str += "</div></li>";
+	        var id = layer.name.replace(/\s/g, '_');
 
-        $('#ulTileLegend').prepend(str);
+	        var str = "<li style='clear:both;' id='li" + id + "' class='liTileLegend'><div class='panelyr' data-toggle='collapse' data-target='#leg" + id + "'><span class='accordion-toggle'></span><input type='checkbox' class='legend-check' id='chk" + id + "' checked style='float:left;margin-right:5px;margin-left:3px;'/>" + layer.name + "<div onclick='removeLayer(\"" + id + "\")' style='float:right;cursor:pointer;' class='btnRemove'>×</div></div><div style='clear:both;margin-left:15px;float:left;' id='leg" + id + "' class='collapse in'>";
 
-        layer.HTMLLegend = legend;
+	        if (typeof (data.legend) != 'undefined') {
+	            str += data.legend;
+	        }
 
-        applyContextMenu(id);
+	        str += "</div></li>";
 
-        var url = data.canonicalURL;
+	        $('#ulTileLegend').prepend(str);
 
-        if (typeof(layer.requireToken) != 'undefined') {
-            url += '?token=' + config.token;
-        }
-
-        layer.mapLayer = new L.TileLayer(url, { subdomains: data.subdomains, zIndex: (typeof layer.zIndex != 'undefined') ? layer.zIndex : 70, maxZoom:19, reuseTiles:true});
-
-        layer.mapLayer.addTo(map);
-
-    });
-}
-
-function loadBasemap(basemap) {
-    var zIndex = (typeof (basemap.zIndex) != 'undefined') ? basemap.zIndex : 0;
-    var attribution = (typeof (basemap.source) != 'undefined') ? basemap.source : '';
-    var url = (typeof (basemap.requireToken) != 'undefined') ? basemap.url + '?token=' + config.token : basemap.url;
-    var maxZoom = (typeof(basemap.maxZoom) != 'undefined') ? basemap.maxZoom : 19;
-    basemap.mapLayer = new L.TileLayer(url, { zIndex: 0, attribution: attribution, subdomains: SUBDOMAINS, maxZoom:maxZoom });
-    map.addLayer(basemap.mapLayer);
-}
-
-function parseGeoJSON(data, layer) {
-    
-    if($.isArray(data)){
-    
-        for (d in data){
-            if(typeof(data[d].type) != 'undefined' && data[d].type=='FeatureCollection'){
-                data = data[d];
-                break;
-            }
-        }
-    }
-    var geoJson = {};
-    
-    /* in order of preference:
-        layer.legend
-            layer.style
-                data.legend
-                    symbolField
-                        simpleStyle
-    */
-
-    if (typeof (layer.legend) == 'undefined') { //there is no legend.
-
-        layer.legend = { "symbols": [], "title": layer.name };
-
-        if(typeof(layer.style) != 'undefined'){
-
-            layer.legend.type = RENDERER.SINGLE_SYMBOL;
-
-            layer.legend.symbols.push({
-                "value": "*",
-                "fillColor": (typeof(layer.style.fillColor) != 'undefined') ? layer.style.fillColor : DEFAULT_FILLCOLOR,
-                'color': (typeof(layer.style.color) != 'undefined') ? layer.style.color : DEFAULT_COLOR,
-                'fillOpacity' : (typeof(layer.style.fillOpacity) != 'undefined') ? layer.style.fillOpacity : DEFAULT_FILLOPACITY,
-                'weight': (typeof(layer.style.weight) != 'undefined') ? layer.style.weight: DEFAULT_WEIGHT
-            });
-
-        } else if (typeof (data.legend) != 'undefined') {
-
-            layer.legend = data.legend;
-
-        } else if (typeof(layer.symbolField) != 'undefined') {
-
-            layer.ramp = DEFAULT_RAMP;
-
-            layer.legend.type = RENDERER.UNIQUE_VALUE;
-            
-            var values = [];
-
-            for (var i = 0; i < data.features.length; i++) {
-                var value = data.features[i].properties[layer.symbolField];
-
-                if (value != value) {
-                    value='null';
-                }
-
-                if ($.inArray(value, values) === -1) {
-                    values.push({ value: value });
-                }
-            }
-
-            layer.scale = chroma.scale(DEFAULT_RAMP).domain([1, (values.length > 1) ? values.length : 2]).out('hex');
-
-            for (var val in values.sort(symbolComparator)) {
-                layer.legend.symbols.push(createJSONLegend(layer.geom, values[val], layer.scale));
-            }
-
-        } else { 
-
-            layer.legend.type = RENDERER.SINGLE_SYMBOL;
-
-            layer.legend.symbols.push({
-                "value": "*",
-                "fillColor": getRandomColor(), 'color': DEFAULT_COLOR, 'weight': DEFAULT_WEIGHT
-            });
-        }
-    }
-
-    var _onEachFeature = (typeof(layer.popupTemplate) != 'undefined') ?
-         function(feature, slayer) {
-            var thm = Mustache.render(layer.popupTemplate, feature.properties);
-            slayer.bindPopup(thm);
-        }
-    : function (feature, slayer) {
-            if (feature.properties) {
-                slayer.bindPopup(Object.keys(feature.properties).map(function (k) {
-                    if ($.inArray(k, STYLE_KEYWORDS) == -1) {
-                        return '<strong>' + k + "</strong>: " + feature.properties[k] + '<br/>';
-                    }
-                }).join(""), { maxHeight: 200 });
-            }
-        };
-
-    switch (data.features[0].geometry.type) {
-        case "Point":
-            geoJson = L.geoJson(data, {
-                pointToLayer: 
-                    function (feature, latlng) {
-                        return L.circleMarker(latlng, styleFromLegend(feature, layer));
-                    },
-                onEachFeature: _onEachFeature
-            });
-            break;
-        case "LineString":
-        case "Polygon":
-        case "MultiPolygon":
-            geoJson = L.geoJson(data, {
-                style: (typeof (layer.style) != 'undefined') ?
-                    layer.style : function(feature) {return styleFromLegend(feature, layer); },
-                onEachFeature: _onEachFeature,
-                clickable: (typeof (layer.clickable) == 'undefined' || layer.clickable == true)
-            });
-    }
-
-    var id = layer.name.replace(/\s/g, '_');
-
-    layer.geom = data.features[0].geometry.type;
-
-    //parse fields and add to layer object
-    layer.fields = [];
-
-    for (var field in data.features[0].properties) {
-        var fieldType = isNaN(data.features[0].properties[field]) ? 'string' : 'number';
-        layer.fields.push({ name: field, type: fieldType});
-    }
-
-    //create the HTMLLegend from the jsonLegend property of the layer.
-    var legend = createHTMLLegend(layer);
-
-    $('#ulVectorLegend').prepend(legend);
-
-    layer.HTMLLegend = legend;
-
-    $('.sortable').sortable().bind('sortupdate', function(e, ui) {
-        //return false;
-        handleSort(e, ui);
-    });
-
-    layer.mapLayer = geoJson.addTo(map);
-
-    applyContextMenu(id);
-
-}
-
-function loadShapefile(options) {
-
-    //Check in local storage first
-    var localGeoJSON = localStorage.getObject(options.url);
-
-    if (localGeoJSON != null) {
-        parseGeoJSON(localGeoJSON, options);
-        return;
-    }
-
-    var xhr = new XMLHttpRequest(),
-            reader = new FileReader();
-
-    //url_prefix = 'data/';
-    xhr.open("GET", options.url, true);
-    // Set the responseType to blob
-    xhr.responseType = "blob";
-
-    xhr.addEventListener("load", function () {
-        if (xhr.status === 200) {
-            // onload needed since Google Chrome doesn't support addEventListener for FileReader
-            reader.onload = function (e) {
-                var ext;
-                if (reader.readyState !== 2 || reader.error) {
-                    return;
-                } else {
-                    shp(reader.result).then(function (data) {
-
-                        //cache geojson in localstorage
-                        try {
-                            localStorage.setObject(options.url, data);
-                        }
-                        catch (ex) {
-                            console.log('unable to store this in local storage');
-                        }
-                        options.callback(data);
-                    });
-                    //.then(function (data) {
-                    //console.log('bon');
-                    // console.log(z);
-                    //});
-                    //worker.data([reader.result, file.name.slice(0, (0 - (ext.length + 1)))], [reader.result]).then(function(data) {
-                    //  console.log(data);
-                    //  });
-                }
-            }
-            // Load blob as Data URL
-            reader.readAsArrayBuffer(xhr.response);
-        }
-    }, false);
-    // Send XHR
-    xhr.send();
-}
-
-//function hasSimpleStyle(featureProperties) {
-//    for (var prop in featureProperties) {
-//        if ($.inArray(prop, STYLE_KEYWORDS) > -1) {
-//            return true;
-//        }
-//    }
-//    return false;
-//}
-
-/* Creates and returns an HTML legend from a jsonlegend
-  @layer - a layer object
-*/
-function createHTMLLegend(layer) {
+	        layer.HTMLLegend = legend;
+
+	        applyContextMenu(id);
+
+	        //beware that this is based on my own spec of the tilejson
+	        //doesn't conform to other tilejson spec.
+	        var url = data.canonicalURL;
+
+	        if (typeof(layer.requireToken) != 'undefined') {
+	            url += '?token=' + config.token;
+	        }
+
+	        //** todo - reconcile layer map options with tilejson options.
+	        layer.mapLayer = new L.TileLayer(url, { subdomains: data.subdomains, zIndex: (typeof layer.zIndex != 'undefined') ? layer.zIndex : 70, maxZoom:19, reuseTiles:true});
+
+	        layer.mapLayer.addTo(map);
+	    });
+	},
+
+	legendFactory : {
+
+		init : function(layer){
+			/* in order of preference:
+	        layer.legend
+	            layer.style
+	                data.legend
+	                    symbolField
+	                        simpleStyle
+		    */
+
+		    if (typeof (layer.legend) == 'undefined') { //there is no legend.
+
+		        layer.legend = { "symbols": [], "title": layer.name };
+
+		        if(typeof(layer.style) != 'undefined'){
+
+		            layer.legend.type = RENDERER.SINGLE_SYMBOL;
+
+		            layer.legend.symbols.push({
+		                "value": "*",
+		                "fillColor": (typeof(layer.style.fillColor) != 'undefined') ? layer.style.fillColor : DEFAULT_FILLCOLOR,
+		                'color': (typeof(layer.style.color) != 'undefined') ? layer.style.color : DEFAULT_COLOR,
+		                'fillOpacity' : (typeof(layer.style.fillOpacity) != 'undefined') ? layer.style.fillOpacity : DEFAULT_FILLOPACITY,
+		                'weight': (typeof(layer.style.weight) != 'undefined') ? layer.style.weight: DEFAULT_WEIGHT
+		            });
+
+		        } else if (typeof (data.legend) != 'undefined') {
+
+		            layer.legend = data.legend;
+
+		        } else if (typeof(layer.symbolField) != 'undefined') {
+
+		            layer.ramp = DEFAULT_RAMP;
+
+		            layer.legend.type = RENDERER.UNIQUE_VALUE;
+		            
+		            var values = [];
+
+		            for (var i = 0; i < data.features.length; i++) {
+		                var value = data.features[i].properties[layer.symbolField];
+
+		                if (value != value) {
+		                    value='null';
+		                }
+
+		                if ($.inArray(value, values) === -1) {
+		                    values.push({ value: value });
+		                }
+		            }
+
+		            layer.scale = chroma.scale(DEFAULT_RAMP).domain([1, (values.length > 1) ? values.length : 2]).out('hex');
+
+		            for (var val in values.sort(symbolComparator)) {
+		                layer.legend.symbols.push(createJSONLegend(layer.geom, values[val], layer.scale));
+		            }
+
+		        } else { 
+
+		            layer.legend.type = RENDERER.SINGLE_SYMBOL;
+
+		            layer.legend.symbols.push({
+		                "value": "*",
+		                "fillColor": getRandomColor(), 'color': DEFAULT_COLOR, 'weight': DEFAULT_WEIGHT
+		            });
+		        }
+		    }
+		},
+
+		renderHTMLLegend : function (layer) {
    
-    var id = layer.name.replace(/\s/g, '_');
+		    var id = layer.name.replace(/\s/g, '_');
 
-    var title = (typeof(layer.legend.title) != 'undefined') ? layer.legend.title : layer.name;
+		    var title = (typeof(layer.legend.title) != 'undefined') ? layer.legend.title : layer.name;
 
-    var str = "<li style='clear:both;' id='li" + id + "' class='liVectorLegend'><div class='panelyr' data-toggle='collapse' data-target='#leg" + id + "'><span class='accordion-toggle'></span><input type='checkbox' class='legend-check' id='chk" + id + "' checked style='float:left;margin-right:5px;margin-left:3px;'/>" + title + "<div onclick='removeLayer(\""+id+"\")' style='float:right;cursor:pointer;' class='btnRemove'>×</div></div><div style='clear:both;margin-left:15px;float:left;padding-top:6px;' id='leg" + id + "' class='collapse in'>";
+		    var str = "<li style='clear:both;' id='li" + id + "' class='liVectorLegend'><div class='panelyr' data-toggle='collapse' data-target='#leg" + id + "'><span class='accordion-toggle'></span><input type='checkbox' class='legend-check' id='chk" + id + "' checked style='float:left;margin-right:5px;margin-left:3px;'/>" + title + "<div onclick='removeLayer(\""+id+"\")' style='float:right;cursor:pointer;' class='btnRemove'>×</div></div><div style='clear:both;margin-left:15px;float:left;padding-top:6px;' id='leg" + id + "' class='collapse in'>";
 
-    str += HTMLLegendFactory(layer);
+		    str += App.legendFactory.renderHTMLLegendItems(layer);
+		    
+		    str += "</div></li>";
+
+		    return str;
+		},
+
+		renderHTMLLegendItems : function (layer) {
+
+		    var HTMLLegend = "";
+
+		    layer.legend.symbols.forEach(function (symbol) {
+
+		        HTMLLegend += App.legendFactory.renderHTMLLegendItem(layer.geom, symbol);
+		    });
+
+		    return HTMLLegend;
+		},
+
+		renderHTMLLegendItem : function (geom, symbol){
+			var legendItem = null;
+		    var symVal = (symbol.value == '*') ? '' : typeof(symbol.label) != 'undefined' ? symbol.label : symbol.value;
+
+			legendItem = '<div class="legend-item">'
+		                    + '<svg width="16" height="14">';
+
+		    switch (geom) {
+		        case App.GEOM_TYPES.POINT:
+		            legendItem += '<circle cx="6.5" cy="8" r="5.8" stroke="'+symbol.color+'" stroke-width="'+symbol.weight+'" fill="' + symbol.fillColor + '" />'
+		            break;
+		        case App.GEOM_TYPES.MULTIPOLYGON:
+		        case App.GEOM_TYPES.POLYGON:
+		            legendItem += '<rect width="12" height="12" fill=' + symbol.fillColor + ' stroke-width="'+symbol.weight+'" stroke="'+symbol.color+'">';
+		            break;
+		        case App.GEOM_TYPES.LINESTRING:
+		            legendItem += '<rect width="12" height="3" fill=' + symbol.color + ' stroke-width="0" >';
+		    }
+
+		    legendItem += + '</svg> ' + symVal + '</div>';
+
+		    return legendItem;
+		},
+
+		createJSONLegend : function(geom, symbol, scale,  color, weight) {
+
+		    //_(value);
+		    color = (typeof (color) !== 'undefined') ? color : App.DEFAULT_COLOR;
+		    weight = (typeof (weight) !== 'undefined') ? weight : App.DEFAULT_WEIGHT;
+		    
+		    var fillColor;
+
+		    if (symbol.value == 'null') {
+		        fillColor = App.DEFAULT_FILLCOLOR;
+		        scaleCounter += 1;
+
+		    } else {
+		        fillColor = getColorFromRamp(scale);
+		    }
+
+		    var obj = {}
+		    if(geom==App.GEOM_TYPES.LINESTRING){
+		        obj =  {"value" : symbol.value,  'color': fillColor, 'weight': weight};
+		    }else{
+		        obj =  {"value" : symbol.value, "fillColor": fillColor, 'color': color, 'weight': weight};
+		    }
+
+		    if (typeof (symbol.label) != 'undefined') {
+		        obj.label = symbol.label;
+		    }
+		    return obj;
+		}
+	},
+
+	parseGeoJSON: function (data, layer) {
     
-    str += "</div></li>";
+    	//Sometimes the Shapefile parser will find multiple objects in a zipped shapefile
+    	//We could prompt the user...but this works for the time being...
+	    if($.isArray(data)){
+	        for (d in data){
+	            if(typeof(data[d].type) != 'undefined' && data[d].type=='FeatureCollection'){
+	                data = data[d];
+	                break;
+	            }
+	        }
+	    }
 
-    return str;
-}
+	    var geoJson = {};
+    	
+    	//assemble the legend for this layer
+	    App.legendFactory.init(layer);
 
-function HTMLLegendFactory(layer) {
+	    var _onEachFeature = (typeof(layer.popupTemplate) != 'undefined') ?
+	         function(feature, slayer) {
+	            var thm = Mustache.render(layer.popupTemplate, feature.properties);
+	            slayer.bindPopup(thm);
+	        }
+	    : function (feature, slayer) {
+	            if (feature.properties) {
+	                slayer.bindPopup(Object.keys(feature.properties).map(function (k) {
+	                    if ($.inArray(k, STYLE_KEYWORDS) == -1) {
+	                        return '<strong>' + k + "</strong>: " + feature.properties[k] + '<br/>';
+	                    }
+	                }).join(""), { maxHeight: 200 });
+	            }
+	        };
 
-    var HTMLLegend = "";
+	    layer.geom = data.features[0].geometry.type;
 
-    layer.legend.symbols.forEach(function (symbol) {
-        HTMLLegend += createSVGLegendItem(layer.geom, symbol);
-    });
+	    switch (layer.geom) {
+	        case App.GEOM_TYPES.POINT:
+	            geoJson = L.geoJson(data, {
+	                pointToLayer: 
+	                    function (feature, latlng) {
+	                        return L.circleMarker(latlng, styleFeatures(feature, layer));
+	                    },
+	                onEachFeature: _onEachFeature
+	            });
+	            break;
+	        case App.GEOM_TYPES.LINESTRING:
+	        case App.GEOM_TYPES.POLYGON:
+	        case App.GEOM_TYPES.MULTIPOLYGON:
+	            geoJson = L.geoJson(data, {
+	                style: (typeof (layer.style) != 'undefined') ?
+	                    layer.style : function(feature) {return styleFromLegend(feature, layer); },
+	                onEachFeature: _onEachFeature,
+	                clickable: (typeof (layer.clickable) == 'undefined' || layer.clickable == true)
+	            });
+	    }
 
-    return HTMLLegend;
-}
+		//**going to need some additional logic here
+		//to handle offensive characters in layer names
+	    var id = layer.name.replace(/\s/g, '_');
 
-/* Creates HTML(& SVG) elements based on geometry and color
-@geom - string, an enum of sorts. looking for Point, LineString, Multipolygon etc.
-@value - string/number, the value of the legend item
-@color - Hexadecimal color #FFCC00
-*/
-function createSVGLegendItem(geom, symbol) {
-    var legendItem = null;
-    var symVal = (symbol.value == '*') ? '' : typeof(symbol.label) != 'undefined' ? symbol.label : symbol.value;
+	    //parse fields and add to layer object
+	    //This is used in the layer symbology dialog when applying a renderer
+	    layer.fields = [];
 
-    switch (geom) {
-        case "Point":
-            legendItem = '<div class="legend-item">'
-                    + '<svg width="16" height="14">'
-                    + '<circle cx="6.5" cy="8" r="5.8" stroke="'+symbol.color+'" stroke-width="'+symbol.weight+'" fill="' + symbol.fillColor + '" />'
-                    + '</svg> ' + symVal + '</div>';
-            break;
-        case "Polygon":
-        case "MultiPolygon":
-            legendItem = '<div class="legend-item">'
-                + '<svg width="16" height="14">'
-                + '<rect width="12" height="12" fill=' + symbol.fillColor + ' stroke-width="'+symbol.weight+'" stroke="'+symbol.color+'">'
-                + '</svg> ' + symVal + '</div>';
-            break;
-        case "LineString":
-            legendItem = '<div class="legend-item">'
-                + '<svg width="16" height="14">'
-                + '<rect width="12" height="3" fill=' + symbol.color + ' stroke-width="0" >'
-                + '</svg> ' + symVal + '</div>';
-    }
+	    for (var field in data.features[0].properties) {
+	        var fieldType = isNaN(data.features[0].properties[field]) ? 'string' : 'number';
+	        layer.fields.push({ name: field, type: fieldType});
+	    }
 
-    return legendItem;
-}
+	    //create the HTMLLegend from the jsonLegend property of the layer.
+	    layer.HTMLLegend = App.legendFactory.createHTMLLegend(layer);
 
-function styleFromLegend(feature, layer) {
- 
-    var style = {
-        fillColor: DEFAULT_FILLCOLOR,
-        fillOpacity: layer.fillOpacity,
-        stroke: true,
-        weight: DEFAULT_WEIGHT,
-        opacity: layer.strokeOpacity,
-        color: DEFAULT_COLOR
-    };
+	    $('#ulVectorLegend').prepend(layer.HTMLLegend);
 
-    var sym ={};
+	    App.applyContextMenu(id);
 
-    //a little defense here
-    if (typeof (layer.legend.type) == 'undefined') {
-        if (layer.legend.symbols.length == 1) {
-            layer.legend.type = RENDERER.SINGLE_SYMBOL;
-        } else {
-            layer.legend.type = RENDERER.UNIQUE_VALUE;
-        }
-    }
+	    //init sortable functionality in TOC for this item
+	    $('.sortable').sortable().bind('sortupdate', function(e, ui) {
+	        //return false;
+	        handleSort(e, ui);
+	    });
 
-    if (layer.legend.type==RENDERER.SINGLE_SYMBOL ) {
-        sym = layer.legend.symbols[0];
-    } else {
+	    //Add geojson layer to map
+	    layer.mapLayer = geoJson.addTo(map);
+	}
 
-        var value = feature.properties[layer.symbolField];
+	loadShapefile: function (layer, callback) {
 
-        //NaN is the only value in javascript that does not equal itself
-        if (value !== value) {
-            return style;
-        }
+	    //Check in local storage first
+	    var localGeoJSON = localStorage.getObject(layer.url);
 
-        for (var i = 0; i < layer.legend.symbols.length; i++) {
-            sym = layer.legend.symbols[i];
-            if (layer.legend.type == RENDERER.UNIQUE_VALUE) {
-                if (isNaN(value) && isNaN(sym.value)) {
-                    if (sym.value.toUpperCase() == value.toUpperCase()) {
-                        break;
-                    }
-                }
-                else if (layer.legend.symbols[i].value == value) {
-                    break;
-                }
-            } else if (layer.legend.type == RENDERER.CLASS_BREAKS) {
-                if (!isNaN(value) && (value >= sym.minVal && value <= sym.maxVal)) {
-                    break;
-                }
-            }
-        }
-    }
+	    if (localGeoJSON != null) {
+	        parseGeoJSON(localGeoJSON, layer);
+	        return;
+	    }
 
-    style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
-    style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
-    style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : DEFAULT_FILLCOLOR;
-    style.fillOpacity = (typeof sym.fillOpacity != 'undefined') ? sym.fillOpacity : DEFAULT_FILLOPACITY;
-    style.opacity = (typeof sym.opacity != 'undefined') ? sym.opacity : DEFAULT_OPACITY;
+	    var xhr = new XMLHttpRequest(),
+	            reader = new FileReader();
 
-    if (feature.geometry.type == 'Point') {
-        style.radius = (typeof sym.radius != 'undefined') ? sym.radius : DEFAULT_RADIUS;
-    }
+	    //url_prefix = 'data/';
+	    xhr.open("GET", layer.url, true);
+	    // Set the responseType to blob
+	    xhr.responseType = "blob";
 
-    return style;
-};
+	    xhr.addEventListener("load", function () {
+	        if (xhr.status === 200) {
+	            // onload needed since Google Chrome doesn't support addEventListener for FileReader
+	            reader.onload = function (e) {
+	                var ext;
+	                if (reader.readyState !== 2 || reader.error) {
+	                    return;
+	                } else {
+	                    shp(reader.result).then(function (data) {
 
-function createJSONLegend(geom, symbol, scale,  color, weight) {
+	                        //cache geojson in localstorage
+	                        try {
+	                            localStorage.setObject(layer.url, data);
+	                        }
+	                        catch (ex) {
+	                            console.log('unable to store this in local storage');
+	                        }
+	                        callback(data);
+	                    });
+	                    //this is worker code - currently not in web worker...
+	                    //.then(function (data) {
+	                    //console.log('bon');
+	                    // console.log(z);
+	                    //});
+	                    //worker.data([reader.result, file.name.slice(0, (0 - (ext.length + 1)))], [reader.result]).then(function(data) {
+	                    //  console.log(data);
+	                    //  });
+	                }
+	            }
+	            // Load blob as Data URL
+	            reader.readAsArrayBuffer(xhr.response);
+	        }
+	    }, false);
+	    // Send XHR
+	    xhr.send();
+	},
 
-    //_(value);
-    color = (typeof (color) !== 'undefined') ? color : DEFAULT_COLOR;
-    weight = (typeof (weight) !== 'undefined') ? weight : DEFAULT_WEIGHT;
-    
-    var fillColor;
+	styleFeatures : function(feature, layer){
 
-    if (symbol.value == 'null') {
-        fillColor = DEFAULT_FILLCOLOR;
-        scaleCounter += 1;
+	    var style = {
+	        fillColor: DEFAULT_FILLCOLOR,
+	        fillOpacity: layer.fillOpacity,
+	        stroke: true,
+	        weight: DEFAULT_WEIGHT,
+	        opacity: layer.strokeOpacity,
+	        color: DEFAULT_COLOR
+	    };
 
-    } else {
-        fillColor = getColorFromRamp(scale);
-    }
-    var obj = {}
-    if(geom=='LineString'){
-        obj =  {"value" : symbol.value,  'color': fillColor, 'weight': weight};
-    }else{
-        obj =  {"value" : symbol.value, "fillColor": fillColor, 'color': color, 'weight': weight};
-    }
+	    var sym ={};
 
-    if (typeof (symbol.label) != 'undefined') {
-        obj.label = symbol.label;
-    }
-    return obj;
-}
+	    //a little defense here
+	    if (typeof (layer.legend.type) == 'undefined') {
+	        if (layer.legend.symbols.length == 1) {
+	            layer.legend.type = RENDERER.SINGLE_SYMBOL;
+	        } else {
+	            layer.legend.type = RENDERER.UNIQUE_VALUE;
+	        }
+	    }
 
-function populateLayers() {
-    var madeFirstActiveTab = false;
+	    if (layer.legend.type==RENDERER.SINGLE_SYMBOL ) {
+	        sym = layer.legend.symbols[0];
+	    } else {
 
-    for (var _layer in config.layers) {
+	        var value = feature.properties[layer.symbolField];
 
-        var layer = config.layers[_layer];
-        var id = layer.name.replace(/\s/g, '_');
+	        //NaN is the only value in javascript that does not equal itself
+	        if (value !== value) {
+	            return style;
+	        }
 
-        //If the layers source tab doesn't exist, create it.
-        var source = layer.source.replace(/\s/g, '_');
+	        for (var i = 0; i < layer.legend.symbols.length; i++) {
+	            sym = layer.legend.symbols[i];
+	            if (layer.legend.type == RENDERER.UNIQUE_VALUE) {
+	                if (isNaN(value) && isNaN(sym.value)) {
+	                    if (sym.value.toUpperCase() == value.toUpperCase()) {
+	                        break;
+	                    }
+	                }
+	                else if (layer.legend.symbols[i].value == value) {
+	                    break;
+	                }
+	            } else if (layer.legend.type == RENDERER.CLASS_BREAKS) {
+	                if (!isNaN(value) && (value >= sym.minVal && value <= sym.maxVal)) {
+	                    break;
+	                }
+	            }
+	        }
+	    }
 
-        if (!$('#' + source).length) {
-            var sourceTabString = '<li ';
+	    style.color = (typeof sym.color != 'undefined') ? sym.color : DEFAULT_COLOR;
+	    style.weight = (typeof sym.weight != 'undefined') ? sym.weight : DEFAULT_WEIGHT;
+	    style.fillColor = (typeof sym.fillColor != 'undefined') ? sym.fillColor : DEFAULT_FILLCOLOR;
+	    style.fillOpacity = (typeof sym.fillOpacity != 'undefined') ? sym.fillOpacity : DEFAULT_FILLOPACITY;
+	    style.opacity = (typeof sym.opacity != 'undefined') ? sym.opacity : DEFAULT_OPACITY;
 
-            if (!madeFirstActiveTab) {
-                sourceTabString += 'class="active"';
-            }
+	    if (feature.geometry.type == 'Point') {
+	        style.radius = (typeof sym.radius != 'undefined') ? sym.radius : DEFAULT_RADIUS;
+	    }
 
-            sourceTabString += '><a href="#' + source + '" data-toggle="tab">';
+	    return style;
+	},
 
-            if (typeof (layer.icon) != 'undefined') {
-                sourceTabString += '<img src="' + layer.icon + '" align="left" style="margin-top:3px;"/>&nbsp;';
-            } else{
-                sourceTabString += '<i class="fa fa-check-circle-o"></i>&nbsp;';
-            }
+	populateLayers: function() {
+	    var madeFirstActiveTab = false;
 
-            sourceTabString += layer.source + '</a></li>';
+	    for (var _layer in config.layers) {
 
-            $('#layerSourceTabs').append(sourceTabString);
+	        var layer = config.layers[_layer];
+	        var id = layer.name.replace(/\s/g, '_');
 
-            var tabstring = '<div class="tab-pane fade ';
-            
-            if (!madeFirstActiveTab) {
-                tabstring += 'active in';
-                madeFirstActiveTab = true;
-            }
-            tabstring += '" id="' + source + '"></div>';
+	        //If the layers source tab doesn't exist, create it.
+	        var source = layer.source.replace(/\s/g, '_');
 
-            $('#layerSourceTabs').next().append(tabstring);
-        }
+	        if (!$('#' + source).length) {
+	            var sourceTabString = '<li ';
 
-        //If the layers theme section doesn't exist in the source tab content,
-        //create it.
-        var theme = (typeof layer.theme == 'undefined') ? '' : layer.theme.replace(/\s/g, '_');
+	            if (!madeFirstActiveTab) {
+	                sourceTabString += 'class="active"';
+	            }
 
-        if (!$('#' + source + '_' + theme).length) {
-                $('#' + source).append('<div style="clear:both;" id="' + source + '_' + theme + '"><h4 style="margin:0;">' + layer.theme + '</h4><hr style="margin:0;padding:0;"/></div');
-        }
+	            sourceTabString += '><a href="#' + source + '" data-toggle="tab">';
 
-        if (typeof (layer.thumb) != 'undefined') {
-            var thumb = layer.thumb;
-        }
-        else {
-            var thumb = '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png';
-        }
+	            if (typeof (layer.icon) != 'undefined') {
+	                sourceTabString += '<img src="' + layer.icon + '" align="left" style="margin-top:3px;"/>&nbsp;';
+	            } else{
+	                sourceTabString += '<i class="fa fa-check-circle-o"></i>&nbsp;';
+	            }
 
-        var elem = "<div class='layer img-block ";
-        
-        if (layer.level == 2) {
-            elem += "img-block-m";
-        }
+	            sourceTabString += layer.source + '</a></li>';
 
-        if (layer.level == 3) {
-            elem += "img-block-lg";
-        }
+	            $('#layerSourceTabs').append(sourceTabString);
 
-        elem += "'><div class='caption ";
+	            var tabstring = '<div class="tab-pane fade ';
+	            
+	            if (!madeFirstActiveTab) {
+	                tabstring += 'active in';
+	                madeFirstActiveTab = true;
+	            }
+	            tabstring += '" id="' + source + '"></div>';
 
-        if (layer.level == 2) {
-            elem += "caption-m";
-        }
+	            $('#layerSourceTabs').next().append(tabstring);
+	        }
 
-        if (layer.level == 3) {
-            elem += "caption-lg";
-        }
+	        //If the layers theme section doesn't exist in the source tab content,
+	        //create it.
+	        var theme = (typeof layer.theme == 'undefined') ? '' : layer.theme.replace(/\s/g, '_');
 
-        elem += "'>" + layer.name + "</div><img ";
-        
-        if (layer.level == 2 || layer.level == 3) {
-            elem += "width='190' height='130'";
-        } else {
-            elem += "width='82' height='62'";
-        }
-        
-        elem+=" class='lazy' data-original='"+thumb+"' alt='" + layer.name + "' id='img" + id + "'/></div>";
+	        if (!$('#' + source + '_' + theme).length) {
+	                $('#' + source).append('<div style="clear:both;" id="' + source + '_' + theme + '"><h4 style="margin:0;">' + layer.theme + '</h4><hr style="margin:0;padding:0;"/></div');
+	        }
 
-        $('#' + source + '_' + theme).append(elem);
-    }
+	        if (typeof (layer.thumb) != 'undefined') {
+	            var thumb = layer.thumb;
+	        }
+	        else {
+	            var thumb = '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png';
+	        }
 
-    //I want the custom tab at the end.
-    $('#layerSourceTabs').append('  <li><a href="#customData" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Custom</a></li>')
+	        var elem = "<div class='layer img-block ";
+	        
+	        if (layer.level == 2) {
+	            elem += "img-block-m";
+	        }
 
-    $('#layerSourceTabs').next().append("<div class='tab-pane fade' id='customData'>Data Source: &nbsp;    <select class='selectpicker' id='selCustomData' data-style='btn-default' data-width='180'><option value='0'>GeoJSON</option><option value='1'>ArcGIS Server</option><option value='2'>Tile Layer</option><option value='3'>Shapefile</option><option value='4'>CSV</option></select></div>");
+	        if (layer.level == 3) {
+	            elem += "img-block-lg";
+	        }
 
-}
+	        elem += "'><div class='caption ";
+
+	        if (layer.level == 2) {
+	            elem += "caption-m";
+	        }
+
+	        if (layer.level == 3) {
+	            elem += "caption-lg";
+	        }
+
+	        elem += "'>" + layer.name + "</div><img ";
+	        
+	        if (layer.level == 2 || layer.level == 3) {
+	            elem += "width='190' height='130'";
+	        } else {
+	            elem += "width='82' height='62'";
+	        }
+	        
+	        elem+=" class='lazy' data-original='"+thumb+"' alt='" + layer.name + "' id='img" + id + "'/></div>";
+
+	        $('#' + source + '_' + theme).append(elem);
+	    }
+
+	    //I want the custom tab at the end.
+	    $('#layerSourceTabs').append('  <li><a href="#customData" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Custom</a></li>')
+
+	    $('#layerSourceTabs').next().append("<div class='tab-pane fade' id='customData'>Data Source: &nbsp;    <select class='selectpicker' id='selCustomData' data-style='btn-default' data-width='180'><option value='0'>GeoJSON</option><option value='1'>ArcGIS Server</option><option value='2'>Tile Layer</option><option value='3'>Shapefile</option><option value='4'>CSV</option></select></div>");
+
+	}
 
 function populateBasemaps() {
 
@@ -878,7 +850,9 @@ function populateBasemaps() {
             map.addLayer(basemap.mapLayer);
         }
         else {
-            loadBasemap(basemap);
+        	basemap.zIndex = 0;
+        	map.maxZoom = (typeof basemap.maxZoom != 'undefined') ? basemap.maxZoom : 19;
+            App.LoadTileLayer(basemap);
         }
         basemap.active = true;
     });
@@ -1080,7 +1054,7 @@ function singleFillResymbolize(layer) {
         layer.legend.type = RENDERER.SINGLE_SYMBOL;
 
         layer.mapLayer.setStyle(function (feature) {
-            return styleFromLegend(feature, layer);
+            return styleFeatures(feature, layer);
         });
 
         var id = layer.name.replace(/\s/g, '_');
@@ -1182,7 +1156,7 @@ function resymbolize(layer) {
         layer.legend.type = RENDERER.UNIQUE_VALUE;
         
         layer.mapLayer.setStyle(function (feature) {
-            return styleFromLegend(feature, layer);
+            return styleFeatures(feature, layer);
         });
 
         var id=layer.name.replace(/\s/g,'_');
@@ -1623,4 +1597,8 @@ function handleSort(e, ui) {
 
     //get prev element id, zIndex increment 1;
 
+}
+
+$(document).ready(function () {
+	App.init();
 }
