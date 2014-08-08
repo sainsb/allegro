@@ -135,17 +135,17 @@ var App = {
         //Attach behavior to opacity sliders
         $('body').on('input', '.sliderFillOpacity', function () {
             var id = $(this).attr('id').replace('sli', '');
-            var layer = getLayerById(id);
+            var layer = App.util.getLayerById(id);
             layer.fillOpacity = $(this).val() / 100;
             switch(layer.type) {
-                case LAYER_TYPES.GEOJSON:
-                case LAYER_TYPES.SHAPEFILE:
+                case App.LAYER_TYPES.GEOJSON:
+                case App.LAYER_TYPES.SHAPEFILE:
                     layer.mapLayer.setStyle ({
                         fillOpacity: layer.fillOpacity,
                     });
                     break;
-                case LAYER_TYPES.TILELAYER:
-                case LAYER_TYPES.TILEJSON:
+                case App.LAYER_TYPES.TILELAYER:
+                case App.LAYER_TYPES.TILEJSON:
                     layer.mapLayer.setOpacity(layer.fillOpacity);
                     break;
             }
@@ -153,7 +153,7 @@ var App = {
 
         $('body').on('input', '.sliderStrokeOpacity', function () {
             var id = $(this).attr('id').replace('sli', '');
-            var layer = getLayerById(id);
+            var layer = App.util.getLayerById(id);
             layer.strokeOpacity = $(this).val() / 100;
             layer.mapLayer.setStyle({
                 opacity: layer.strokeOpacity
@@ -174,12 +174,12 @@ var App = {
                 if (typeof (layer.mapLayer) != 'undefined') {
                     map.addLayer(layer.mapLayer);
                     switch(layer.type){
-                        case LAYER_TYPES.GEOJSON:
-                        case LAYER_TYPES.SHAPEFILE:
+                        case App.LAYER_TYPES.GEOJSON:
+                        case App.LAYER_TYPES.SHAPEFILE:
                             $('#ulVectorLegend').prepend(layer.HTMLLegend);
                             break;
-                        case LAYER_TYPES.TILELAYER:
-                        case LAYER_TYPES.TILEJSON:
+                        case App.LAYER_TYPES.TILELAYER:
+                        case App.LAYER_TYPES.TILEJSON:
                             $('#ulTileLegend').prepend(layer.HTMLLegend);
                             break;
                     }
@@ -407,7 +407,7 @@ var App = {
                 : function (feature, slayer) {
                     if (feature.properties) {
                         slayer.bindPopup(Object.keys(feature.properties).map(function (k) {
-                            if ($.inArray(k, STYLE_KEYWORDS) == -1) {
+                            if ($.inArray(k, App.STYLE_KEYWORDS) == -1) {
                                 return '<strong>' + k + "</strong>: " + feature.properties[k] + '<br/>';
                             }
                         }).join(""), { maxHeight: 200 });
@@ -502,12 +502,13 @@ var App = {
                     layer.legend = data.legend;
 
                 } else if (typeof(layer.symbolField) != 'undefined') {
-
+                    _('yay')
                     layer.ramp = App.DEFAULT_RAMP;
 
                     layer.legend.type = App.RENDERER.UNIQUE_VALUE;
 		            
                     var values = [];
+                    var temp_values = [];
 
                     for (var i = 0; i < data.features.length; i++) {
                         var value = data.features[i].properties[layer.symbolField];
@@ -516,8 +517,9 @@ var App = {
                             value='null';
                         }
 
-                        if ($.inArray(value, values) === -1) {
+                        if ($.inArray(value, temp_values) === -1) {
                             values.push({ value: value });
+                            temp_values.push(value);
                         }
                     }
 
@@ -546,7 +548,7 @@ var App = {
 
             var title = (typeof(layer.legend.title) != 'undefined') ? layer.legend.title : layer.name;
 
-            var str = "<li style='clear:both;' id='li" + id + "' class='liVectorLegend'><div class='panelyr' data-toggle='collapse' data-target='#leg" + id + "'><span class='accordion-toggle'></span><input type='checkbox' class='legend-check' id='chk" + id + "' checked style='float:left;margin-right:5px;margin-left:3px;'/>" + title + "<div onclick='removeLayer(\""+id+"\")' style='float:right;cursor:pointer;' class='btnRemove'>×</div></div><div style='clear:both;margin-left:15px;float:left;padding-top:6px;' id='leg" + id + "' class='collapse in'>";
+            var str = "<li style='clear:both;' id='li" + id + "' class='liVectorLegend'><div class='panelyr' data-toggle='collapse' data-target='#leg" + id + "'><span class='accordion-toggle'></span><input type='checkbox' class='legend-check' id='chk" + id + "' checked style='float:left;margin-right:5px;margin-left:3px;'/>" + title + "<div onclick='App.util.removeLayer(\""+id+"\")' style='float:right;cursor:pointer;' class='btnRemove'>×</div></div><div style='clear:both;margin-left:15px;float:left;padding-top:6px;' id='leg" + id + "' class='collapse in'>";
 
             str += this.renderHTMLLegendItems(layer);
 		    
@@ -878,7 +880,7 @@ var App = {
     symbolDialog : {
 
         refresh : function(id){
-            var layer = getLayerById(id);
+            var layer = App.util.getLayerById(id);
 
             //hide stroke inputs if we're dealing with a LineString geometry
             if(layer.geom=='LineString'){
@@ -887,7 +889,7 @@ var App = {
                 $('.lblStroke').show();
             }
 
-            App.symbolDialog.ramps.refresh();
+            App.symbolDialog.ramps.refresh(layer);
 		    
             //populate field select control
             $('#selCatField').off('change.core');
@@ -991,14 +993,13 @@ var App = {
                     //add error class to field input?
                     return;
                 }
-
-                resymbolize(layer);
+                this.legends.uniqueValues(layer);
             });
 
             $('#symbolModal').modal('show');
         },
 
-        apply : function(layer, newSymbol, renderer, ramp){
+        apply : function(layer, newSymbol, renderer, ramp, legendItem){
 
             layer.legend.symbols = newSymbol;
             layer.legend.type = renderer;
@@ -1021,12 +1022,14 @@ var App = {
 
         },
 
-        ramps : {
+        ramps: {
+
             scaleCounter: 0,
 
             $lstRamps: null,
 
-            refresh : function(layer){
+            refresh: function (layer) {
+
                 if (typeof (layer.ramp) != 'undefined') {
 
                     var _ramp = layer.ramp;
@@ -1089,7 +1092,8 @@ var App = {
                 }
 
                 $('#selGradient').prepend($span);
-            }			
+            }
+
         },
 
         legends : {
@@ -1106,7 +1110,7 @@ var App = {
 
                     $('#btnApplySymbol').off().on('click', function () {
 
-                        App.symbolDialog.apply(layer, [phantomSymbol], RENDERER.SINGLE_SYMBOL);
+                        App.symbolDialog.apply(layer, [phantomSymbol], RENDERER.SINGLE_SYMBOL, legendItem);
 
                     });
 
@@ -1194,7 +1198,7 @@ var App = {
                         layer.symbolField = symbolField;
                         layer.scale = scale;
 
-                        App.symbolDialog.apply(layer, phantomSymbols, RENDERER.UNIQUE_VALUE, ramp);
+                        App.symbolDialog.apply(layer, phantomSymbols, App.RENDERER.UNIQUE_VALUE, ramp, legendItems);
                     });
                 }
             },
@@ -1395,7 +1399,7 @@ var App = {
 
         removeLayer: function(id){
             var layer = this.getLayerById(id);
-            this.map.removeLayer(layer.mapLayer);
+            App.map.removeLayer(layer.mapLayer);
             $('#li' + id).remove();
             $('.img-block.active').each(function (index) {
                 if ($(this).find('img').attr('id').replace('img', '') == id) {
