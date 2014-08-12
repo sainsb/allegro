@@ -110,7 +110,7 @@ var App = {
         //Attach behavior to legend checkboxes
         $('body').on('click', '.legend-check', function (evt) {
             var id = $(this).attr('id').replace('chk', '');
-            var layer = getLayerById(id);
+            var layer = App.util.getLayerById(id);
             if ($(this).is(':checked')) {
                 //we'll need to bring stuff to back and front
                 if (layer.type == LAYER_TYPES.geojson || layer.type == LAYER_TYPES.shapefile) {
@@ -235,6 +235,7 @@ var App = {
 
     data: {
 
+        /* event handler for add data button */
         add : function(layer){
             switch (layer.type) {
                 case App.LAYER_TYPES.GEOJSON:
@@ -256,6 +257,7 @@ var App = {
             }
         },
 
+        /* load a variety of data types */
         load: {
 
             tileLayer : function(layer){
@@ -379,6 +381,7 @@ var App = {
 
         },
 
+        /* Parse geojson into Leaflet, include legend creation */
         parse : {
 
             geoJSON : function(data, layer){
@@ -439,7 +442,7 @@ var App = {
 
                 //**going to need some additional logic here
                 //to handle offensive characters in layer names
-                var id = layer.name.replace(/\s/g, '_');
+                var id = App.util.getLayerId(layer.name);
 
                 //parse fields and add to layer object
                 //This is used in the layer symbology dialog when applying a renderer
@@ -472,6 +475,7 @@ var App = {
 
     legendFactory : {
 
+        /* Initialize a legend for a given layer */
         init : function(layer, data){
             /* in order of preference:
 	        layer.legend
@@ -502,7 +506,7 @@ var App = {
                     layer.legend = data.legend;
 
                 } else if (typeof(layer.symbolField) != 'undefined') {
-                    _('yay')
+                    
                     layer.ramp = App.DEFAULT_RAMP;
 
                     layer.legend.type = App.RENDERER.UNIQUE_VALUE;
@@ -542,9 +546,10 @@ var App = {
             }
         },
 
+        /* render an HTML Legend from a JSON legend */
         renderHTMLLegend : function (layer) {
    
-            var id = layer.name.replace(/\s/g, '_');
+            var id = App.util.getLayerId(layer.name);
 
             var title = (typeof(layer.legend.title) != 'undefined') ? layer.legend.title : layer.name;
 
@@ -557,6 +562,7 @@ var App = {
             return str;
         },
 
+        /* render each individual HTML legend Item */
         renderHTMLLegendItems : function (layer) {
 
             var HTMLLegend = "";
@@ -570,6 +576,7 @@ var App = {
             return HTMLLegend;
         },
 
+        /* render SVG shape for each legend item */
         renderHTMLLegendItem: function (geom, symbol) {
 
             var legendItem = null;
@@ -595,6 +602,7 @@ var App = {
             return legendItem;
         },
 
+        /* create the JSON obj/representation for a given symbol */
         createJSONLegend : function(geom, symbol, scale, color, weight) {
 
             color = (typeof (color) !== 'undefined') ? color : App.DEFAULT_COLOR;
@@ -692,10 +700,13 @@ var App = {
 
     layersDialog : {
 
+        /* We keep track of this in order to apply the active class to the first tab */
         madeFirstTab: false,
 
+        /* DOM object for the <ul> element that contains the tabs */
         $ulSourceTabs : null,
 
+        /* Render the entire layer tabs collection */
         render : function(){
 
             this.$ulSourceTabs = $('#ulSourceTabs');
@@ -730,6 +741,9 @@ var App = {
             this.$ulSourceTabs.next().append("<div class='tab-pane fade' id='customData'>Data Source: &nbsp; <select class='selectpicker' id='selCustomData' data-style='btn-default' data-width='180'><option value='0'>GeoJSON</option><option value='1'>ArcGIS Server</option><option value='2'>Tile Layer</option><option value='3'>Shapefile</option><option value='4'>CSV</option></select></div>");
         },
 
+        /* Render a tab for a given source 
+        returns:: @void; appends source tab to ulSourceTabs
+        */
         renderSourceTab: function (source, icon) {
 
             var safe_source = source.replace(/\s/g, '_');
@@ -764,6 +778,7 @@ var App = {
             this.$ulSourceTabs.next().append(tabstring);
         },
 
+        /* Render individual data/layer item */
         renderLayerElement: function (layer) {
 
             var id = App.util.getLayerId(layer.name);
@@ -811,6 +826,7 @@ var App = {
 
     basemapDialog :{
 
+        /* Render the basemap dialog. */
         render : function(){
             for (_basemap in config.basemaps) {
 
@@ -879,6 +895,10 @@ var App = {
 
     symbolDialog : {
 
+        /* Refresh the symboldialog with controls specific to layer type...
+        e.g. hide fill control for lines, show circle radius range for points
+        */
+
         refresh : function(id){
             var layer = App.util.getLayerById(id);
 
@@ -934,10 +954,10 @@ var App = {
 
             $('#rngSingleWeight').off('change');
 
-            var legend = App.legendFactory.renderHTMLLegend(layer);
+            var legend = App.legendFactory.renderHTMLLegendItems(layer);
 
             //Set to correct tab
-            if (layer.legend.symbols[0].value == '*') {
+            if (layer.legend.type==App.RENDERER.SINGLE_SYMBOL) {
                 //haxxor - bootstrap tabs don't work right...
                 //the uniqueValues tab is still active.. I can't make it not active w/out breaking this thing...
                 $('#symbolTabs > li > a').first().tab('show');
@@ -950,9 +970,12 @@ var App = {
 
                 //show the legend item
                 $('#singleLegend').empty().append(legend);
-            } else {
+            } else if (layer.legend.type == App.RENDERER.UNIQUE_VALUE {
                 //recreate the legend in the dialog???
+                
                 $('#catLegend').empty().append(legend);
+                $('#symbolTabs > li > a').first().next().tab('show');
+                $('#singleFill').addClass('active in');
             }
 
             $('#_colSingleFillColor, #_colSingleColor').on('changeColor', function (ev) {
@@ -993,12 +1016,14 @@ var App = {
                     //add error class to field input?
                     return;
                 }
-                this.legends.uniqueValues(layer);
+
+                App.symbolDialog.legends.uniqueValues.refresh(layer);
             });
 
             $('#symbolModal').modal('show');
         },
 
+        /* Applies chosen symbology to layer */
         apply : function(layer, newSymbol, renderer, ramp, legendItem){
 
             layer.legend.symbols = newSymbol;
@@ -1012,13 +1037,16 @@ var App = {
                 return App.styleFeatures(feature, layer);
             });
 
-            var id = layer.name.replace(/\s/g, '_');
+            var id = App.util.getLayerId(layer.name);
 
             $('#leg' + id + ' .legend-item').remove();
             $('#leg' + id).append(legendItem);
 
-            var HTMLLegend = $('#leg' + id).clone().html();
-            layer.HTMLLegend = '<div class="legend" id="leg' + id + '">' + HTMLLegend + '</div';
+            layer.HTMLLegend = $('#li' + id).clone().html();
+
+            //this is a problem what with the new legends...
+            //layer.HTMLLegend = '<div class="legend" id="leg' + id + '">' + HTMLLegend + '</div';
+           
 
         },
 
@@ -1188,7 +1216,7 @@ var App = {
                         }
                     }
 
-                    var legendItems = App.legendFactory.renderHTMLLegend({ name : layer.name,geom: layer.geom, legend: {symbols: phantomSymbols }});
+                    var legendItems = App.legendFactory.renderHTMLLegendItems({ name : layer.name,geom: layer.geom, legend: {symbols: phantomSymbols }});
 
                     $('#catLegend').empty().html(legendItems);
 
@@ -1214,7 +1242,7 @@ var App = {
     contextMenu : {
 
         apply: function(id){
-
+            _(id);
             var layer = App.util.getLayerById(id);
 
             context.init({
@@ -1410,7 +1438,7 @@ var App = {
 
         getLayerId : function(name){
             //name need lots more here to make safe
-            return name.replace(/\s/g, '_');
+            return name.replace(/[\s,]/g, '_');
         },
 
         getLayerById : function(id) {
