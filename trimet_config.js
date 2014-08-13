@@ -6,16 +6,15 @@ config.layers.push(
     'metadataUrl': 'http://developer.trimet.org/gis/meta_tm_boundary.shtml',
     'source': 'TriMet',
     'icon': 'img/trimet_logo.png',
-    'theme': '',
-    'zIndex': 75
+    'theme': ''
 },
 {
     'name': 'Trimet Park and Rides',
     'url': '//developer.trimet.org/gis/data/tm_parkride.zip',
     'type': 'shapefile',
     'source': 'TriMet',
-    'theme': '',
-    'zIndex': 75
+    'metadataUrl': 'http://developer.trimet.org/gis/meta_tm_parkride.shtml',
+    'theme': ''
 },
 {
     'name': 'Trimet Rail Lines',
@@ -23,8 +22,8 @@ config.layers.push(
     'type': 'shapefile',
     'source': 'TriMet',
     'theme': '',
-    'level': 2,
-    'zIndex': 75
+    'metadataUrl': 'http://developer.trimet.org/gis/meta_tm_rail_lines.shtml',
+    'level': 2
 },
 {
     'name': 'Trimet Rail Stops',
@@ -32,14 +31,14 @@ config.layers.push(
     'type': 'shapefile',
     'source': 'TriMet',
     'theme': '',
-    'level':2,
-    'zIndex': 75
+    'level': 2,
+    'metadataUrl': 'http://developer.trimet.org/gis/meta_tm_rail_stops.shtml'
 },
 {
     'name': 'Trimet Transit Centers',
     'url': '//developer.trimet.org/gis/data/tm_tran_cen.zip',
     'type': 'shapefile',
     'source': 'TriMet',
-    'theme': '',
-    'zIndex': 75
+    'metadataUrl':'http://developer.trimet.org/gis/meta_tm_tran_cen.shtml',
+    'theme': ''
 });

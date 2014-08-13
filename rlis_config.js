@@ -1,101 +1,4 @@
-﻿var config = {
-    'token': 'jtJ3qevgR0oEBOZQVIrdF9nCWVlzEOnMqNi62askpes.',
-    'basemaps': [
-    {
-        'name': 'Metro Basemap',
-        'url': '//{s}.oregonmetro.gov/ArcGIS/rest/services/metromap/baseAll/MapServer/tile/{z}/{y}/{x}/',
-        'type': 'composite',
-        'thumb': 'img/metro_base.jpg',
-        'source': 'Metro',
-        'theme': 'Roads and Landscape',
-        'requireToken':true
-    },
-    {
-        'name': '2013 Air Photos',
-        'url': '//{s}.oregonmetro.gov/ArcGIS/rest/services/photo/2013aerialphoto/MapServer/tile/{z}/{y}/{x}/',
-        'type': 'photo',
-        'thumb': 'img/photo2013.png',
-        'source': 'Metro',
-          'maxZoom': 20,
-        'theme': 'Air Photo',
-        'requireToken': true
-    },
-      {
-          'name': '2012 Air Photos',
-          'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2012aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
-          'type': 'photo',
-          'thumb': 'img/photo2012.jpg',
-          'source': 'Metro',
-          'maxZoom': 20,
-          'theme': 'Air Photo',
-          'requireToken': true
-      },
-        {
-            'name': '2011 Air Photos',
-            'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2011aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
-            'type': 'photo',
-            'thumb': 'img/photo2011.jpg',
-            'source': 'Metro',
-            'theme': 'Air Photo',
-            'requireToken': true
-        },
-          {
-              'name': '2010 Air Photos',
-              'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2010aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
-              'type': 'photo',
-              'thumb': 'img/photo2010.jpg',
-              'source': 'Metro',
-              'theme': 'Air Photo',
-              'requireToken': true
-          },
-        {
-            'name': '2009 Air Photos',
-            'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2009aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
-            'type': 'photo',
-            'thumb': 'img/photo2009.jpg',
-            'source': 'Metro',
-            'theme': 'Air Photo',
-            'requireToken': true
-        },
-            {
-                'name': '2008 Air Photos',
-                'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2008aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
-                'type': 'photo',
-                'thumb': 'img/photo2008.jpg',
-                'source': 'Metro',
-                'theme': 'Air Photo',
-                'requireToken': true
-            },
-            {
-                'name': '2007 Air Photos',
-                'url': '//{s}.oregonmetro.gov/arcgis/rest/services/photo/2007aerialPhotoWebMerc/MapServer/tile/{z}/{y}/{x}/',
-                'type': 'photo',
-                'thumb': 'img/photo2013.png',
-                'source': 'Metro',
-                'theme': 'Air Photo',
-                'requireToken': true
-            },
-        
-            {
-                'name': 'Gray Scale',
-                'url': '//server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-                'type': 'basemap',
-                'active': true,
-                'thumb': 'img/esriGray.png',
-                'icon': 'img/esri_logo.png',
-                'source': 'ESRI',
-                'theme': 'Roads and Landscape'
-        },
-        {'name': 'Open Street Map',
-'url': 'http://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-'type': 'basemap',
-                'thumb': 'img/esriGray.png',
-                'icon': 'img/esri_logo.png',
-                'source': 'OSM',
-                'theme': 'Roads and Landscape'
-    }
-    ],
-    'layers': [
+﻿config.layers.push(
             {
                 'name': 'City Limits',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/cty_fill.zip',
@@ -104,9 +7,9 @@
                 "popupTemplate": "<b>Name: </b>{{CITYNAME}}<br/><b>Area (sq.ft): </b>{{AREA}}",
                 'symbolField': 'CITYNAME',
                 'source': 'RLIS',
-                'icon' : './img/metro_logo.png',
+                'icon': './img/metro_logo.png',
                 'theme': 'Boundary',
-                'level':2
+                'level': 2
             },
             {
                 'name': 'Metro Council Districts 1979 to 1981',
@@ -126,7 +29,7 @@
                 "symbolField": "DISTRICT",
                 'source': 'RLIS',
                 'theme': 'Boundary'
-            },{
+            }, {
                 'name': 'Metro Council Districts 1993 to 1994',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/council1993.zip',
                 'type': 'shapefile',
@@ -134,7 +37,7 @@
                 "symbolField": "DISTRICT",
                 'source': 'RLIS',
                 'theme': 'Boundary'
-            },{
+            }, {
                 'name': 'Metro Council Districts 1995 to 2002',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/council1995.zip',
                 'type': 'shapefile',
@@ -143,7 +46,7 @@
                 'source': 'RLIS',
                 'theme': 'Boundary',
                 "legend": {
-                    "type":"uniqueValue",
+                    "type": "uniqueValue",
                     "symbols": [
                         {
                             "value": 1,
@@ -175,7 +78,7 @@
                         }
                     ]
                 },
-            },{
+            }, {
                 'name': 'Metro Council Districts 2003 to 2012',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/council2003.zip',
                 'type': 'shapefile',
@@ -183,7 +86,7 @@
                 "symbolField": "DISTRICT",
                 'source': 'RLIS',
                 'theme': 'Boundary'
-            },{
+            }, {
                 'name': 'Metro Council Districts',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/council.zip',
                 'type': 'shapefile',
@@ -191,16 +94,17 @@
                 "symbolField": "DISTRICT",
                 'source': 'RLIS',
                 'theme': 'Boundary',
-                'level':2
-            },{
+                'level': 2
+            }, {
                 'name': 'Counties',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/co_fill.zip',
                 'type': 'shapefile',
                 'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/co_fill.png',
+                "popupTemplate": "<b>Name: </b>{{COUNTY}}<br/><b>Census Code: </b>{{COUNTY_NO}}<br/><b>Area (sq.ft): </b>{{AREA}}",
                 'symbolField': 'COUNTY',
                 'source': 'RLIS',
                 'theme': 'Boundary'
-            },{
+            }, {
                 'name': 'County Line',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/co_line.zip',
                 'type': 'shapefile',
@@ -217,7 +121,7 @@
                     'lineJoin': 'round'
                 },
                 'clickable': false
-            },{
+            }, {
                 'name': 'Fire District',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/fire_dst.zip',
                 'type': 'shapefile',
@@ -225,7 +129,7 @@
                 'symbolField': 'FIRE_DIST',
                 'source': 'RLIS',
                 'theme': 'Boundary'
-            },{
+            }, {
                 'name': 'Fire District Tile Layer',
                 'url': '//gis.oregonmetro.gov/services/Boundary/fireDistricts/tilejson',
                 'type': 'tilejson',
@@ -238,10 +142,20 @@
                 'url': '//library.oregonmetro.gov/rlisdiscovery/hauler.zip',
                 'type': 'shapefile',
                 'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/hauler.png',
+                "popupTemplate": "<b>Name: </b>{{HN}}<br/>"+
+                    "<b>Residential Hauler: </b>{{RESIDENTIA}}<br/>" +
+                    "<b>Residential Hauler Phone: </b>{{PHONE}}<br/>" +
+                    "<b>Commercial Hauler: </b>{{COMMERCIAL}}<br/>" +
+                    "<b>Commercial Hauler Phone: </b>{{COMM_PHONE}}<br/>" +
+                    "<b>Dropbox Provider: </b>{{DROPBOX}}<br/>" +
+                    "<b>Dropbox Provider Phone: </b>{{DROPBOX_PH}}<br/>" +
+                    "<b>Account Number: </b>{{ACCOUNT}}<br/>" +
+                    "<b>Franchise Agent: </b>{{AGENCY}}<br/>" +
+                    "<b>Area (sq.ft): </b>{{AREA}}",
                 'source': 'RLIS',
                 'theme': 'Boundary',
                 'symbolField': 'HN',
-                'level':2,
+                'level': 2,
                 'style': {
                     'stroke': true,
                     'weight': 3,
@@ -251,7 +165,7 @@
                     'lineCap': 'round',
                     'lineJoin': 'round'
                 }
-            },{
+            }, {
                 'name': 'Metro Boundary',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/metro.zip',
                 'type': 'shapefile',
@@ -268,7 +182,7 @@
                     'lineCap': 'round',
                     'lineJoin': 'round'
                 }
-            },{
+            }, {
                 'name': 'Neighborhoods Tile Layer',
                 'url': '//gis.oregonmetro.gov/services/Boundary/neighborhoods/tilejson',
                 'type': 'tilejson',
@@ -290,7 +204,7 @@
                 'symbolField': 'PARK_DIST',
                 'source': 'RLIS',
                 'theme': 'Boundary'
-            },{
+            }, {
                 'name': 'School Districts',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/school_district.zip',
                 'type': 'shapefile',
@@ -298,14 +212,14 @@
                 'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/school_district.png',
                 'source': 'RLIS',
                 'theme': 'Boundary'
-            },{
+            }, {
                 'name': 'School Districts Tile Layer',
                 'url': '//gis.oregonmetro.gov/services/Boundary/schoolDistricts/tilejson',
                 'type': 'tilejson',
                 'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/school_district.png',
                 'source': 'RLIS',
                 'theme': 'Boundary'
-            },{
+            }, {
                 'name': 'Sewer District',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/sewerdst.zip',
                 'type': 'shapefile',
@@ -329,14 +243,14 @@
                 'symbolField': 'TRAN_DIST',
                 'source': 'RLIS',
                 'theme': 'Boundary'
-            },{
+            }, {
                 'name': 'Urban Growth Boundary',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/ugb.zip',
                 'type': 'shapefile',
                 'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/ugb.png',
                 'source': 'RLIS',
                 'theme': 'Boundary',
-                'level':2,
+                'level': 2,
                 'style': {
                     'stroke': true,
                     'weight': 3,
@@ -346,7 +260,7 @@
                     'lineCap': 'round',
                     'lineJoin': 'round'
                 }
-            },{
+            }, {
                 'name': 'Voter Precincts',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/precinct.zip',
                 'type': 'shapefile',
@@ -355,7 +269,7 @@
                 'source': 'RLIS',
                 'theme': 'Boundary'
             },
-            
+
             {
                 'name': 'Voter Precincts Tiles',
                 'url': '//gis.oregonmetro.gov/services/Boundary/voterPrecincts/tilejson',
@@ -372,7 +286,7 @@
                 'symbolField': 'WATER_DIST',
                 'source': 'RLIS',
                 'theme': 'Boundary'
-            },{
+            }, {
                 'name': 'Zipcodes',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/zipcode.zip',
                 'type': 'shapefile',
@@ -416,7 +330,7 @@
                 'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/tract.png',
                 'source': 'RLIS',
                 'theme': 'Census'
-            },{
+            }, {
                 'name': '2000 Census Block Groups',
                 'url': '//library.oregonmetro.gov/rlisdiscovery/blockgrp2000.zip',
                 'type': 'shapefile',
@@ -459,7 +373,7 @@
                   'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/district20.png',
                   'source': 'RLIS',
                   'theme': 'Census',
-                  'metadataUrl' :'http://rlisdiscovery.oregonmetro.gov/metadataviewer/display.cfm?meta_layer_id=2342'
+                  'metadataUrl': 'http://rlisdiscovery.oregonmetro.gov/metadataviewer/display.cfm?meta_layer_id=2342'
               },
                {
                    'name': '2013 Vacant Lands',
@@ -511,13 +425,13 @@
                    'source': 'RLIS',
                    'theme': 'Land',
                    'level': 2,
-               },{
+               }, {
                    'name': 'Multifamily Housing',
-                    'url': '//gis.oregonmetro.gov/services/Land/multifamily/tilejson',
-                    'type': 'tilejson',
-                    'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/multifamily_housing_invento.png',
-                    'source': 'RLIS',
-                    'theme': 'Land'
+                   'url': '//gis.oregonmetro.gov/services/Land/multifamily/tilejson',
+                   'type': 'tilejson',
+                   'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/multifamily_housing_invento.png',
+                   'source': 'RLIS',
+                   'theme': 'Land'
                },
                {
                    'name': 'ORCA Cemeteries',
@@ -639,7 +553,7 @@
                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/school_site.png',
                      'source': 'RLIS',
                      'theme': 'Places',
-                     'level':2
+                     'level': 2
                  },
                  {
                      'name': 'Schools',
@@ -660,30 +574,30 @@
                      'theme': 'Planning'
                  },
                   {
-                     'name': 'Concept Centers',
-                     'url': '//library.oregonmetro.gov/rlisdiscovery/concept_centers.zip',
-                     'type': 'shapefile',
-                     'symbolField': 'NAME',
-                     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/concept_centers.png',
-                     'source': 'RLIS',
-                     'theme': 'Planning'
-                 }, {
-                     'name': 'Concept Corridors',
-                     'url': '//library.oregonmetro.gov/rlisdiscovery/concept_corridors.zip',
-                     'type': 'shapefile',
-                     'symbolField': 'CORRIDOR',
-                     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/concept_corridors.png',
-                     'source': 'RLIS',
-                     'theme': 'Planning'
-                 }, {
-                     'name': 'Concept Main Streets',
-                     'url': '//library.oregonmetro.gov/rlisdiscovery/concept_main_streets.zip',
-                     'type': 'shapefile',
-                     'symbolField': 'MAINSTEET',
-                     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/concept_main_streets.png',
-                     'source': 'RLIS',
-                     'theme': 'Planning'
-                 },
+                      'name': 'Concept Centers',
+                      'url': '//library.oregonmetro.gov/rlisdiscovery/concept_centers.zip',
+                      'type': 'shapefile',
+                      'symbolField': 'NAME',
+                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/concept_centers.png',
+                      'source': 'RLIS',
+                      'theme': 'Planning'
+                  }, {
+                      'name': 'Concept Corridors',
+                      'url': '//library.oregonmetro.gov/rlisdiscovery/concept_corridors.zip',
+                      'type': 'shapefile',
+                      'symbolField': 'CORRIDOR',
+                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/concept_corridors.png',
+                      'source': 'RLIS',
+                      'theme': 'Planning'
+                  }, {
+                      'name': 'Concept Main Streets',
+                      'url': '//library.oregonmetro.gov/rlisdiscovery/concept_main_streets.zip',
+                      'type': 'shapefile',
+                      'symbolField': 'MAINSTEET',
+                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/concept_main_streets.png',
+                      'source': 'RLIS',
+                      'theme': 'Planning'
+                  },
                  {
                      'name': 'Concept Station Communities',
                      'url': '//library.oregonmetro.gov/rlisdiscovery/concept_station_communities.zip',
@@ -801,34 +715,34 @@
                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/bike_routes.png',
                      'source': 'RLIS',
                      'theme': 'Transit',
-                     'level':2,
+                     'level': 2,
                      'requireToken': true
                  },
                                   {
-                     'name': 'Light Rail Lines and Stops Tiles',
-                     'url': '//gis.oregonmetro.gov/services/Transit/LRT/tilejson',
-                     'type': 'tilejson',
-                     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/lrt_line.png',
-                     'source': 'RLIS',
-                     'theme': 'Transit',
-                     'zIndex': 86
-                 }, {
-                     'name': 'Light Rail Stops',
-                     'url': '//library.oregonmetro.gov/rlisdiscovery/lrt_stop.zip',
-                     'type': 'shapefile',
-                     'symbolField': 'TYPE',
-                     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/lrt_stop.png',
-                     'source': 'RLIS',
-                     'theme': 'Transit'
-                 }, {
-                     'name': 'Park and Rides',
-                     'url': '//library.oregonmetro.gov/rlisdiscovery/parkride.zip',
-                     'type': 'shapefile',
-                     'symbolField': 'STATUS',
-                     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/parkride.png',
-                     'source': 'RLIS',
-                     'theme': 'Transit'
-                 },
+                                      'name': 'Light Rail Lines and Stops Tiles',
+                                      'url': '//gis.oregonmetro.gov/services/Transit/LRT/tilejson',
+                                      'type': 'tilejson',
+                                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/lrt_line.png',
+                                      'source': 'RLIS',
+                                      'theme': 'Transit',
+                                      'zIndex': 86
+                                  }, {
+                                      'name': 'Light Rail Stops',
+                                      'url': '//library.oregonmetro.gov/rlisdiscovery/lrt_stop.zip',
+                                      'type': 'shapefile',
+                                      'symbolField': 'TYPE',
+                                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/lrt_stop.png',
+                                      'source': 'RLIS',
+                                      'theme': 'Transit'
+                                  }, {
+                                      'name': 'Park and Rides',
+                                      'url': '//library.oregonmetro.gov/rlisdiscovery/parkride.zip',
+                                      'type': 'shapefile',
+                                      'symbolField': 'STATUS',
+                                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/parkride.png',
+                                      'source': 'RLIS',
+                                      'theme': 'Transit'
+                                  },
                   {
                       'name': 'Railroad',
                       'url': '//library.oregonmetro.gov/rlisdiscovery/railroad.zip',
@@ -885,5 +799,4 @@
                        'theme': 'Water',
                        'zIndex': 75
                    }
-    ]
-}
+    );

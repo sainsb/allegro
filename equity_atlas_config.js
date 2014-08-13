@@ -834,9 +834,9 @@ config.layers.push(
         }, 
         "name": "Number of Languages Spoken K-12 Student Body - Points", 
         "popupTemplate": "<b>School Name: </b>{{NAME}}<br/><b>No. Languages Spoken (K-12 Student Body): </b>{{LANGUAGES}}", 
-        "source": "Equity Atlas", 
-        "symbolField": "LANGUAGES", 
-        "theme": "Education", 
+        "source": "Equity Atlas",
+        "symbolField": "LANGUAGES",
+        "theme": "Education",
         "type": "shapefile", 
         "url": "//gis.oregonmetro.gov/equityAtlas/data/vector/Schools.zip"
     }, 
@@ -846,19 +846,19 @@ config.layers.push(
                 {
                     "color": "#000", 
                     "fillColor": "#DE9019", 
-                    "radius": 13, 
+                    "radius": 5, 
                     "value": "Not Met"
                 }, 
                 {
                     "color": "#000", 
                     "fillColor": "#4DB452", 
-                    "radius": 13, 
+                    "radius": 5, 
                     "value": "Met"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
-        "name": "Schools attainment of Adequate Yearly Progress AYP  - Points", 
+        "name": "Schools attainment of Adequate Yearly Progress AYP - Points", 
         "popupTemplate": "<b>School Name: </b>{{NAME}}<br/><b>Annual Yearly Progress (AYP): </b>{{AYP}}", 
         "source": "Equity Atlas", 
         "symbolField": "AYP", 
@@ -874,7 +874,7 @@ config.layers.push(
                     "fillColor": "#ABA68E", 
                     "maxVal": 60, 
                     "minVal": 8, 
-                    "radius": 7, 
+                    "radius": 5, 
                     "value": "8 - 60%"
                 }, 
                 {
@@ -882,7 +882,7 @@ config.layers.push(
                     "fillColor": "#EEE8AA", 
                     "maxVal": 76, 
                     "minVal": 61, 
-                    "radius": 9, 
+                    "radius": 6, 
                     "value": "61 - 76%"
                 }, 
                 {
@@ -890,7 +890,7 @@ config.layers.push(
                     "fillColor": "#D1CF63", 
                     "maxVal": 87, 
                     "minVal": 77, 
-                    "radius": 11, 
+                    "radius": 7, 
                     "value": "77 - 87%"
                 }, 
                 {
@@ -898,7 +898,7 @@ config.layers.push(
                     "fillColor": "#8A7C34", 
                     "maxVal": 97, 
                     "minVal": 88, 
-                    "radius": 13, 
+                    "radius": 9, 
                     "value": "88 - 97%"
                 }
             ], 
@@ -1280,7 +1280,7 @@ config.layers.push(
                     "value": "2600 - 3302 Hours"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
         "name": "Locations of Community, Public, and School-Based Health Clinics for Uninsured and Low-Income Patients - Points", 
         "popupTemplate": "<b>Name: </b>{{NAME}}<br/><b>Address: </b>{{ADDRESSS}}<br/><b>City: </b>{{CITY}}<br/><b>Annual hours of operation: </b>{{Label}}", 
@@ -1822,7 +1822,7 @@ config.layers.push(
             "type": "classBreaks"
         }, 
         "name": "Rate of Cardiovascular Disease - Tracts", 
-        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Cardiovascular Disease Rate:</b>{{p_HeartDis}}%", 
+        "popupTemplate": "<b>Census Tract: </b>{{ID}}<br/><b>Cardiovascular Disease Rate: </b>{{p_HeartDis}}%", 
         "source": "Equity Atlas", 
         "symbolField": "p_HeartDis", 
         "theme": "Health Outcomes", 
@@ -2020,7 +2020,7 @@ config.layers.push(
                     "value": "121 to 170"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
         "name": "Air Quality: Number of Times Levels Above Benchmark - All Sources - Polygon", 
         "popupTemplate": "<b>Times Above Benchmark: </b>{{LABEL}}", 
@@ -2074,7 +2074,7 @@ config.layers.push(
                     "value": "121 to 170"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
         "name": "Air Quality: Number of Times Levels Above Benchmark - Road Sources - Polygon", 
         "popupTemplate": "<b>Times Above Benchmark: </b>{{LABEL}}", 
@@ -2128,7 +2128,7 @@ config.layers.push(
                     "value": "121 to 170"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
         "name": "Air Quality: Number of Times Levels Above Benchmark - Non-Road Sources - Polygon", 
         "popupTemplate": "<b>Times Above Benchmark: </b>{{LABEL}}", 
@@ -2182,7 +2182,7 @@ config.layers.push(
                     "value": "121 to 170"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
         "name": "Air Quality: Number of Times Levels Above Benchmark - Residential Wood Burning - Polygon", 
         "popupTemplate": "<b>Times Above Benchmark: </b>{{LABEL}}", 
@@ -2236,7 +2236,7 @@ config.layers.push(
                     "value": "121 to 170"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
         "name": "Air Quality: Number of Times Levels Above Benchmark - Point Sources - Polygon", 
         "popupTemplate": "<b>Times Above Benchmark: </b>{{LABEL}}", 
@@ -2290,7 +2290,7 @@ config.layers.push(
                     "value": "121 to 170"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
         "name": "Air Quality: Number of Times Levels Above Benchmark - Area Sources - Polygon", 
         "popupTemplate": "<b>Times Above Benchmark: </b>{{LABEL}}", 
@@ -3412,7 +3412,7 @@ config.layers.push(
                     "value": "Bus & Streetcar"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
         "name": "Public Transit Stop Safety Amenities - Curbcuts - Points", 
         "popupTemplate": "<b>Stop Name: </b>{{STOP_NAME}}<br/><b>Jurisdiction: </b>{{JURISDIC}}<br/><b>Stop Type: </b>{{TYPE}}", 
@@ -3450,7 +3450,7 @@ config.layers.push(
                     "value": "Bus & Streetcar"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
         "name": "Public Transit Stop Safety Amenities - Sidewalks - Points", 
         "popupTemplate": "<b>Stop Name: </b>{{STOP_NAME}}<br/><b>Jurisdiction: </b>{{JURISDIC}}<br/><b>Stop Type: </b>{{TYPE}}", 
@@ -3482,7 +3482,7 @@ config.layers.push(
                     "value": "Car - Bicycle"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
         "name": "Transportation Safety: 2010 ODOT Crash Data fatalities - Points", 
         "popupTemplate": "", 
@@ -3502,7 +3502,7 @@ config.layers.push(
                     "value": "Car - Car Crash"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
         "name": "Transportation Safety: 2010 ODOT Crash Data car-car incidents - Points", 
         "popupTemplate": "", 
@@ -3522,7 +3522,7 @@ config.layers.push(
                     "value": "Car - Pedestrian Crash"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
         "name": "Transportation Safety: 2010 ODOT Crash Data car-pedestrian incidents - Points", 
         "popupTemplate": "", 
@@ -3542,7 +3542,7 @@ config.layers.push(
                     "value": "Car Bicycle Crash"
                 }
             ], 
-            "type": "uniqueValues"
+            "type": "uniqueValue"
         }, 
         "name": "Transportation Safety: 2010 ODOT Crash Data car-bicycle incidents - Points", 
         "popupTemplate": "", 

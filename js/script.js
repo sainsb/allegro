@@ -1,7 +1,8 @@
 ﻿
 
-//note that 'this' refers to the owner of the method in which we are located
-//oftentimes this works out, but in other cases.. we refer to the global, static app object.
+//note that 'this' is used when able. 'this' refers to the owner of the method in which we are located
+//otherwise we assume that it is safe to refer to the global, static App object.
+
 var map = null;
 
 var App = {
@@ -56,6 +57,7 @@ var App = {
             $('#dataModal').on('shown.bs.modal', function () {
 
                 $("img.lazy").lazyload({
+                    //effect: "fadeIn",
                     container: $(".tab-content")
                 });
 
@@ -113,7 +115,7 @@ var App = {
             var layer = App.util.getLayerById(id);
             if ($(this).is(':checked')) {
                 //we'll need to bring stuff to back and front
-                if (layer.type == LAYER_TYPES.geojson || layer.type == LAYER_TYPES.shapefile) {
+                if (layer.type == this.LAYER_TYPES.geojson || layer.type == this.LAYER_TYPES.shapefile) {
                     layer.mapLayer.addTo(map).bringToFront();
                 } else {
                     layer.mapLayer.addTo(map);
@@ -158,36 +160,6 @@ var App = {
             layer.mapLayer.setStyle({
                 opacity: layer.strokeOpacity
             });
-        });
-
-        //Attach behavior to items in Add Data Modal
-        $('body').on('click','.img-block.layer', function () {
-            var id = $(this).find('img').attr('id').replace('img', '');
-            var layer = App.util.getLayerById(id);
-            if ($(this).hasClass('active')) {
-                $(this).removeClass('active');
-                map.removeLayer(layer.mapLayer);
-                $('#li' + id).remove();
-            }
-            else {
-                $(this).addClass('active');
-                if (typeof (layer.mapLayer) != 'undefined') {
-                    map.addLayer(layer.mapLayer);
-                    switch(layer.type){
-                        case App.LAYER_TYPES.GEOJSON:
-                        case App.LAYER_TYPES.SHAPEFILE:
-                            $('#ulVectorLegend').prepend(layer.HTMLLegend);
-                            break;
-                        case App.LAYER_TYPES.TILELAYER:
-                        case App.LAYER_TYPES.TILEJSON:
-                            $('#ulTileLegend').prepend(layer.HTMLLegend);
-                            break;
-                    }
-                }
-                else {
-                    App.data.add(layer);
-                }
-            }
         });
 
         this.map = new L.Map('map', {
@@ -267,8 +239,13 @@ var App = {
                 options.zIndex = (typeof (layer.zIndex) != 'undefined') ? layer.zIndex : 70;
                 options.attribution = (typeof (layer.source) != 'undefined') ? layer.source : '';
                 options.maxZoom = (typeof(layer.maxZoom) != 'undefined') ? layer.maxZoom : 19;
-                options.minZoom = (typeof(layer.maxZoom) != 'undefined') ? layer.maxZoom : 0;
+                options.minZoom = (typeof(layer.maxZoom) != 'undefined') ? layer.minZoom : 0;
                 options.opacity = (typeof(layer.fillOpacity) != 'undefined') ? layer.fillOpacity : (typeof(layer.opacity) != 'undefined') ? layer.opacity : 1;
+
+                //This is too custom for comfort
+                if (typeof (layer.requireToken) != 'undefined') {
+                    layer.url += '?token=' + config.token;
+                }
 
                 if (typeof(layer.subdomains) != 'undefined') {
                     options.subdomains = layer.subdomains;
@@ -320,7 +297,7 @@ var App = {
 
             geoJSON : function(layer){
                 $.getJSON(layer.url, function (data) {
-                    parseGeoJSON(data, layer);
+                    App.data.parse.geoJSON(data, layer);
                 });
             },
 
@@ -463,13 +440,12 @@ var App = {
                 //init sortable functionality in TOC for this item
                 $('.sortable').sortable().bind('sortupdate', function(e, ui) {
                     //return false;
-                    handleSort(e, ui);
+                    App.util.handleSort(e, ui);
                 });
 
                 //Add geojson layer to map
                 layer.mapLayer = geoJson.addTo(map);
             }
-
         }
     },
 
@@ -634,7 +610,7 @@ var App = {
     },
 
     styleFeatures : function(feature, layer){
-
+  
         var style = {
             fillColor: App.DEFAULT_FILLCOLOR,
             fillOpacity: layer.fillOpacity,
@@ -739,6 +715,50 @@ var App = {
             this.$ulSourceTabs.append('  <li><a href="#customData" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Custom</a></li>')
 
             this.$ulSourceTabs.next().append("<div class='tab-pane fade' id='customData'>Data Source: &nbsp; <select class='selectpicker' id='selCustomData' data-style='btn-default' data-width='180'><option value='0'>GeoJSON</option><option value='1'>ArcGIS Server</option><option value='2'>Tile Layer</option><option value='3'>Shapefile</option><option value='4'>CSV</option></select></div>");
+
+            $('#ulSourceTabs > li > a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                $("img.lazy").lazyload({
+                    //effect: "fadeIn",
+                    container: $(".tab-content")
+                });
+            })
+
+            this.attachEventHandler();
+        },
+
+        attachEventHandler : function(){
+            //Attach behavior to items in Add Data Modal
+            $('.img-block.layer').on('click', function () {
+                var id = $(this).find('img').attr('id').replace('img', '');
+                var layer = App.util.getLayerById(id);
+                if ($(this).hasClass('active')) {
+                    $(this).removeClass('active');
+                    map.removeLayer(layer.mapLayer);
+                    $('#li' + id).remove();
+                }
+                else {
+                    $(this).addClass('active');
+                    if (typeof (layer.mapLayer) != 'undefined') {
+                        map.addLayer(layer.mapLayer);
+                        switch(layer.type){
+                            case App.LAYER_TYPES.GEOJSON:
+                            case App.LAYER_TYPES.SHAPEFILE:
+                                //apply context menu,
+                                //wire up behavior of close button.
+                                //the layer.HTMLLegend is a div not an li.
+                                $('#ulVectorLegend').prepend(layer.HTMLLegend);
+                                break;
+                            case App.LAYER_TYPES.TILELAYER:
+                            case App.LAYER_TYPES.TILEJSON:
+                                $('#ulTileLegend').prepend(layer.HTMLLegend);
+                                break;
+                        }
+                    }
+                    else {
+                        App.data.add(layer);
+                    }
+                }
+            });
         },
 
         /* Render a tab for a given source 
@@ -821,6 +841,7 @@ var App = {
             elem += " class='lazy' data-original='" + thumb + "' alt='" + layer.name + "' id='img" + id + "'/></div>";
 
             return elem;
+
         }
     },
 
@@ -846,6 +867,7 @@ var App = {
 
                 if (basemap.active == true) {
                     imgBlockText += ' active';
+                    
                     App.data.load.tileLayer(basemap);
                 }
 
@@ -854,6 +876,11 @@ var App = {
                 $('#' + theme).append(imgBlockText);
             }
 
+            this.attachEventHandlers();
+   
+        },
+
+        attachEventHandlers: function () {
             $('.img-block.basemap').on('click', function () {
                 var id = $(this).find('img').attr('id').replace('img', '');
 
@@ -864,18 +891,19 @@ var App = {
                 //handle multi-ply layers etc. etc.
 
                 //get existing basemap
-                var oldBasemap = $($('.img-block.basemap.active')[0]).removeClass('active').find('img').attr('id').replace('img','');
+                var oldBasemap = $($('.img-block.basemap.active')[0]).removeClass('active').find('img').attr('id').replace('img', '');
                 oldBasemap = App.util.getBasemapById(oldBasemap);
                 oldBasemap.active = false;
                 App.map.removeLayer(oldBasemap.mapLayer);
-		      
+
                 $(this).addClass('active');
                 if (typeof (basemap.mapLayer) != 'undefined') {
                     App.map.addLayer(basemap.mapLayer);
                 }
                 else {
                     basemap.zIndex = 0;
-                    App.map.maxZoom = (typeof basemap.maxZoom != 'undefined') ? basemap.maxZoom : 19;
+                    //App.map.maxZoom = (typeof basemap.maxZoom != 'undefined') ? basemap.maxZoom : 19;
+                    
                     App.data.load.tileLayer(basemap);
                 }
                 basemap.active = true;
@@ -890,7 +918,6 @@ var App = {
 		        }
 		    );
         }
-
     },
 
     symbolDialog : {
@@ -941,7 +968,9 @@ var App = {
 		            
                     //if a ramp hasn't been set, set it to the default ramp in the dropdown.
                     //set a ramp in the selGradient combobox
-                    App.symbolDialog.ramps.default();
+                    if ($($('#selGradient').children()[0]).is('b')) {
+                        App.symbolDialog.ramps.default();
+                    }
 
                     App.symbolDialog.legends.uniqueValues.refresh(layer);
                 });
@@ -956,26 +985,43 @@ var App = {
 
             var legend = App.legendFactory.renderHTMLLegendItems(layer);
 
+            //Just start from scratch on which tab each time
+            $('#symbolModal .tab-content > div').each(function (index) { $(this).removeClass('active in') });
+
             //Set to correct tab
-            if (layer.legend.type==App.RENDERER.SINGLE_SYMBOL) {
-                //haxxor - bootstrap tabs don't work right...
-                //the uniqueValues tab is still active.. I can't make it not active w/out breaking this thing...
-                $('#symbolTabs > li > a').first().tab('show');
-                $('#singleFill').addClass('active in');
+            switch (layer.legend.type) {
+                case App.RENDERER.SINGLE_SYMBOL:
+                   
+                    //haxxor - bootstrap tabs don't work right...
+                    //the uniqueValues tab is still active.. I can't make it not active w/out breaking this thing...
+                    
+                    $('#symbolTabs > li > a').first().tab('show');
+                    $('#singleFill').addClass('active in');
 
-                //match colors and stroke
-                $('#_colSingleFillColor').colorpicker('setValue', layer.legend.symbols[0].fillColor);
-                $('#_colSingleColor').colorpicker('setValue', layer.legend.symbols[0].color);
-                $('#rngSingleWeight').val(layer.legend.symbols[0].weight);
+                    //match colors and stroke
+                    $('#_colSingleFillColor').colorpicker('setValue', layer.legend.symbols[0].fillColor);
+                    $('#_colSingleColor').colorpicker('setValue', layer.legend.symbols[0].color);
+                    $('#rngSingleWeight').val(layer.legend.symbols[0].weight);
 
-                //show the legend item
-                $('#singleLegend').empty().append(legend);
-            } else if (layer.legend.type == App.RENDERER.UNIQUE_VALUE {
-                //recreate the legend in the dialog???
-                
-                $('#catLegend').empty().append(legend);
-                $('#symbolTabs > li > a').first().next().tab('show');
-                $('#singleFill').addClass('active in');
+                    //show the legend item
+                    $('#singleLegend').empty().append(legend);
+                    break;
+
+                case App.RENDERER.UNIQUE_VALUE:
+
+                    //recreate the legend in the dialog???
+                    $('#uniqueValuesLegend').empty().append(legend);
+                    $('#symbolTabs > li:nth-child(2) > a').tab('show');
+                    $('#uniqueValues').addClass('active in');
+                    break;
+                case App.RENDERER.CLASS_BREAKS:
+                    
+                    //match number of classes, min, max and labels
+                    
+                    $('#classBreaksLegend').empty().append(legend);
+                    $('#symbolTabs > li:nth-child(3) > a').tab('show');
+                    $('#classBreaks').addClass('active in');
+                    break;
             }
 
             $('#_colSingleFillColor, #_colSingleColor').on('changeColor', function (ev) {
@@ -1024,7 +1070,7 @@ var App = {
         },
 
         /* Applies chosen symbology to layer */
-        apply : function(layer, newSymbol, renderer, ramp, legendItem){
+        apply : function(layer, newSymbol, renderer, legendItem, ramp){
 
             layer.legend.symbols = newSymbol;
             layer.legend.type = renderer;
@@ -1042,12 +1088,8 @@ var App = {
             $('#leg' + id + ' .legend-item').remove();
             $('#leg' + id).append(legendItem);
 
-            layer.HTMLLegend = $('#li' + id).clone().html();
-
-            //this is a problem what with the new legends...
-            //layer.HTMLLegend = '<div class="legend" id="leg' + id + '">' + HTMLLegend + '</div';
-           
-
+            //slight haxxorz to get outerhtml.
+            layer.HTMLLegend = $('#li' + id).clone().wrap('<p>').parent().html();
         },
 
         ramps: {
@@ -1138,11 +1180,15 @@ var App = {
 
                     $('#btnApplySymbol').off().on('click', function () {
 
-                        App.symbolDialog.apply(layer, [phantomSymbol], RENDERER.SINGLE_SYMBOL, legendItem);
+                        if (typeof (layer.symbolField) != 'undefined') {
+                            layer.symbolField = undefined;
+                        }
+
+                        App.symbolDialog.apply(layer, [phantomSymbol], App.RENDERER.SINGLE_SYMBOL, legendItem);
 
                     });
 
-                    $('#catLegend').empty();
+                    $('#uniqueValuesLegend').empty();
                 }
             },
 
@@ -1218,7 +1264,7 @@ var App = {
 
                     var legendItems = App.legendFactory.renderHTMLLegendItems({ name : layer.name,geom: layer.geom, legend: {symbols: phantomSymbols }});
 
-                    $('#catLegend').empty().html(legendItems);
+                    $('#uniqueValuesLegend').empty().html(legendItems);
 
                     $('#btnApplySymbol').off().on('click', function () {
 
@@ -1226,7 +1272,7 @@ var App = {
                         layer.symbolField = symbolField;
                         layer.scale = scale;
 
-                        App.symbolDialog.apply(layer, phantomSymbols, App.RENDERER.UNIQUE_VALUE, ramp, legendItems);
+                        App.symbolDialog.apply(layer, phantomSymbols, App.RENDERER.UNIQUE_VALUE, legendItems, ramp);
                     });
                 }
             },
@@ -1283,9 +1329,26 @@ var App = {
                             } },
                         {
                             text: 'GeoJSON', action: function () {
-                                window.open("data:text/plain;charset=utf-8," + JSON.stringify(layer.mapLayer.toGeoJSON()));
-                            } },
-                        {text: 'CSV', action: function() {
+                                var foo = JSON.stringify(layer.mapLayer.toGeoJSON());
+                                var goo = new Blob([foo], { type: 'application/octet' });
+                                
+                                if (window.navigator.msSaveBlob) {
+                                    window.navigator.msSaveBlob(goo, id + '.geojson');
+                                }
+                                else {
+                                    var blobUrl = URL.createObjectURL(goo);
+                                    var a = document.createElement("a");
+                                    document.body.appendChild(a);
+                                    a.style = "display: none";
+                                    a.href = blobUrl;
+                                    a.download = id + '.geojson';
+                                    a.click();
+                                    URL.revokeObjectURL(blobUrl);
+                                }
+                            } 
+                        },
+                        {
+                            text: 'CSV', action: function () {
                             var str = App.util.export2CSV(layer.mapLayer._layers, true);
                             //DBF files are generally in the ISO8859-1
                             //http://gis.stackexchange.com/questions/3529/which-character-encoding-is-used-by-the-dbf-file-in-shapefiles
@@ -1438,7 +1501,7 @@ var App = {
 
         getLayerId : function(name){
             //name need lots more here to make safe
-            return name.replace(/[\s,]/g, '_');
+            return name.replace(/[\s,\/\:]/g, '_');
         },
 
         getLayerById : function(id) {
@@ -1517,127 +1580,137 @@ var App = {
             }
 
             return str;
-        }   
+        },
+
+        export2GeoJSON : function(blob, options){
+            
+        },
+
+        handleSort: function (e, ui) {
+            
+                var dropped = ui.item;
+
+                var trgid = dropped[0].id;
+                var id = trgid.replace('li', '');
+                var layer = this.getLayerById(id);
+                layer.mapLayer.bringToFront();
+                //var trgkey = trgid.substring(2, trgid.length);
+
+                //if (dropped[0].previousSibling == null) { //At top
+                //    var srcid = dropped[0].nextSibling.id;
+                //    var srckey = srcid.substring(2, srcid.length);
+                //    var srcz = maplayers.layers[srckey].source.options.zIndex;
+                //    var newz = srcz + 1;
+                //} else if (dropped[0].nextSibling == null) {
+                //    srcid = dropped[0].previousSibling.id;
+                //    srckey = srcid.substring(2, srcid.length);
+                //    srcz = maplayers.layers[srckey].source.options.zIndex;
+                //    newz = srcz - 1;
+                //} else {
+                //    //somehow iterate all the zindex values for this group.
+
+
+                //    var topsrcid = dropped[0].previousSibling.id;
+                //    var topsrckey = topsrcid.substring(2, topsrcid.length);
+                //    var topsrcz = maplayers.layers[topsrckey].source.options.zIndex;
+                //    var botsrcid = dropped[0].nextSibling.id;
+                //    var botsrckey = botsrcid.substring(2, botsrcid.length);
+                //    var botsrcz = maplayers.layers[botsrckey].source.options.zIndex;
+                //    newz = botsrcz + (Math.abs(topsrcz - botsrcz) / 2);
+                //}
+
+                //maplayers.layers[trgkey].source.options.zIndex = newz;
+
+                //if (map.hasLayer(maplayers.layers[trgkey].source)) {
+                //    map.removeLayer(maplayers.layers[trgkey].source);
+                //    map.addLayer(maplayers.layers[trgkey].source);
+                //}
+
+                //map._resetView(map.getCenter(), map.getZoom(), true);
+                //if prev element is null then at top
+
+                //if nextsibling element is null then at bottom.
+
+                //get prev element id, zIndex increment 1;
+        }
+
     }
 }
 
-        var QueryString = function () {
-            var query_string = {};
-            var query = window.location.search.substring(1);
-            var vars = query.split("&");
-            for (var i = 0; i < vars.length; i++) {
-                var pair = vars[i].split("=");
-                // If first entry with this name
-                if (typeof query_string[pair[0]] === "undefined") {
-                    query_string[pair[0]] = pair[1];
-                    // If second entry with this name
-                } else if (typeof query_string[pair[0]] === "string") {
-                    var arr = [query_string[pair[0]], pair[1]];
-                    query_string[pair[0]] = arr;
-                    // If third or later entry with this name
-                } else {
-                    query_string[pair[0]].push(pair[1]);
-                }
-            }
-            return query_string;
-        }();
+var QueryString = function () {
+    var query_string = {};
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split("=");
+        // If first entry with this name
+        if (typeof query_string[pair[0]] === "undefined") {
+            query_string[pair[0]] = pair[1];
+            // If second entry with this name
+        } else if (typeof query_string[pair[0]] === "string") {
+            var arr = [query_string[pair[0]], pair[1]];
+            query_string[pair[0]] = arr;
+            // If third or later entry with this name
+        } else {
+            query_string[pair[0]].push(pair[1]);
+        }
+    }
+    return query_string;
+}();
     
-        Storage.prototype.setObject = function (key, value) {
-            this.setItem(key, JSON.stringify(value));
+Storage.prototype.setObject = function (key, value) {
+    this.setItem(key, JSON.stringify(value));
+}
+
+Storage.prototype.getObject = function (key) {
+    var value = this.getItem(key);
+    return value && JSON.parse(value);
+}
+
+String.prototype.toProperCase = function () {
+    return this.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
+};
+
+function isNumeric(n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+// implement JSON.stringify serialization
+JSON.stringify = JSON.stringify || function (obj) {
+    var t = typeof (obj);
+    if (t != "object" || obj === null) {
+        // simple data type
+        if (t == "string") obj = '"' + obj + '"';
+        return String(obj);
+    }
+    else {
+        // recurse array or object
+        var n, v, json = [], arr = (obj && obj.constructor == Array);
+        for (n in obj) {
+            v = obj[n]; t = typeof (v);
+            if (t == "string") v = '"' + v + '"';
+            else if (t == "object" && v !== null) v = JSON.stringify(v);
+            json.push((arr ? "" : '"' + n + '":') + String(v));
         }
+        return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+    }
+};
 
-        Storage.prototype.getObject = function (key) {
-            var value = this.getItem(key);
-            return value && JSON.parse(value);
-        }
+function _(msg) {
+    console.log(msg);
+}
 
-        String.prototype.toProperCase = function () {
-            return this.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
-        };
+//function str2ab(str) {
+//    var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+//    var bufView = new Uint16Array(buf);
+//    for (var i = 0, strLen = str.length; i < strLen; i++) {
+//        bufView[i] = str.charCodeAt(i);
+//    }
+//    return buf;
+//}
 
-
-        function isNumeric(n) {
-            return !isNaN(parseFloat(n)) && isFinite(n);
-        }
-
-
-
-
-
-        // implement JSON.stringify serialization
-        JSON.stringify = JSON.stringify || function (obj) {
-            var t = typeof (obj);
-            if (t != "object" || obj === null) {
-                // simple data type
-                if (t == "string") obj = '"' + obj + '"';
-                return String(obj);
-            }
-            else {
-                // recurse array or object
-                var n, v, json = [], arr = (obj && obj.constructor == Array);
-                for (n in obj) {
-                    v = obj[n]; t = typeof (v);
-                    if (t == "string") v = '"' + v + '"';
-                    else if (t == "object" && v !== null) v = JSON.stringify(v);
-                    json.push((arr ? "" : '"' + n + '":') + String(v));
-                }
-                return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
-            }
-        };
-
-        function _(msg) {
-            console.log(msg);
-        }
-
-        function handleSort(e, ui) {
-            var dropped = ui.item;
-
-            var trgid = dropped[0].id;
-            var id = trgid.replace('li', '');
-            var layer = getLayerById(id);
-            layer.mapLayer.bringToFront();
-            //var trgkey = trgid.substring(2, trgid.length);
-
-            //if (dropped[0].previousSibling == null) { //At top
-            //    var srcid = dropped[0].nextSibling.id;
-            //    var srckey = srcid.substring(2, srcid.length);
-            //    var srcz = maplayers.layers[srckey].source.options.zIndex;
-            //    var newz = srcz + 1;
-            //} else if (dropped[0].nextSibling == null) {
-            //    srcid = dropped[0].previousSibling.id;
-            //    srckey = srcid.substring(2, srcid.length);
-            //    srcz = maplayers.layers[srckey].source.options.zIndex;
-            //    newz = srcz - 1;
-            //} else {
-            //    //somehow iterate all the zindex values for this group.
-
-
-            //    var topsrcid = dropped[0].previousSibling.id;
-            //    var topsrckey = topsrcid.substring(2, topsrcid.length);
-            //    var topsrcz = maplayers.layers[topsrckey].source.options.zIndex;
-            //    var botsrcid = dropped[0].nextSibling.id;
-            //    var botsrckey = botsrcid.substring(2, botsrcid.length);
-            //    var botsrcz = maplayers.layers[botsrckey].source.options.zIndex;
-            //    newz = botsrcz + (Math.abs(topsrcz - botsrcz) / 2);
-            //}
-
-            //maplayers.layers[trgkey].source.options.zIndex = newz;
-
-            //if (map.hasLayer(maplayers.layers[trgkey].source)) {
-            //    map.removeLayer(maplayers.layers[trgkey].source);
-            //    map.addLayer(maplayers.layers[trgkey].source);
-            //}
-
-            //map._resetView(map.getCenter(), map.getZoom(), true);
-            //if prev element is null then at top
-
-            //if nextsibling element is null then at bottom.
-
-            //get prev element id, zIndex increment 1;
-
-        }
 
 //document.load
-        $(function () {
+$(function () {
             App.init();
         });
