@@ -71,11 +71,16 @@ def processMaptip(t):
 
 for i in poo['Configuration']['categories']['category']:
     cat = i['name']
-    print bcolors.HEADER+cat
+    print "<h3>"+cat+"</h3>"
     for ind in i['indicators']['indicator']:
         #if ind['type']=='raster':
             #print bcolors.OKGREEN+'\t'+ind['name']
+
+        if ind['type']=='raster':
+            print "<input type='checkbox' class='indicator' id='chk"+ind['filename']+"'>"+ind['name']+"<br/>"
+
         if ind['type']=='vector':
+            continue
             #print bcolors.OKBLUE+'\t'+ind['name']
             t = xmltodict.parse(ind['style'])
             legend = {'symbols':[]}

@@ -115,7 +115,7 @@ var App = {
             var layer = App.util.getLayerById(id);
             if ($(this).is(':checked')) {
                 //we'll need to bring stuff to back and front
-                if (layer.type == this.LAYER_TYPES.geojson || layer.type == this.LAYER_TYPES.shapefile) {
+                if (layer.type == App.LAYER_TYPES.geojson || layer.type == App.LAYER_TYPES.shapefile) {
                     layer.mapLayer.addTo(map).bringToFront();
                 } else {
                     layer.mapLayer.addTo(map);
@@ -203,6 +203,8 @@ var App = {
                 App.data.add(layer);
             }
         }
+
+        this.util.dragHandler();
     },
 
     data: {
@@ -235,7 +237,6 @@ var App = {
             tileLayer : function(layer){
                 
                 var options = {};
-
                 options.zIndex = (typeof (layer.zIndex) != 'undefined') ? layer.zIndex : 70;
                 options.attribution = (typeof (layer.source) != 'undefined') ? layer.source : '';
                 options.maxZoom = (typeof(layer.maxZoom) != 'undefined') ? layer.maxZoom : 19;
@@ -278,7 +279,7 @@ var App = {
 
                     layer.HTMLLegend = legend;
 
-                    App.contextMenu.apply(id);
+                    App.contextMenu.apply(layer);
 
                     //beware that this is based on my own spec of the tilejson
                     //doesn't conform to other tilejson spec.
@@ -378,7 +379,7 @@ var App = {
     	
                 //assemble the legend for this layer
                 App.legendFactory.init(layer, data);
-
+                
                 var _onEachFeature = (typeof(layer.popupTemplate) != 'undefined') ?
                      function(feature, slayer) {
                          var thm = Mustache.render(layer.popupTemplate, feature.properties);
@@ -435,13 +436,18 @@ var App = {
 
                 $('#ulVectorLegend').prepend(layer.HTMLLegend);
 
-                App.contextMenu.apply(id);
-
+                App.contextMenu.apply(layer);
+                
                 //init sortable functionality in TOC for this item
                 $('.sortable').sortable().bind('sortupdate', function(e, ui) {
                     //return false;
-                    App.util.handleSort(e, ui);
+                    App.util.sortHandler(e, ui);
                 });
+
+                //if it's something that's been dropped
+                if (typeof (config.layers[App.util.getLayerId(layer.name)]) == 'undefined') {
+                    config.layers.push(layer);
+                }
 
                 //Add geojson layer to map
                 layer.mapLayer = geoJson.addTo(map);
@@ -711,10 +717,10 @@ var App = {
                 $('#' + source + '_' + theme).append(elem);
             }
 
-            //Put the custom tab at the end.
-            this.$ulSourceTabs.append('  <li><a href="#customData" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Custom</a></li>')
+            ////Put the custom tab at the end.
+            //this.$ulSourceTabs.append('  <li><a href="#customData" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Custom</a></li>')
 
-            this.$ulSourceTabs.next().append("<div class='tab-pane fade' id='customData'>Data Source: &nbsp; <select class='selectpicker' id='selCustomData' data-style='btn-default' data-width='180'><option value='0'>GeoJSON</option><option value='1'>ArcGIS Server</option><option value='2'>Tile Layer</option><option value='3'>Shapefile</option><option value='4'>CSV</option></select></div>");
+            //this.$ulSourceTabs.next().append("<div class='tab-pane fade' id='customData'>Data Source: &nbsp; <select class='selectpicker' id='selCustomData' data-style='btn-default' data-width='180'><option value='0'>GeoJSON</option><option value='1'>ArcGIS Server</option><option value='2'>Tile Layer</option><option value='3'>Shapefile</option><option value='4'>CSV</option></select></div>");
 
             $('#ulSourceTabs > li > a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 $("img.lazy").lazyload({
@@ -867,7 +873,7 @@ var App = {
 
                 if (basemap.active == true) {
                     imgBlockText += ' active';
-                    
+                    basemap.zIndex = 0;
                     App.data.load.tileLayer(basemap);
                 }
 
@@ -1287,9 +1293,8 @@ var App = {
 
     contextMenu : {
 
-        apply: function(id){
-            _(id);
-            var layer = App.util.getLayerById(id);
+        apply: function(layer){
+            var id = App.util.getLayerId(layer.name);
 
             context.init({
                 fadeSpeed: 100,
@@ -1318,7 +1323,10 @@ var App = {
                         function(e) {
                             App.util.removeLayer(id);
                         }
-                },
+                });
+
+            if (layer.type == 'shapefile' || layer.type == 'geojson') {
+                contents.push(
                 {
                     text: "Download...",
                     subMenu:
@@ -1349,36 +1357,40 @@ var App = {
                         },
                         {
                             text: 'CSV', action: function () {
-                            var str = App.util.export2CSV(layer.mapLayer._layers, true);
-                            //DBF files are generally in the ISO8859-1
-                            //http://gis.stackexchange.com/questions/3529/which-character-encoding-is-used-by-the-dbf-file-in-shapefiles
-                            window.open("data:text/plain;charset=iso-8859-1," + escape(str));
-                        }
+                                var str = App.util.export2CSV(layer.mapLayer._layers, true);
+                                //DBF files are generally in the ISO8859-1
+                                //http://gis.stackexchange.com/questions/3529/which-character-encoding-is-used-by-the-dbf-file-in-shapefiles
+                                window.open("data:text/plain;charset=iso-8859-1," + escape(str));
+                            }
                         }
                     ]
                 },
-                {
-                    text: 'Zoom To',
-                    action:
-                        function(e) {
-                            map.fitBounds(layer.mapLayer.getBounds());
-                        }
-                },
-                {
-                    text: "Select...",
-                    subMenu:
-                    [
-                        {
-                            text: 'By Attributes...', action: function () {
-                                window.open(layer.url);
-                            } },
-                        {
-                            text: 'By Location...', action: function () {
-                                window.open("data:text/plain;charset=utf-8," + JSON.stringify(layer.mapLayer.toGeoJSON()));
-                            } },
-                    ]
-                }
-            );
+                 {
+                     text: 'Zoom To',
+                     action:
+                         function (e) {
+                             map.fitBounds(layer.mapLayer.getBounds());
+                         }
+                 }
+                );
+            }
+           // contents.push(
+               
+                //{
+                //    text: "Select...",
+                //    subMenu:
+                //    [
+                //        {
+                //            text: 'By Attributes...', action: function () {
+                //                window.open(layer.url);
+                //            } },
+                //        {
+                //            text: 'By Location...', action: function () {
+                //                window.open("data:text/plain;charset=utf-8," + JSON.stringify(layer.mapLayer.toGeoJSON()));
+                //            } },
+                //    ]
+                //}
+           // );
 
             if (layer.type == 'shapefile' || layer.type == 'geojson') {
                 contents.push({
@@ -1586,7 +1598,7 @@ var App = {
             
         },
 
-        handleSort: function (e, ui) {
+        sortHandler: function (e, ui) {
             
                 var dropped = ui.item;
 
@@ -1632,8 +1644,54 @@ var App = {
                 //if nextsibling element is null then at bottom.
 
                 //get prev element id, zIndex increment 1;
-        }
+        },
 
+        dragHandler: function(){
+            var dropbox = document.getElementById("map");
+            dropbox.addEventListener("dragenter", dragenter, false);
+            dropbox.addEventListener("dragover", dragover, false);
+            dropbox.addEventListener("drop", drop, false);
+            dropbox.addEventListener("dragleave",function(){map.scrollWheelZoom.enable();},false);
+            function dragenter(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                map.scrollWheelZoom.disable();
+            }
+ 
+            function dragover(e) {
+                e.stopPropagation();
+                e.preventDefault();
+            } 
+
+            function drop(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                map.scrollWheelZoom.enable();
+                var dt = e.dataTransfer;
+                var files = dt.files;
+ 
+                var i = 0;
+                var len = files.length;
+                if(!len){return}
+                while (i < len) {
+                    //we're going to assume zipped shapefile for the ever so brief moment.
+                    reader = new FileReader();
+                    reader.onload = function (e) {
+                        var ext;
+                        if (reader.readyState !== 2 || reader.error) {
+                            return;
+                        } else {
+                            shp(reader.result).then(function (data) {
+                                App.data.parse.geoJSON(data, {name:data.fileName, type: 'shapefile'});
+                            });
+                        }
+                    }
+                    // Load blob as Data URL
+                    reader.readAsArrayBuffer(files[i]);
+                    i++;
+                }
+            }
+        }
     }
 }
 
@@ -1699,16 +1757,6 @@ JSON.stringify = JSON.stringify || function (obj) {
 function _(msg) {
     console.log(msg);
 }
-
-//function str2ab(str) {
-//    var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
-//    var bufView = new Uint16Array(buf);
-//    for (var i = 0, strLen = str.length; i < strLen; i++) {
-//        bufView[i] = str.charCodeAt(i);
-//    }
-//    return buf;
-//}
-
 
 //document.load
 $(function () {

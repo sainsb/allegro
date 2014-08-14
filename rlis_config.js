@@ -135,6 +135,7 @@
                 'type': 'tilejson',
                 'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/fire_dst.png',
                 'source': 'RLIS',
+                'zIndex':45,
                 'theme': 'Boundary'
             },
             {
@@ -689,6 +690,14 @@
                      'url': '//library.oregonmetro.gov/rlisdiscovery/township.zip',
                      'type': 'shapefile',
                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/section.gif',
+                     'source': 'RLIS',
+                     'theme': 'Taxlots'
+                 },
+                 {
+                     'name': 'Quarter Townships',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/qtr_town.zip',
+                     'type': 'shapefile',
+                     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/qtrtownsm.gif',
                      'source': 'RLIS',
                      'theme': 'Taxlots'
                  },

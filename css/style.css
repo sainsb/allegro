@@ -37,9 +37,7 @@ vertical-align: top;
 }
 
  .img-block{
- transition-property: border-color;
- transition-duration: .2s;
-  transition-timing-function: linear;
+ 
   border-radius: 12px;
   border: 2px solid #eee;
   padding:7px;
@@ -49,7 +47,21 @@ vertical-align: top;
   position: relative;
   cursor:pointer;
   float: left;
-     overflow: hidden;
+  overflow: hidden;
+  -webkit-transition: all .1s linear;
+  -o-transition: all .1s linear;
+  -moz-transition: all .1s linear;
+  -ms-transition: all .1s linear;
+  -kthtml-transition: all .1s linear;
+  transition: all .1s linear;
+  }
+
+  .img-block:hover{
+  box-shadow: 0px 0px 2px 2px #ddd;
+  }
+
+  .img-block-tall{
+    height:174px;
   }
 
  .caption {
@@ -61,7 +73,7 @@ vertical-align: top;
   color:#222;
   border-bottom-right-radius: 9px;
   border-bottom-left-radius: 9px;
-  background-color:#FFF;
+  background-color:#fff;
   width: 95px;
   height: 45px;
   padding-left:6px;
@@ -71,6 +83,9 @@ vertical-align: top;
   z-index:10000;
 }
 
+  .caption-tall{
+height:95px;
+  }
 
  .img-block-m {
        width:209px;
@@ -99,9 +114,7 @@ vertical-align: top;
      border: 2px solid #0E613B
  }*/
 
-  .img-block:hover{
-  border-color:#BBB;
-  }
+
 
   .img-block.active{
   border:2px solid #6896AC;
@@ -117,7 +130,6 @@ opacity: 1;
 
 .caption.hover{
 background-color:#EEE;
-    transition: background-color 0.2s linear;
 }
 
 .palette {
