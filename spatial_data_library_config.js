@@ -8,7 +8,7 @@ config.layers.push(
     'icon': 'http://spatialdata.oregonexplorer.info/geoportal/catalog/skins/themes/blue/images/OE_Logo.gif',
     'thumb' : 'http://spatialdata.oregonexplorer.info/Metadata/Thumbnails/mpo_2013.GIF',
     'theme': 'Administrative',
-    'proxyUrl':'http://ben/simpleProxy/index.ashx?file='
+    'proxyUrl':'./index.ashx?file='
 },
 {
     'name': 'Urban Growth Boundaries',
