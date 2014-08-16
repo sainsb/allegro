@@ -57,7 +57,7 @@ var App = {
             $('#dataModal').on('shown.bs.modal', function () {
 
                 $("img.lazy").lazyload({
-                    //effect: "fadeIn",
+                    effect: "fadeIn",
                     container: $(".tab-content")
                 });
 
@@ -165,7 +165,7 @@ var App = {
         this.map = new L.Map('map', {
             center: new L.LatLng(45.44944, -122.67599),
             zoom: 10,
-            minZoom: 9,
+            minZoom: 3,
             maxZoom: 19,
             fullscreenControl: true
         });
@@ -315,8 +315,16 @@ var App = {
                 var xhr = new XMLHttpRequest(),
                         reader = new FileReader();
 
+                var url = '';
+                
+                if (typeof (layer.proxyUrl) != 'undefined') {
+                    url = layer.proxyUrl + encodeURIComponent(layer.url);
+                } else {
+                    url = layer.url;
+                }
+
                 //url_prefix = 'data/';
-                xhr.open("GET", layer.url, true);
+                xhr.open("GET", url, true);
                 // Set the responseType to blob
                 xhr.responseType = "blob";
 
@@ -326,10 +334,14 @@ var App = {
                         reader.onload = function (e) {
                             var ext;
                             if (reader.readyState !== 2 || reader.error) {
+                                if (reader.error) {
+                                    console.log(reader.error);
+                                }
                                 return;
                             } else {
+                                
                                 shp(reader.result).then(function (data) {
-
+                                    
                                     //cache geojson in localstorage
                                     try {
                                         localStorage.setObject(layer.url, data);
@@ -376,7 +388,17 @@ var App = {
                 }
 
                 var geoJson = {};
-    	
+                //parse a defnition query
+                if (typeof (layer.defQuery) != 'undefined') {
+                    var new_features = []
+                    //for(var f=data.features.length;f in data.features)
+                    new_features = $.grep(data.features, function (feature, i) {
+                        return eval('feature.properties.'+layer.defQuery);
+                    });
+
+                    data.features = new_features;
+                }
+
                 //assemble the legend for this layer
                 App.legendFactory.init(layer, data);
                 
@@ -1513,7 +1535,7 @@ var App = {
 
         getLayerId : function(name){
             //name need lots more here to make safe
-            return name.replace(/[\s,\/\:]/g, '_');
+            return name.replace(/[\s,\/\:\%\.]/g, '_');
         },
 
         getLayerById : function(id) {

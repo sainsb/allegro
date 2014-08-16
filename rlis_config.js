@@ -411,6 +411,25 @@
                    'theme': 'Environment'
                },
                {
+                   'name': 'Hydric Soils',
+                   'url': '//library.oregonmetro.gov/rlisdiscovery/hydric.zip',
+                   'type': 'shapefile',
+                   'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/soil.gif',
+                   'source': 'RLIS',
+                   'theme': 'Environment',
+                   'metadataUrl': 'http://rlisdiscovery.oregonmetro.gov/?action=viewDetail&layerID=1476',
+                       'style': {
+                           'stroke': true,
+                           'weight': 1,
+                           'fillOpacity': .9,
+                           'opacity': 1,
+                           'fillColor':'#BED2FF',
+                           'color': '#73B2FF',
+                           'lineCap': 'round',
+                           'lineJoin': 'round'
+                       }
+               },
+               {
                    'name': 'Soils',
                    'url': '//gis.oregonmetro.gov/services/Environment/soils/tilejson',
                    'type': 'tilejson',
@@ -727,31 +746,49 @@
                      'level': 2,
                      'requireToken': true
                  },
-                                  {
-                                      'name': 'Light Rail Lines and Stops Tiles',
-                                      'url': '//gis.oregonmetro.gov/services/Transit/LRT/tilejson',
-                                      'type': 'tilejson',
-                                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/lrt_line.png',
-                                      'source': 'RLIS',
-                                      'theme': 'Transit',
-                                      'zIndex': 86
-                                  }, {
-                                      'name': 'Light Rail Stops',
-                                      'url': '//library.oregonmetro.gov/rlisdiscovery/lrt_stop.zip',
-                                      'type': 'shapefile',
-                                      'symbolField': 'TYPE',
-                                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/lrt_stop.png',
-                                      'source': 'RLIS',
-                                      'theme': 'Transit'
-                                  }, {
-                                      'name': 'Park and Rides',
-                                      'url': '//library.oregonmetro.gov/rlisdiscovery/parkride.zip',
-                                      'type': 'shapefile',
-                                      'symbolField': 'STATUS',
-                                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/parkride.png',
-                                      'source': 'RLIS',
-                                      'theme': 'Transit'
-                                  },
+                  {
+                      'name': 'Tri-Met Bus Lines',
+                      'url': '//gis.oregonmetro.gov/arcgis/rest/services/transit/BikeThere2014/MapServer/tile/{z}/{y}/{x}/',
+                      'type': 'tilelayer',
+                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/bike_routes.png',
+                      'source': 'RLIS',
+                      'theme': 'Transit',
+                      'level': 2,
+                      'requireToken': true
+                  },
+                 {
+                     'name': 'Portland Aerial Tram',
+                     'url': '//library.oregonmetro.gov/rlisdiscovery/tram.zip',
+                     'type': 'shapefile',
+                     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/tram.png',
+                     'source': 'RLIS',
+                     'theme': 'Transit'
+                 },
+                {
+                    'name': 'Light Rail Lines and Stops Tiles',
+                    'url': '//gis.oregonmetro.gov/services/Transit/LRT/tilejson',
+                    'type': 'tilejson',
+                    'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/lrt_line.png',
+                    'source': 'RLIS',
+                    'theme': 'Transit',
+                    'zIndex': 86
+                }, {
+                    'name': 'Light Rail Stops',
+                    'url': '//library.oregonmetro.gov/rlisdiscovery/lrt_stop.zip',
+                    'type': 'shapefile',
+                    'symbolField': 'TYPE',
+                    'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/lrt_stop.png',
+                    'source': 'RLIS',
+                    'theme': 'Transit'
+                }, {
+                    'name': 'Park and Rides',
+                    'url': '//library.oregonmetro.gov/rlisdiscovery/parkride.zip',
+                    'type': 'shapefile',
+                    'symbolField': 'STATUS',
+                    'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/parkride.png',
+                    'source': 'RLIS',
+                    'theme': 'Transit'
+                },
                   {
                       'name': 'Railroad',
                       'url': '//library.oregonmetro.gov/rlisdiscovery/railroad.zip',

@@ -77,7 +77,7 @@ for i in poo['Configuration']['categories']['category']:
             #print bcolors.OKGREEN+'\t'+ind['name']
 
         if ind['type']=='raster':
-            print "<input type='checkbox' class='indicator' id='chk"+ind['filename']+"'>"+ind['name']+"<br/>"
+            print "<input type='checkbox' class='indicator' id='chk"+ind['filename']+"'>"+ind['name']+"<br/>"+"<input type='range' class='indrange' value='1' min='1' max='10' step='.25' id='sli"+ind['filename']+"'/><div class='indlabel' id='lbl"+ind["filename"]+"'>1</div><br/>"
 
         if ind['type']=='vector':
             continue
