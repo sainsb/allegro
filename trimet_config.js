@@ -39,6 +39,8 @@ config.layers.push(
     'url': '//developer.trimet.org/gis/data/tm_routes.zip',
     'type': 'shapefile',
     'source': 'TriMet',
+    'ramp': 'Spectral',
+    'symbolField':'rte_desc',
     'theme': '',
     'defQuery': "type=='BUS'",
     'level': 2,

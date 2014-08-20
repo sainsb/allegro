@@ -64,7 +64,7 @@ def processMaptip(t):
                 yug+='<b>'+r['@Text']+'</b>'
         except:
             if 'Binding' in r['@Text']:
-                yug +='{{{'+r['@Text'].replace('{Binding [','').replace(']}','') + '}}}'
+                yug +='{{'+r['@Text'].replace('{Binding [','').replace(']}','').replace('], Mode=OneWay}','') + '}}'
             else:
                 yug +=r['@Text']
     return yug
@@ -77,10 +77,11 @@ for i in poo['Configuration']['categories']['category']:
             #print bcolors.OKGREEN+'\t'+ind['name']
 
         if ind['type']=='raster':
+            continue
             print "<input type='checkbox' class='indicator' id='chk"+ind['filename']+"'>"+ind['name']+"<br/>"+"<input type='range' class='indrange' value='1' min='1' max='10' step='.25' id='sli"+ind['filename']+"'/><div class='indlabel' id='lbl"+ind["filename"]+"'>1</div><br/>"
 
         if ind['type']=='vector':
-            continue
+            
             #print bcolors.OKBLUE+'\t'+ind['name']
             t = xmltodict.parse(ind['style'])
             legend = {'symbols':[]}
@@ -88,7 +89,7 @@ for i in poo['Configuration']['categories']['category']:
  
             try:
                 symbolField = t['esri:ClassBreaksRenderer']['@Field']
-                legend['type'] = 'classBreaks'
+                legend['type'] = 'classBreak'
             
                 goo= t["esri:ClassBreaksRenderer"]["esri:ClassBreaksRenderer.Classes"]['esri:ClassBreakInfo']
 
@@ -103,7 +104,7 @@ for i in poo['Configuration']['categories']['category']:
             except Exception as e:
                 #print (e)
                 symbolField = t['esri:UniqueValueRenderer']['@Field']
-                legend['type']='uniqueValues'
+                legend['type']='uniqueValue'
 
                 goo = t['esri:UniqueValueRenderer']["esri:UniqueValueRenderer.Infos"]['esri:UniqueValueInfo']
 
@@ -131,6 +132,6 @@ for i in poo['Configuration']['categories']['category']:
                     mustache = mustache[0:-5]
             except Exception as e:
                 pass
-            config.append({'name': ind['name'].replace('[','- ').replace(']','').replace('(','').replace(')',''),'url':'//gis.oregonmetro.gov/equityAtlas/data/vector/'+ind['filename'].replace('shp','zip'), 'type':'shapefile', 'symbolField': symbolField, 'source' : 'Equity Atlas', 'theme':cat, 'legend':legend, 'popupTemplate':mustache})
+            config.append({'name': ind['name'].replace('[','- ').replace(']','').replace('(','').replace(')',''),'thumb':  '//gis.oregonmetro.gov/equityAtlas/data/thumbs/'+ind['name'].replace('[','- ').replace(']','').replace('(','').replace(')','').replace(':','-').replace(' ','_')+'.jpg', 'url':'//gis.oregonmetro.gov/equityAtlas/data/vector/'+ind['filename'].replace('shp','zip'), 'type':'shapefile', 'symbolField': symbolField, 'source' : 'Equity Atlas', 'theme':cat, 'legend':legend, 'popupTemplate':mustache})
 
 print json.dumps(config,sort_keys=True, indent=4)

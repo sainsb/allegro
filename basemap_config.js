@@ -100,5 +100,16 @@
             'icon': 'img/esri_logo.png',
             'source': 'OSM',
             'theme': 'Roads and Landscape'
-        }
+        },
+         {
+                       'name': 'Photo Labels',
+                       'url': '//{s}.oregonmetro.gov/arcgis/rest/services/metromap/baseAnno/MapServer/tile/{z}/{y}/{x}/',
+                       'type': 'labels',
+                       'thumb': 'img/photo2013.png',
+                       'source': 'Metro',
+                       'zIndex': 90,
+                       'theme': 'Air Photo',
+                       'requireToken': true,
+                       'subdomains': ['gistiles1', 'gistiles2', 'gistiles3', 'gistiles4']
+                   },
 ];

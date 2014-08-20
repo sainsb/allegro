@@ -9,8 +9,6 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <!-- <link href="//library.oregonmetro.gov/libraries/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="//library.oregonmetro.gov/libraries/bootstrap/2.3.2/css/bootstrap-responsive.min.css" rel="stylesheet">-->
     <link href="//library.oregonmetro.gov/libraries/metro/rlis/css/metro-bootstrap-fix-new.css" rel="stylesheet"> 
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
@@ -119,18 +117,7 @@
       </style>
     </head>
 <body>
-  <!-- <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner" >
-      </div>
-      <div id='brc'>
-        <ul class="breadcrumb">
-        <li><a href="//www.oregonmetro.gov/">Metro</a> <span class="divider">&gt;</span></li>
-        <li><a href="//gis.oregonmetro.gov/">GIS</a> <span class="divider">&gt;</span></li>
-        <li class='active'>RISE Map</li>
-        </ul>
-      </div>
-  </div>
- -->
+ 
   <div class="navbar navbar-fixed-top" role="navigation">
       <div class="container-fluid" style='padding:0;'>
         <div class="navbar-inner">
@@ -140,7 +127,7 @@
         <ul class="breadcrumb" style='height:auto;'>
         <li><a href="//www.oregonmetro.gov/">Metro</a></li>
         <li><a href="//gis.oregonmetro.gov/">GIS</a></li>
-        <li class='active'>RISE Map</li>
+        <li class='active'>Map Viewer</li>
         </ul>
       </div>
       </div>
@@ -190,6 +177,10 @@
                     </div>
                 </div>
                  <div class="modal-footer">
+                     <div style='float:left;display:none;' id='imgLoadingData'>
+                     <img src='img/ajax-loader.gif'>
+                         Loading...
+                         </div>
                 <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
             </div>
             </div>
@@ -350,7 +341,7 @@
      <script type="text/javascript" src="//library.oregonmetro.gov/libraries/leaflet.fullscreen/Control.FullScreen.js"></script>
         <script type="text/javascript" src="//library.oregonmetro.gov/libraries/leaflet-hash/leaflet-hash.js"></script>
     <!-- https://github.com/calvinmetcalf/shapefile-js/ -->
-      <script type="text/javascript" src="//library.oregonmetro.gov/libraries/leaflet.shapefile/shp.min.js"></script>
+      <script type="text/javascript" src="//library.oregonmetro.gov/libraries/leaflet.shapefile/shp.js"></script>
         <script type="text/javascript" src="//library.oregonmetro.gov/libraries/colorbrewer/colorbrewer.js"></script>
     <script type="text/javascript" src="//library.oregonmetro.gov/libraries/metro/bootstrap-context/context.js"></script>
     <script type="text/javascript" src="//library.oregonmetro.gov/libraries/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>

@@ -174,6 +174,7 @@
                 'source': 'RLIS',
                 'theme': 'Boundary',
                 'level': 2,
+                'clickable': false,
                 'style': {
                     'stroke': true,
                     'weight': 3,
@@ -251,6 +252,7 @@
                 'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/ugb.png',
                 'source': 'RLIS',
                 'theme': 'Boundary',
+                'clickable': false,
                 'level': 2,
                 'style': {
                     'stroke': true,
