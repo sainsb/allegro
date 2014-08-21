@@ -406,7 +406,7 @@ var App = {
                 //Sometimes the Shapefile parser will find multiple objects in a zipped shapefile
                 //We could prompt the user...but this works for the time being...
                 if ($.isArray(data)) {
-                    for (d in data) {
+                    for (var d in data) {
                         if (typeof (data[d].type) != 'undefined' && data[d].type == 'FeatureCollection') {
                             data = data[d];
                             break;
@@ -415,15 +415,16 @@ var App = {
                 }
                 
                 var geoJson = {};
+
                 //parse a defnition query
                 if (typeof (layer.defQuery) != 'undefined') {
-                    var new_features = []
+                    var newFeatures = [];
                     //for(var f=data.features.length;f in data.features)
-                    new_features = $.grep(data.features, function (feature, i) {
+                    newFeatures = $.grep(data.features, function (feature, i) {
                         return eval('feature.properties.' + layer.defQuery);
                     });
 
-                    data.features = new_features;
+                    data.features = newFeatures;
                 }
 
                 //assemble the legend for this layer
@@ -530,6 +531,16 @@ var App = {
 
         /* Initialize a legend for a given layer */
         init: function (layer, data) {
+
+            //set parent properties of layer.fillOpacity and layer.strokeOpacity
+            if (typeof (layer.style) != 'undefined') {
+                layer.strokeOpacity = (typeof (layer.style.opacity) != 'undefined') ? layer.style.opacity : App.DEFAULT_OPACITY;
+                layer.fillOpacity = (typeof (layer.style.fillOpacity) != 'undefined') ? layer.style.fillOpacity : App.DEFAULT_FILLOPACITY;
+            } else {
+                layer.fillOpacity = App.DEFAULT_FILLOPACITY;
+                layer.strokeOpacity = App.DEFAULT_OPACITY;
+            }
+
             /* in order of preference:
 	        layer.legend
 	            layer.style
@@ -584,7 +595,7 @@ var App = {
                     layer.scale = chroma.scale(layer.ramp).domain([1, (values.length > 1) ? values.length : 2]).out('hex');
 
                     for (var val in values.sort(App.util.comparator)) {
-                        var legend = App.legendFactory.createJSONLegend(layer.geom, values[val], layer.scale);
+                        var legend = App.legendFactory.createJSONLegend(layer.geom, values[val], layer.scale, layer.fillOpacity, layer.strokeOpacity);
                         layer.legend.symbols.push(legend);
                     }
 
@@ -633,24 +644,26 @@ var App = {
         /* render SVG shape for each legend item */
         renderHTMLLegendItem: function (geom, symbol) {
 
-            var legendItem = null;
+            var legendItem;
             var symVal = (symbol.value == '*') ? '' : typeof (symbol.label) != 'undefined' ? symbol.label : symbol.value;
 
             legendItem = '<div class="legend-item">'
-		                    + '<svg width="16" height="14">';
+		                    + '<svg width="16" height="16">';
 
             switch (geom) {
                 case App.GEOM_TYPES.MULTIPOINT:
                 case App.GEOM_TYPES.POINT:
-                    legendItem += '<circle cx="6.5" cy="8" r="5.8" stroke="' + symbol.color + '" stroke-width="' + symbol.weight + '" fill="' + symbol.fillColor + '" />'
+                    legendItem += '<circle cx="6.5" cy="8" r="5.8" stroke="' + symbol.color + '" stroke-width="' + symbol.weight + '" fill-opacity="'+symbol.fillOpacity+'"  stroke-opacity="'+symbol.opacity+'" fill="' + symbol.fillColor + '" />';
                     break;
                 case App.GEOM_TYPES.MULTIPOLYGON:
                 case App.GEOM_TYPES.POLYGON:
-                    legendItem += '<rect width="12" height="12" fill=' + symbol.fillColor + ' stroke-width="' + symbol.weight + '" stroke="' + symbol.color + '"/>';
+                    //console.log(symbol.fillOpacity);
+                    legendItem += '<rect y="' + (symbol.weight - 1) + '" x="' + (symbol.weight - 1) + '" width="12" height="12" fill-opacity="' + symbol.fillOpacity + '" fill=' + symbol.fillColor + ' stroke-width="' + symbol.weight + '" stroke="' + symbol.color + '" />';
                     break;
                 case App.GEOM_TYPES.LINESTRING:
                 case App.GEOM_TYPES.MULTILINESTRING:
-                    legendItem += '<rect width="12" height="3" fill=' + symbol.color + ' stroke-width="0" />';
+                    legendItem += '<rect width="12" height="' + (symbol.weight + 1) + '" fill=' + symbol.color + ' stroke-width="0" />';
+                    break;
             }
 
             legendItem += '</svg> ' + symVal + '</div>';
@@ -659,7 +672,7 @@ var App = {
         },
 
         /* create the JSON obj/representation for a given symbol */
-        createJSONLegend: function (geom, symbol, scale, color, weight) {
+        createJSONLegend: function (geom, symbol, scale, fillOpacity, opacity, color, weight) {
 
             color = (typeof (color) !== 'undefined') ? color : App.DEFAULT_COLOR;
             weight = (typeof (weight) !== 'undefined') ? weight : App.DEFAULT_WEIGHT;
@@ -676,9 +689,9 @@ var App = {
 
             var obj = {}
             if (geom == App.GEOM_TYPES.LINESTRING || geom == App.GEOM_TYPES.MULTILINESTRING) {
-                obj = { "value": symbol.value, 'color': fillColor, 'weight': weight };
+                obj = { "value": symbol.value, 'opacity': opacity, 'color': fillColor, 'weight': weight };
             } else {
-                obj = { "value": symbol.value, "fillColor": fillColor, 'color': color, 'weight': weight };
+                obj = { "value": symbol.value, 'opacity':opacity, 'fillOpacity':fillOpacity, "fillColor": fillColor, 'color': color, 'weight': weight };
             }
 
             if (typeof (symbol.label) != 'undefined') {
@@ -690,7 +703,7 @@ var App = {
     },
 
     styleFeatures: function (feature, layer) {
-
+        
         var style = {
             fillColor: App.DEFAULT_FILLCOLOR,
             fillOpacity: layer.fillOpacity,
@@ -1166,29 +1179,6 @@ var App = {
             $('#symbolModal').modal('show');
         },
 
-        /* Applies chosen symbology to layer */
-        apply: function (layer, newSymbol, renderer, legendItem, ramp) {
-
-            layer.legend.symbols = newSymbol;
-            layer.legend.type = renderer;
-
-            if (typeof (ramp) != 'undefined') {
-                layer.ramp = ramp;
-            }
-
-            layer.mapLayer.setStyle(function (feature) {
-                return App.styleFeatures(feature, layer);
-            });
-
-            var id = App.util.getLayerId(layer.name);
-
-            $('#leg' + id + ' .legend-item').remove();
-            $('#leg' + id).append(legendItem);
-
-            //slight haxxorz to get outerhtml.
-            layer.HTMLLegend = $('#li' + id).clone().wrap('<p>').parent().html();
-        },
-
         ramps: {
 
             scaleCounter: 0,
@@ -1269,7 +1259,7 @@ var App = {
                 refresh: function (layer) {
 
                     //construct the faux legend item
-                    var phantomSymbol = { value: '*', fillColor: $('#colSingleFillColor').val(), color: $('#colSingleColor').val(), weight: $('#rngSingleWeight').val() };
+                    var phantomSymbol = { value: '*', fillColor: $('#colSingleFillColor').val(), color: $('#colSingleColor').val(), weight: $('#rngSingleWeight').val(), fillOpacity:layer.fillOpacity };
 
                     var legendItem = App.legendFactory.renderHTMLLegendItem(layer.geom, phantomSymbol);
 
@@ -1281,7 +1271,7 @@ var App = {
                             layer.symbolField = undefined;
                         }
 
-                        App.symbolDialog.apply(layer, [phantomSymbol], App.RENDERER.SINGLE_SYMBOL, legendItem);
+                        App.symbolDialog.apply(layer, [phantomSymbol],              App.RENDERER.SINGLE_SYMBOL, legendItem);
 
                     });
 
@@ -1312,14 +1302,14 @@ var App = {
                     //take the ramp, reparse the JSON features and build a fake JSON legend
 
                     var values = [];
-                    var temp_values = []
+                    var tempValues = [];
 
                     if (symbolField != layer.symbolField || layer.legend.symbols[0].value == '*') {
                         for (var feature in layer.mapLayer._layers) {
-                            value = layer.mapLayer._layers[feature].feature.properties[symbolField];
-                            if ($.inArray(value, temp_values) === -1) {
+                            var value = layer.mapLayer._layers[feature].feature.properties[symbolField];
+                            if ($.inArray(value, tempValues) === -1) {
                                 values.push({ value: value });
-                                temp_values.push(value);
+                                tempValues.push(value);
                             }
                         }
                     }
@@ -1343,7 +1333,7 @@ var App = {
                         values.sort(App.util.comparator);
 
                         for (var i = 0; i < values.length; i++) {
-                            var obj = App.legendFactory.createJSONLegend(layer.geom, values[i], scale, color, weight);
+                            var obj = App.legendFactory.createJSONLegend(layer.geom, values[i], scale, layer.fillOpacity, layer.strokeOpacity, color, weight);
                             //if (typeof (values[i].label) != 'undefined') { obj.label = symbol.label; }
                             phantomSymbols.push(obj);
                         }
@@ -1352,7 +1342,7 @@ var App = {
                         //keep fillcolor the same here but alter weight and color....
                         for (var s in layer.legend.symbols) {
                             var sym = layer.legend.symbols[s];
-                            var obj = { value: sym.value, fillColor: sym.fillColor, color: color, weight: weight };
+                            var obj = { value: sym.value, fillColor: sym.fillColor, color: color, weight: weight, opacity: layer.strokeOpacity, fillOpacity: layer.fillOpacity };
                             //if (typeof(symbol.label) != 'undefined'){obj.label = symbol.label;}
                             phantomSymbols.push(obj);
                         }
@@ -1378,7 +1368,30 @@ var App = {
 
                 }
             }
-        }
+        },
+        
+        /* Applies chosen symbology to layer */
+        apply: function (layer, newSymbol, renderer, legendItem, ramp) {
+
+            layer.legend.symbols = newSymbol;
+            layer.legend.type = renderer;
+
+            if (typeof (ramp) != 'undefined') {
+                layer.ramp = ramp;
+            }
+
+            layer.mapLayer.setStyle(function (feature) {
+                return App.styleFeatures(feature, layer);
+            });
+
+            var id = App.util.getLayerId(layer.name);
+
+            $('#leg' + id + ' .legend-item').remove();
+            $('#leg' + id).append(legendItem);
+
+                    //slight haxxorz to get outerhtml.
+            layer.HTMLLegend = $('#li' + id).clone().wrap('<p>').parent().html();
+        },
     },
 
     contextMenu: {
