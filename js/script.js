@@ -159,7 +159,7 @@ var App = {
         $('body').on('input', '.sliderFillOpacity', function () {
             var id = $(this).attr('id').replace('sli', '');
             var layer = App.util.getLayerById(id);
-            layer.fillOpacity = $(this).val() / 100;
+            layer.fillOpacity = $(this).val();
             switch (layer.type) {
                 case App.LAYER_TYPES.GEOJSON:
                 case App.LAYER_TYPES.SHAPEFILE:
@@ -177,7 +177,7 @@ var App = {
         $('body').on('input', '.sliderStrokeOpacity', function () {
             var id = $(this).attr('id').replace('sli', '');
             var layer = App.util.getLayerById(id);
-            layer.strokeOpacity = $(this).val() / 100;
+            layer.strokeOpacity = $(this).val();
             layer.mapLayer.setStyle({
                 opacity: layer.strokeOpacity
             });
@@ -394,8 +394,11 @@ var App = {
                 }, false);
                 // Send XHR
                 xhr.send();
-            }
+            },
 
+            heatmap: function(layer) {
+                
+            }
         },
 
         /* Parse geojson into Leaflet, include legend creation */
@@ -1394,6 +1397,10 @@ var App = {
         },
     },
 
+    optionsDialog : {
+        
+    },
+
     contextMenu: {
 
         apply: function (layer) {
@@ -1542,13 +1549,14 @@ var App = {
                         contents.push({ header: 'Fill Opacity' }, {
                             class: 'sliderFillOpacity',
                             id: id,
-                            value: 100
+                            value: (typeof (layer.fillOpacity) != 'undefined') ? layer.fillOpacity : 1
+                               
                         });
                     }
                     contents.push({ header: 'Stroke Opacity' }, {
                         class: 'sliderStrokeOpacity',
                         id: id,
-                        value: 100
+                        value: (typeof (layer.strokeOpacity) != 'undefined') ? layer.strokeOpacity : 1
                     });
                     break;
                 case "tilejson":
@@ -1556,7 +1564,7 @@ var App = {
                     contents.push({ header: 'Opacity' }, {
                         class: 'sliderFillOpacity',
                         id: id,
-                        value: 100
+                        value: (typeof (layer.fillOpacity) != 'undefined') ? layer.fillOpacity : 1
                     });
                     break;
             }
