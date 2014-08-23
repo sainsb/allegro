@@ -13,7 +13,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
     <link href="//library.oregonmetro.gov/libraries/metro/rlis/css/autosuggest.css" rel="stylesheet">
-    <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/leaflet/0.8-dev/leaflet.css" />
+    <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/leaflet/0.7.3/leaflet.css" />
     <!-- <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/leaflet.markercluster/0.4/MarkerCluster.css" /> -->
     <!--  <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/leaflet.markercluster/0.4/MarkerCluster.Default.css" /> -->
     <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/leaflet.fullscreen/Control.FullScreen.css" />
@@ -28,6 +28,10 @@
 
           #map {
               border: solid #DDD 1px;
+          }
+
+          .ranger, .indlabel {
+              display: inline-block;
           }
 
           .panelyr.collapsed > .accordion-toggle:before {
@@ -139,8 +143,50 @@
             <div class="btn-group">
                 <button class='btn btn-default btn-sm' id='btnAddData'><i class="glyphicon glyphicon-plus"></i> Add Layers</button>
                 <button class='btn btn-default btn-sm' id='btnBasemap'><i class="glyphicon glyphicon-th"></i> Basemap</button>
-                <button class='btn btn-default btn-sm' id='btnOptions'><i class="glyphicon glyphicon-cog"></i> Options</button>
+                <div class="btn-group dropdown keep-open" >
+                    <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
+                        Heatmap Options <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" style="margin:0;padding:10px 0px 10px 10px;width:250px;">
+                        <li>
+                            Radius<input class='ranger' type="range" min='0.001' max='.03' step='.00005' id='sliRadius'  />
+                          
+                            <div id='txtRadius' class='ranger'></div>
+                        </li>
+                        <li>
+                            Blur
+                            <input class='ranger' type="range" min='0' max='1' step='.01' id='sliBlur' />
+                            <div id='txtBlur' class='ranger'></div>
+                        </li>
+                        <li>
+                            Resolution
+                            <input class='ranger' type="range" min='3' max='40' step='.25' id='sliResolution' />
+                            <div id='txtResolution' class='ranger'></div>
+                        </li>
+                        <li>
+                            <input type='checkbox' id='chkLocalExtrema' checked='checked' />Use Local Extrema
+                        </li>
+                        <li>
+                            MaxVal
+                            <input disabled class='ranger' type="range" min='1' max='100' value='4' step='.5' id='sliMaxVal' />
+                            <div id='txtMaxVal' class='ranger'></div>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            Max Opacity
+                            <input class='ranger' type="range" min='0' max='1' step='.1' id='sliMaxOpacity' />
+                            <div id='txtMaxOpacity' class='ranger'></div>
+                        </li>
+                        <li>
+                            Min Opacity
+                            <input class='ranger' type="range" min='0' max='1' step='.1' id='sliMinOpacity' />
+                            <div id='txtMinOpacity' class='ranger'></div>
+                        </li>
+
+                        <li><button id='btnGradient' class="btn btn-sm" style="margin-top:6px;">Different Gradient</button></li>
+                    </ul>
                 </div>
+            </div>
                 <!--<select class="selectpicker" multiple data-width="100" data-style='btn-sm btn-default' title="options" id="selOptions">
                 <option>Show Coordinates</option>
             </select>-->
@@ -153,6 +199,7 @@
             <div class="col-md-2" id='legend'>
                 <ul class='sortable' style='list-style:none;padding-left:0;' id="ulVectorLegend"></ul>
                 <ul class='sortable' style='list-style:none;padding-left:0;' id="ulTileLegend"></ul>
+                <ul style='list-style:none;padding-left:0;' id="ulHeatmapLegend"></ul>
             </div>
             <div class="col-md-10" id='map-area' style="margin-bottom:0;">
                 <div id="map" style="background-color:#fff;width:100%;padding:0;margin-right:10px;margin:00px;"></div>
@@ -180,11 +227,47 @@
                          Loading...
                          </div>
                 <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-            </div>
+                </div>
             </div>
         </div>
     </div>
     
+    <div class="modal" id="optionsModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Options</h4>
+                </div>
+                <div class="modal-body" style='overflow:hidden;'>
+                    <ul id="ulOptionTabs" class="nav nav-tabs">
+                        <li><a href="#mapControls" data-toggle="tab"><i class="fa fa-cogs"></i>&nbsp;Map Controls</a></li>
+                        <li class='active'><a href="#heatmapControls" data-toggle="tab"><i class="fa fa-fire"></i>&nbsp;Heatmap Controls</a></li>
+                    </ul>
+
+                    <div class="tab-content" style="overflow-y:scroll;padding-top:10px;">
+                        <div class="tab-pane fade" id="mapControls">
+                        </div>
+                        <div class="tab-pane fade in active" id="heatmapControls" >
+
+                            <h4>Heatmap settings</h4>
+                            
+                                
+                                
+</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div style='float:left;display:none;' id='imgLoadingData'>
+                        <img src='img/ajax-loader.gif'>
+                        Loading...
+                    </div>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="tableModal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -332,7 +415,7 @@
         var config =  {'layers':[], 'token': 'jtJ3qevgR0oEBOZQVIrdF9nCWVlzEOnMqNi62askpes.'};
     </script>
     <script src="//library.oregonmetro.gov/libraries/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
-     <script src="//library.oregonmetro.gov/libraries/leaflet/0.8-dev/leaflet.js" type="text/javascript"></script>
+     <script src="//library.oregonmetro.gov/libraries/leaflet/0.7.3/leaflet.js" type="text/javascript"></script>
     <script src="//gis.oregonmetro.gov/rlisapi2/js/?token=jtJ3qevgR0oEBOZQVIrdF9nCWVlzEOnMqNi62askpes." type="text/javascript"></script>
      <script src="js/bootstrap.min.js" type="text/javascript"></script>
     <!-- <script src="//library.oregonmetro.gov/libraries/bootstrap/2.3.2/js/bootstrap.min.js" type="text/javascript"></script> -->
@@ -350,6 +433,9 @@
     <script src="//library.oregonmetro.gov/libraries/html5sortable/jquery.sortable.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="./js/jquery.csvToTable.js"></script>
     <script type='text/javascript' src='//library.oregonmetro.gov/libraries/jquery.lazyload/jquery.lazyload.min.js'></script>
+    <script type='text/javascript' src='//library.oregonmetro.gov/libraries/PNG/PNG.js'></script>
+    <script src="//library.oregonmetro.gov/libraries/heatmapjs/heatmap.min.js"></script>
+    <script src="//library.oregonmetro.gov/libraries/leaflet.heatmapjs/leaflet-heatmap.js"></script>
 <!--<script type="text/javascript" src="./js/rTree.js"></script>-->
     <script type="text/javascript" src="//library.oregonmetro.gov/libraries/leaflet.coordinates/0.1.4/Leaflet.Coordinates.min.js"></script>
     <script type="text/javascript" src="./rlis_config.js"></script>

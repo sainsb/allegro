@@ -8,7 +8,7 @@ var map = null;
 var App = {
     map: null,
     STYLE_KEYWORDS: ['marker-size', 'marker-symbol', 'marker-color', 'stroke', 'stroke-opacity', 'stroke-width', 'fill', 'fill-opacity'],
-    LAYER_TYPES: { 'GEOJSON': 'geojson', 'SHAPEFILE': 'shapefile', 'TILEJSON': 'tilejson', 'TILELAYER': 'tilelayer', 'DYNAMIC_LAYER': 'dynamicLayer' },
+    LAYER_TYPES: { 'GEOJSON': 'geojson', 'SHAPEFILE': 'shapefile', 'TILEJSON': 'tilejson', 'TILELAYER': 'tilelayer', 'DYNAMIC_LAYER': 'dynamicLayer', 'HEATMAP':'heatmap' },
     GEOM_TYPES: { 'LINESTRING': "LineString", "POINT": "Point", "MULTIPOINT": "MultiPoint", "POLYGON": "Polygon", "MULTIPOLYGON": "MultiPolygon", 'MULTILINESTRING': 'MultiLineString' },
     FIELD_TYPES: { 'number': 1, 'string': 2 },
     RENDERER: { 'UNIQUE_VALUE': 'uniqueValue', 'CLASS_BREAKS': 'classBreaks', 'SINGLE_SYMBOL': 'singleSymbol' },
@@ -104,6 +104,11 @@ var App = {
             $('#basemapModal').modal('show');
         });
 
+        //assign handler to Basemap button
+        $('#btnOptions').click(function () {
+            $('#optionsModal').modal('show');
+        });
+
         //assign handler to Basemap opacity slider
         $('#sliBasemap').on('input', function () {
             //get active basemap
@@ -183,6 +188,13 @@ var App = {
             });
         });
 
+        $('.dropdown.keep-open').on({
+            "shown.bs.dropdown": function () { this.closable = false; },
+            "mouseleave": function () {
+                this.closable = true; },
+            "hide.bs.dropdown": function () { return this.closable; }
+        });
+
         this.map = new L.Map('map', {
             center: new L.LatLng(45.44944, -122.67599),
             zoom: 10,
@@ -197,11 +209,11 @@ var App = {
         new L.Hash(this.map);
 
         // Initialize dialogs
-        App.layersDialog.render();
+        this.layersDialog.render();
 
-        App.basemapDialog.render();
+        this.basemapDialog.render();
 
-        App.symbolDialog.ramps.render();
+        this.symbolDialog.ramps.render();
 
         //init bootstrap select controls
         $('.selectpicker').selectpicker();
@@ -217,12 +229,12 @@ var App = {
         });
         
         //Accept l param to load layers passed in querystring
-        if (typeof (App.QueryString.l) != 'undefined' && App.QueryString.l.trim() != '') {
+        if (typeof (this.QueryString.l) != 'undefined' && this.QueryString.l.trim() != '') {
            
-            var l = decodeURIComponent(App.QueryString.l);
-            var layer = App.util.getLayerByName(l);
+            var l = decodeURIComponent(this.QueryString.l);
+            var layer = this.util.getLayerByName(l);
             if (layer != null) {
-                App.data.add(layer);
+                this.data.add(layer);
             }
         }
 
@@ -246,6 +258,11 @@ var App = {
                     break;
                 case App.LAYER_TYPES.TILELAYER:
                     this.load.tileLayer(layer);
+                    break;
+                case App.LAYER_TYPES.HEATMAP:
+                    this.load.heatmap(layer, function() {
+                        App.heatmap.render();
+                    });
                     break;
                 case App.LAYER_TYPES.SHAPEFILE:
                     this.load.shapefile(layer, function (data) {
@@ -396,8 +413,40 @@ var App = {
                 xhr.send();
             },
 
-            heatmap: function(layer) {
+            heatmap: function (layer, callback) {
+
                 
+                if (typeof (App.heatmap.rasters[App.util.getLayerId(layer.name)]) != 'undefined') {
+
+                    $('#ulHeatmapLegend').append($(layer.HTMLLegend));
+
+                    callback();
+                    return;
+                }
+
+                layer.HTMLLegend = App.legendFactory.createHeatmapLegend(layer.name);
+
+                $('#ulHeatmapLegend').append($(layer.HTMLLegend));
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', layer.file, true);
+                xhr.responseType = 'arraybuffer';
+                pngdata = [];
+                xhr.onload = function (e) {
+                    if (this.status == 200) {
+                        var reader = new PNGReader(this.response);
+                        reader.parse(function (err, png) {
+                            if (err) throw err;
+                            var id = App.util.getLayerId(layer.name);
+                            App.heatmap.curRasters.push(layer);
+                            App.heatmap.rasters[id] = png;
+                            App.heatmap.rasterMultiplier[id] = 1;
+                            callback();
+                        });
+                    }
+                };
+
+                xhr.send();
             }
         },
 
@@ -701,8 +750,13 @@ var App = {
                 obj.label = symbol.label;
             }
             return obj;
-        }
+        },
 
+        createHeatmapLegend : function(name) {
+            var id = App.util.getLayerId(name);
+
+            return "<li id='li" + id + "'><input type='checkbox' checked='checked' class='indicator' id='chk" + id + "'> " + name + "<div onclick='App.util.removeLayer(\"" + id + "\")' style='float:right;cursor:pointer;' class='btnRemove'>×</div>" + "<input type='range' class='indrange' value='1' min='1' max='10' step='.25' id='sli" + id + "'/><div class='indlabel' id='lbl" + id + "'>1</div></li>";
+        }
     },
 
     styleFeatures: function (feature, layer) {
@@ -829,7 +883,15 @@ var App = {
                 var layer = App.util.getLayerById(id);
                 if ($(this).hasClass('active')) {
                     $(this).removeClass('active');
-                    map.removeLayer(layer.mapLayer);
+
+                    if (layer.type == 'heatmap') {
+                        var id = App.util.getLayerId(layer.name);
+                        delete App.heatmap.rasterMultiplier[id];
+                        App.heatmap.sync(id, false);
+                    } else {
+                        map.removeLayer(layer.mapLayer);
+                    }
+
                     $('#li' + id).remove();
                 }
                 else {
@@ -848,6 +910,15 @@ var App = {
                             case App.LAYER_TYPES.TILEJSON:
                                 $('#ulTileLegend').prepend(layer.HTMLLegend);
                                 break;
+                        }
+                    } else if (layer.type == 'heatmap' ) {
+                        var id = App.util.getLayerId(layer.name);
+                        if (typeof (App.heatmap.rasters[id]) != 'undefined') {
+                            $('#ulHeatmapLegend').append($(layer.HTMLLegend));
+                            App.heatmap.rasterMultiplier[id]=1;
+                            App.heatmap.sync(id, true);
+                        } else {
+                            App.data.add(layer);
                         }
                     }
                     else {
@@ -1110,6 +1181,9 @@ var App = {
 
                     $('#symbolTabs > li > a').first().tab('show');
                     $('#singleFill').addClass('active in');
+
+
+                    console.log(layer.legend.symbols[0]);
 
                     //match colors and stroke
                     $('#_colSingleFillColor').colorpicker('setValue', layer.legend.symbols[0].fillColor);
@@ -1401,7 +1475,7 @@ var App = {
         
     },
 
-    contextMenu: {
+    contextMenu : {
 
         apply: function (layer) {
             var id = App.util.getLayerId(layer.name);
@@ -1585,6 +1659,237 @@ var App = {
         }
     },
 
+    heatmap : {
+        layer: null,
+        rasters: {},
+        rasterMultiplier: {},
+        curRasters: [],
+        blur: .65,
+        gradientIndex: 4,
+        gradients: [
+                {'.55': '#278590','.85': '#F9FBBD','1': '#9D5923'},
+                {'.55':'#0C307A','.85':'#76EC00', '1':'#C2523C'},
+                {'0':'#3562CF','.5':'#FFFFBF', '1':'#C44539'},
+                {'0':'#FFDFDF', '1':'#8F0C0A'},
+                  null
+        ],
+        pngdata: [],
+        resolution: 10,
+        radius: .00981,
+        maxOpacity: 0.7,
+        minOpacity :0,
+        
+        _init: function () {
+
+            this.config =  {
+                "radius": this.radius,
+                "maxOpacity": this.maxOpacity,
+                "minOpacity": this.minOpacity,
+                "scaleRadius": true,
+                "useLocalExtrema": true,
+                "blur":this.blur,
+                "gradient":this.gradients[this.gradientIndex],
+                "latField": 'lat',
+                "lngField": 'lng',
+                "valueField": 'count'
+            },
+
+            App.heatmap.layer = new HeatmapOverlay(this.config);
+
+            App.map.addLayer(this.layer);
+
+            $('#sliRadius').val(this.radius);
+            $('#txtRadius').html(this.radius);
+            $('#sliMaxVal').val(this.maxVal);
+            $('#txtMaxVal').html(this.maxVal);
+            $('#sliResolution').val(this.resolution);
+            $('#txtResolution').html(this.resolution);
+            $('#sliMaxOpacity').val(this.maxOpacity);
+            $('#txtMaxOpacity').html(this.maxOpacity);
+            $('#sliMinOpacity').val(this.minOpacity);
+            $('#txtMinOpacity').html(this.minOpacity);
+            $('#sliBlur').val(this.blur);
+            $('#txtBlur').html(this.blur);
+
+            $('#sliRadius').on('input change', function () {
+                $('#txtRadius').html($(this).val());
+                App.heatmap.radius = $(this).val();
+                App.heatmap._reconfigure();
+            });
+
+            $('#sliMaxVal').on('input change', function () {
+                $('#txtMaxVal').html($(this).val());
+                App.heatmap.pngdata.max = parseFloat($(this).val());
+                App.heatmap._reconfigure();
+            });
+
+            $('#sliBlur').on('input change', function () {
+                $('#txtBlur').html($(this).val());
+                App.heatmap.blur = parseFloat($(this).val());
+                App.heatmap._reconfigure();
+            });
+
+            $('#sliResolution').on('input change', function () {
+                $('#txtResolution').html($(this).val());
+                App.heatmap.resolution = parseInt($(this).val());
+                App.heatmap.render();
+            });
+
+            $('#sliMaxOpacity').on('input change', function () {
+                $('#txtMaxOpacity').html($(this).val());
+                App.heatmap.maxOpacity = parseFloat($(this).val());
+                App.heatmap._reconfigure();
+            });
+
+            $('#sliMinOpacity').on('input change', function () {
+                $('#txtMinOpacity').html($(this).val());
+                App.heatmap.minOpacity = parseFloat($(this).val());
+                App.heatmap._reconfigure();
+            });
+
+            $('#chkLocalExtrema').on('change', function () {
+
+
+            });
+
+            $('body').on('input change', '.indrange', function() {
+                var rast = $(this).attr('id').replace('sli', '');
+                var val = parseFloat($(this).val());
+                App.heatmap.rasterMultiplier[rast] = val;
+                $('#lbl' + rast).html($(this).val());
+                App.heatmap.render();
+            });
+
+            $('#btnGradient').on('click', function () {
+                App.heatmap.gradientIndex += 1;
+                if (App.heatmap.gradientIndex > 4) { App.heatmap.gradientIndex = 0; }
+                App.heatmap._reconfigure();
+            });
+
+            //Attach behavior to future indicators
+            $('body').on('change', '.indicator', function () {
+                var id = $(this).attr('id').replace('chk', '');
+                App.heatmap.sync(id, $(this).is(':checked'));
+
+            });
+        },
+
+        //called when a heatmap layer that has already been added to the heatmap is activated or deactivated.
+        sync: function (id, active) {
+           
+            if (active == false) {
+                $.each(this.curRasters, function(i, v) {
+                    if (App.util.getLayerId(v.name) == id) {
+                        App.heatmap.curRasters.splice(i, 1);
+                        App.heatmap.render();
+                        return false;
+                    }
+                });
+            } else {
+                var lyr = $.grep(config.layers, function (item) {
+                    return App.util.getLayerId(item.name) == id;
+                })[0];
+
+                this.curRasters.push(lyr);
+
+                this.render();
+            }
+        },
+
+        _reconfigure: function () {
+
+            map.removeLayer(this.layer);
+
+            this.config = {
+                "radius": this.radius,
+                "maxOpacity": this.maxOpacity,
+                "minOpacity": this.minOpacity,
+                "blur": this.blur,
+                "gradient": this.gradients[this.gradientIndex],
+                "scaleRadius": true,
+                "useLocalExtrema": true,
+                "latField": 'lat',
+                "lngField": 'lng',
+                "valueField": 'count'
+            };
+
+            this.layer = new HeatmapOverlay(this.config);
+            map.addLayer(this.layer);
+            this.layer.setData({ max: this.maxval, data: this.pngdata });
+        },
+
+        render : function() {
+
+            this.pngdata = [];
+
+            if (App.heatmap.layer == null) {
+                this._init();
+            }
+
+            if (this.curRasters.length == 0) {
+                this.layer.setData({ max: 0, data: [] });
+                App.map.removeLayer(this.layer);
+                return;
+            } else if (!map.hasLayer(this.layer)) {
+                App.map.addLayer(this.layer);
+            }
+            
+            var rManager = {};
+
+            //get unique dimensions and associated rasters:
+            $.each(this.curRasters, function (i, v) {
+                var dims = v.width + '_' + v.height;
+
+                var id = App.util.getLayerId(v.name);
+
+                if (typeof (rManager[dims]) != 'undefined') {
+                    rManager[dims].rasters.push(id);
+                }
+                else {
+                    rManager[dims] = { height: v.height, width: v.width, rasters: [id], nodata: v.nodata, ul: v.ul, step: v.step };
+                }
+            });
+
+            for (var dims in rManager) {
+                this._crush(rManager[dims]);
+            }
+
+            $('#sliMaxVal').val(this.maxval);
+            $('#txtMaxVal').html(this.maxval);
+
+            this.layer.setData({ max: this.maxval, data: this.pngdata });
+        },
+
+        _crush: function (colRasters) {
+            var curlng = colRasters.ul[0];
+            var curlat = colRasters.ul[1];
+
+            for (var x = 0; x < colRasters.width - this.resolution; x += this.resolution) {
+                for (var y = 0; y < colRasters.height - this.resolution; y += this.resolution) {
+                    var val = 0;
+
+                    for (var r = 0; r < colRasters.rasters.length; r++) {
+
+                        var tempval = this.rasters[colRasters.rasters[r]].getPixel(x, y)[1];
+                        if (tempval > colRasters.nodata) {
+                            val += tempval * this.rasterMultiplier[colRasters.rasters[r]];
+                        }
+
+                    }
+
+                    if (val > colRasters.nodata && val < 255) {
+                        if (val > this.maxval) { this.maxval = val; }
+                        this.pngdata.push({ lng: curlng, lat: curlat, count: val });
+                    }
+
+                    curlat -= (colRasters.step * this.resolution);
+                }
+                curlng += (colRasters.step * this.resolution);
+                curlat = colRasters.ul[1];
+            }
+        }
+    },
+
     util: {
 
         comparator: function (a, b) {
@@ -1614,7 +1919,13 @@ var App = {
 
         removeLayer: function (id) {
             var layer = this.getLayerById(id);
-            App.map.removeLayer(layer.mapLayer);
+            var id = this.getLayerId(layer.name);
+            if (layer.type == 'heatmap') {
+                App.heatmap.sync(id, false);
+            } else {
+                map.removeLayer(layer.mapLayer);
+            }
+
             $('#li' + id).remove();
             $('.img-block.active').each(function (index) {
                 if ($(this).find('img').attr('id').replace('img', '') == id) {

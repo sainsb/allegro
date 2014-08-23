@@ -124,6 +124,32 @@ config.layers.push({
     'source': 'RISE',
     'theme': 'General'
 },
+   {
+       'type': 'heatmap',
+       'nodata': 0,
+       'ul': [-123.1787600372, 45.6955761882],
+       'step': 0.0008000000,
+       'file': "./data/rise/cdg.png",
+       'source': 'RISE',
+       'theme': 'General',
+       'name': 'Community Development Grants Heatmap',
+       'thumb': 'img/heatmap.jpg',
+       'width': 1330,
+       'height': 708
+   },
+    {
+        'type': 'heatmap',
+        'nodata': 0,
+        'ul': [-123.1787600372, 45.6955761882],
+        'step': 0.0008000000,
+        'file': "./data/rise/ceg.png",
+        'source': 'RISE',
+        'theme': 'General',
+        'name': 'Community Enhancement Grants Heatmap',
+        'thumb': 'img/heatmap.jpg',
+        'width': 1330,
+        'height': 708
+    },
 {
     'name': 'Commmunity Enhancement Grants',
     'url': 'data/RISE/community_enhancement_grants.zip',
@@ -147,4 +173,6 @@ config.layers.push({
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
     'source': 'RISE',
     'theme': 'Major Studies'
-});
+}
+ 
+);

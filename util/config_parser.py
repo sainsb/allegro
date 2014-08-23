@@ -71,17 +71,20 @@ def processMaptip(t):
 
 for i in poo['Configuration']['categories']['category']:
     cat = i['name']
-    print "<h3>"+cat+"</h3>"
+    #print "<h3>"+cat+"</h3>"
     for ind in i['indicators']['indicator']:
         #if ind['type']=='raster':
             #print bcolors.OKGREEN+'\t'+ind['name']
 
         if ind['type']=='raster':
+            #continue
+            print "{'name':'"+ind['name'].replace("'","")+"', 'source': 'Equity Atlas', 'file':'//gis.oregonmetro.gov/equityAtlas/data/newraster/"+ind['filename']+".png','type': 'heatmap', 'nodata':1, 'ul':[-123.51819289449999, 46.0676384925], 'step': 0.000885099, 'width':2116, 'height': 1372, 'theme':'"+cat+"', 'thumb':'img/heatmap.jpg'},"
             continue
-            print "<input type='checkbox' class='indicator' id='chk"+ind['filename']+"'>"+ind['name']+"<br/>"+"<input type='range' class='indrange' value='1' min='1' max='10' step='.25' id='sli"+ind['filename']+"'/><div class='indlabel' id='lbl"+ind["filename"]+"'>1</div><br/>"
+
+            print "<input type='checkbox' class='indicator' id='chk"+ind['filename']+".png'>"+ind['name']+"<br/>"+"<input type='range' class='indrange' value='1' min='1' max='10' step='.25' id='sli"+ind['filename']+"'/><div class='indlabel' id='lbl"+ind["filename"]+"'>1</div><br/>"
 
         if ind['type']=='vector':
-            
+            continue
             #print bcolors.OKBLUE+'\t'+ind['name']
             t = xmltodict.parse(ind['style'])
             legend = {'symbols':[]}
