@@ -384,7 +384,6 @@ var App = {
                             } else {
                                 
                                 shp(reader.result).then(function (data) {
-
                                     //cache geojson in localstorage
                                     try {
                                         localStorage.setObject(layer.url, data);
@@ -502,20 +501,31 @@ var App = {
                 switch (layer.geom) {
                     case App.GEOM_TYPES.POINT:
                     case App.GEOM_TYPES.MULTIPOINT:
-                        // console.log(data.features.length);
-                        // if(data.features.length>1){
-                        //     console.log('yudj');
-                        //     layer.mapLayer = L.markerClusterGroup({showCoverageOnHover:false});
-                        //     console.log('buidy')
-                        //     for (var i = 0; i < data.features.length; i++) {
+                        if(data.features.length>1000){
+                            
+                            //prompt user heatmap or markercollection?
+                            $('#dialogModal.modal-content').html('<button class="btn btn-sm" id="btnHeatmap">Heatmap</button><button class="btn btn-sm" id="btnCluster">Cluster</button>');
 
-                        //         var marker = L.marker(new L.LatLng(data.features[i].geometry.coordinates[1], data.features[i].geometry.coordinates[0]));
-                        //         marker.bindPopup('goo');
-                        //         layer.mapLayer.addLayer(marker);
-                        //     }
-                        //     console.log('yay');
-                        //     App.map.addLayer(layer.mapLayer);
-                        // }else{
+
+                            $('#btnHeatmap').on('click', function(){
+
+
+
+                            });
+
+                            $('#btnCluster').off('click').on('click', function(){
+                                layer.mapLayer = L.markerClusterGroup({showCoverageOnHover:false});
+                         
+                                for (var i = 0; i < data.features.length; i++) {
+
+                                    var marker = L.marker(new L.LatLng(data.features[i].geometry.coordinates[1], data.features[i].geometry.coordinates[0]));
+                                    marker.bindPopup('goo');
+                                    layer.mapLayer.addLayer(marker);
+                                }
+                                
+                                App.map.addLayer(layer.mapLayer);
+                            });
+                        }else{
                         geoJson = L.geoJson(data, {
                             pointToLayer:
                                 function (feature, latlng) {
@@ -523,7 +533,7 @@ var App = {
                                 },
                             onEachFeature: _onEachFeature
                         });
-                        //}
+                        }
                         break;
                     case App.GEOM_TYPES.MULTILINESTRING:
                     case App.GEOM_TYPES.LINESTRING:
@@ -575,6 +585,13 @@ var App = {
                 if ($('#imgLoadingData').is(':visible')) {
                     $('#imgLoadingData').fadeOut(100);
                 };
+            },
+
+            csv: function(csv){
+                console.log(csv.substring(0,50));
+                var data =Papa.parse(csv, {header:true});
+                console.log(data.data[0]);
+                $('#imgLoadingData').fadeOut(100);
             }
         }
     },
