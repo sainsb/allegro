@@ -501,15 +501,13 @@ var App = {
                 switch (layer.geom) {
                     case App.GEOM_TYPES.POINT:
                     case App.GEOM_TYPES.MULTIPOINT:
-                        if(data.features.length>1000){
-                            
+                        if(data.features.length>1000) {
+                           
                             //prompt user heatmap or markercollection?
-                            $('#dialogModal.modal-content').html('<button class="btn btn-sm" id="btnHeatmap">Heatmap</button><button class="btn btn-sm" id="btnCluster">Cluster</button>');
-
+                            $('#dialogModal .modal-content').html('That\'s a lot of points! How would you like them displayed? <br/><button data-dismiss="modal" class="btn btn-sm" id="btnHeatmap" style="margin:10px">Heatmap</button><button class="btn btn-sm" id="btnCluster" style="margin:10px" data-dismiss="modal">Clusters</button>');
 
                             $('#btnHeatmap').on('click', function(){
-
-
+                                
 
                             });
 
@@ -525,6 +523,9 @@ var App = {
                                 
                                 App.map.addLayer(layer.mapLayer);
                             });
+
+                            $('#dialogModal').modal('show');
+
                         }else{
                         geoJson = L.geoJson(data, {
                             pointToLayer:
