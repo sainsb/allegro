@@ -22,6 +22,8 @@ var App = {
     DEFAULT_WEIGHT: 1,
     DEFAULT_RADIUS: 7,
 
+    locateMarker:null,
+
     QueryString: function () {
         var query_string = {};
         var query = window.location.search.substring(1);
@@ -225,6 +227,21 @@ var App = {
                 return;
             }
             $('#frmLocSearch').removeClass('has-error');
+
+            if (App.locateMarker != null) {
+                App.locateMarker.setLatLng([result[0].lat, result[0].lng]);
+                App.locateMarker._icon.title = result[0].fullAddress;
+                App.locateMarker.bindPopup(result[0].fullAddress);
+                App.locateMarker.update();
+            }
+            else {
+                App.locateMarker = new L.marker([result[0].lat, result[0].lng], {
+                    draggable: true,
+                    title: result[0].fullAddress
+                });
+                App.locateMarker.bindPopup(result[0].fullAddress);
+                map.addLayer(App.locateMarker);
+            }
             App.map.setView([result[0].lat, result[0].lng], 15);
         });
         
@@ -414,7 +431,6 @@ var App = {
 
             heatmap: function (layer, callback) {
 
-                
                 if (typeof (App.heatmap.rasters[App.util.getLayerId(layer.name)]) != 'undefined') {
 
                     $('#ulHeatmapLegend').append($(layer.HTMLLegend));
@@ -501,15 +517,34 @@ var App = {
                 switch (layer.geom) {
                     case App.GEOM_TYPES.POINT:
                     case App.GEOM_TYPES.MULTIPOINT:
-                        if(data.features.length>1000){
+                        if(data.features.length>100){
                             
                             //prompt user heatmap or markercollection?
-                            $('#dialogModal.modal-content').html('<button class="btn btn-sm" id="btnHeatmap">Heatmap</button><button class="btn btn-sm" id="btnCluster">Cluster</button>');
-
+                            $('#dialogModal .modal-content').html('That\'s a lot of points. <br/>How would you like to render these?<br/><button class="btn btn-sm" id="btnHeatmap" style="margin:10px;" data-dismiss="modal">Heatmap</button><button class="btn btn-sm" id="btnCluster" style="margin:10px;" data-dismiss="modal">Cluster</button>');
 
                             $('#btnHeatmap').on('click', function(){
+                                //if (typeof (App.heatmap.rasters[App.util.getLayerId(layer.name)]) != 'undefined') {
 
+                                //    $('#ulHeatmapLegend').append($(layer.HTMLLegend));
 
+                                //    callback();
+                                //    return;
+                                //}
+
+                                layer.HTMLLegend = App.legendFactory.createHeatmapLegend(layer.name);
+
+                                $('#ulHeatmapLegend').append($(layer.HTMLLegend));
+
+                                var id = App.util.getLayerId(layer.name);
+
+                                //how are we pushing this into the curRasters?
+                                App.heatmap.curRasters.push(layer);
+                                App.heatmap.rasters[id] = data;
+                                App.heatmap.rasterMultiplier[id] = 1;
+                                
+                                layer.type = 'heatmap';
+
+                                App.heatmap.render();
 
                             });
 
@@ -519,12 +554,34 @@ var App = {
                                 for (var i = 0; i < data.features.length; i++) {
 
                                     var marker = L.marker(new L.LatLng(data.features[i].geometry.coordinates[1], data.features[i].geometry.coordinates[0]));
-                                    marker.bindPopup('goo');
+
+                                    marker.bindPopup(Object.keys(data.features[i].properties).map(function (k) {
+                                        if ($.inArray(k, App.STYLE_KEYWORDS) == -1) {
+                                            return '<strong>' + k + "</strong>: " + data.features[i].properties[k] + '<br/>';
+                                        }
+                                    }).join(""), { maxHeight: 200 });
+
                                     layer.mapLayer.addLayer(marker);
                                 }
                                 
                                 App.map.addLayer(layer.mapLayer);
+
+                                layer.type = 'POINT_CLUSTER';
+
+                                //create the HTMLLegend from the jsonLegend property of the layer.
+                                layer.HTMLLegend = App.legendFactory.renderHTMLLegend(layer);
+
+                                $('#ulVectorLegend').prepend(layer.HTMLLegend);
                             });
+
+                            $('#dialogModal').modal('show');
+
+                            //if it's something that's been dropped
+                            if (typeof (config.layers[App.util.getLayerId(layer.name)]) == 'undefined') {
+                                config.layers.push(layer);
+                            }
+
+                            return false;
                         }else{
                         geoJson = L.geoJson(data, {
                             pointToLayer:
@@ -726,6 +783,8 @@ var App = {
                     break;
                 case App.GEOM_TYPES.MULTIPOLYGON:
                 case App.GEOM_TYPES.POLYGON:
+                    if (isNaN(symbol.weight)) {
+                        symbol.weight = 1;}
                     //console.log(symbol.fillOpacity);
                     legendItem += '<rect y="' + (symbol.weight - 1) + '" x="' + (symbol.weight - 1) + '" width="12" height="12" fill-opacity="' + symbol.fillOpacity + '" fill=' + symbol.fillColor + ' stroke-width="' + symbol.weight + '" stroke="' + symbol.color + '" />';
                     break;
@@ -1791,7 +1850,8 @@ var App = {
             });
         },
 
-        //called when a heatmap layer that has already been added to the heatmap is activated or deactivated.
+        // called when a heatmap layer that has already been added
+        // to the heatmap is activated or deactivated.
         sync: function (id, active) {
            
             if (active == false) {
@@ -1853,28 +1913,58 @@ var App = {
             
             var rManager = {};
 
-            //get unique dimensions and associated rasters:
+            //group rasters by dimensions
             $.each(this.curRasters, function (i, v) {
-                var dims = v.width + '_' + v.height;
-
+                
                 var id = App.util.getLayerId(v.name);
 
+                
+                if (typeof (v.width) != 'undefined') {
+                    var dims = v.width + '_' + v.height;
+                } else { //for geojson point-based heatmaps
+                    
+                    if (typeof(rManager['geojson']) != 'undefined') {
+                        rManager.geojson.push(id);
+                    } else {
+                        rManager.geojson = { rasters: [id] };
+                    };
+                    return true;
+                }
+
+                //concatenated, stringified to code width and height to support 
+                //grouping
+                //for true rasters (eg. PNGs)
                 if (typeof (rManager[dims]) != 'undefined') {
                     rManager[dims].rasters.push(id);
                 }
                 else {
-                    rManager[dims] = { height: v.height, width: v.width, rasters: [id], nodata: v.nodata, ul: v.ul, step: v.step };
+                   rManager[dims] = { height: v.height, width: v.width, rasters: [id], nodata: v.nodata, ul: v.ul, step: v.step };
                 }
             });
 
             for (var dims in rManager) {
-                this._crush(rManager[dims]);
+                //combing point based heatmap
+                if (dims == 'geojson') {
+                    this._crush_geojson(rManager.geojson.rasters);
+                } else {
+                    this._crush(rManager[dims]);
+                }
             }
 
             $('#sliMaxVal').val(this.maxval);
             $('#txtMaxVal').html(this.maxval);
 
             this.layer.setData({ max: this.maxval, data: this.pngdata });
+        },
+
+        _crush_geojson: function(colGeojson) {
+            
+            for (var id in colGeojson) {
+                var features = App.heatmap.rasters[colGeojson[id]].features;
+                for (var point in features) {
+                    this.pngdata.push({ lat: features[point].geometry.coordinates[1], lng: features[point].geometry.coordinates[0], count: 1 * this.rasterMultiplier[colGeojson[id]] });
+                }
+            }
         },
 
         _crush: function (colRasters) {
@@ -1891,7 +1981,6 @@ var App = {
                         if (tempval > colRasters.nodata) {
                             val += tempval * this.rasterMultiplier[colRasters.rasters[r]];
                         }
-
                     }
 
                     if (val > colRasters.nodata && val < 255) {
@@ -1953,7 +2042,7 @@ var App = {
 
         getLayerId: function (name) {
             //name need lots more here to make safe
-            return name.replace(/[\s,\/\:\%\.\(\)]/g, '_');
+            return name.replace(/[\s,\/\:\%\.\(\)\+]/g, '_');
         },
 
         getLayerById: function (id) {
@@ -2134,8 +2223,6 @@ var App = {
         }
     }
 }
-
-
 
 Storage.prototype.setObject = function (key, value) {
     this.setItem(key, JSON.stringify(value));

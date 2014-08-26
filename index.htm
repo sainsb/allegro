@@ -26,6 +26,9 @@
     <!--  <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/leaflet.draw/leaflet.draw.css" /> -->
       <style>
 
+          .input-sm {
+              padding-left:6px !important;
+          }
           #map {
               border: solid #DDD 1px;
           }
@@ -268,6 +271,14 @@
         </div>
     </div>
 
+    <div class="modal fade bs-example-modal-sm" id='dialogModal' tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="tableModal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -422,8 +433,8 @@
      <script type="text/javascript" src="//library.oregonmetro.gov/libraries/leaflet.fullscreen/Control.FullScreen.js"></script>
         <script type="text/javascript" src="//library.oregonmetro.gov/libraries/leaflet-hash/leaflet-hash.js"></script>
     <!-- https://github.com/calvinmetcalf/shapefile-js/ -->
-      <!--<script type="text/javascript" src="//library.oregonmetro.gov/libraries/leaflet.shapefile/shp.js"></script> -->
-      <script type="text/javascript" src="js/shp.js"></script>
+      <script type="text/javascript" src="//library.oregonmetro.gov/libraries/leaflet.shapefile/shp.js"></script> 
+      <!--<script type="text/javascript" src="js/shp.js"></script>-->
       <script type="text/javascript" src="js/papaparse.min.js"></script>
         <script type="text/javascript" src="//library.oregonmetro.gov/libraries/colorbrewer/colorbrewer.js"></script>
     <script type="text/javascript" src="//library.oregonmetro.gov/libraries/metro/bootstrap-context/context.js"></script>
