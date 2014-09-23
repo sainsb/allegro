@@ -241,7 +241,8 @@ var App = {
                 });
                 App.locateMarker.bindPopup(result[0].fullAddress);
                 map.addLayer(App.locateMarker);
-            }
+            }
+
             App.map.setView([result[0].lat, result[0].lng], 15);
         });
         
@@ -1744,10 +1745,12 @@ var App = {
         rasters: {},
         rasterMultiplier: {},
         curRasters: [],
+        tooltip: null,
         blur: .65,
         gradientIndex: 4,
+        heattip_enabled : false,
         gradients: [
-                {'.55': '#278590','.85': '#F9FBBD','.95': '#0000FF', '1.1': '#9D5923'},
+                {'.55': '#278590','.85': '#F9FBBD','.95': '#0000FF', '1': '#9D5923'},
                 {'.55':'#0C307A','.85':'#76EC00', '1':'#C2523C'},
                 {'0':'#3562CF','.5':'#FFFFBF', '1':'#C44539'},
                 {'0':'#FFDFDF', '1':'#8F0C0A'},
@@ -1777,6 +1780,8 @@ var App = {
             App.heatmap.layer = new HeatmapOverlay(this.config);
             
             App.map.addLayer(this.layer);
+
+            this.tooltip = L.popup()
 
             $('#sliRadius').val(this.radius);
             $('#txtRadius').html(this.radius);
@@ -1829,6 +1834,41 @@ var App = {
 
             $('#chkLocalExtrema').on('change', function () {
 
+
+            });
+
+            $('#chkHeatTip').on('change', function () {
+                //if ($(this).hasAttr('checked')){
+                    App.heatmap.heattip_enabled = $(this).is(':checked');
+                    
+                    if(App.heatmap.heattip_enabled){
+
+                    $(map).on('mousemove.heat', function(e){
+                        //console.log(event);
+
+                        var containerPoint = map.mouseEventToContainerPoint(event)
+                        //console.log(containerPoint);
+                        var value=App.heatmap.layer._heatmap.getValueAt({x:containerPoint.x, y:containerPoint.y});  
+                         if(value+''=='0'){
+                             if(map.hasLayer(App.heatmap.tooltip)){
+                             map.removeLayer(App.heatmap.tooltip);
+                         }
+                             return;
+                         }
+                        var latlng = map.mouseEventToLatLng(event);
+                     App.heatmap.tooltip.setLatLng(latlng).setContent('<h3>'+value+'</h3>').update();
+                       
+                if(!map.hasLayer(App.heatmap.tooltip)){
+                    map.addLayer(App.heatmap.tooltip);
+                }
+
+                    })
+
+                }
+                else
+                {
+                    $(map).off('mousemove.heat');
+                }
 
             });
 
