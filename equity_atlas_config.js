@@ -473,7 +473,7 @@ config.layers.push(
                     "fillColor": "#C70063",
                     "maxVal": 30,
                     "minVal": 2,
-                    "radius": 7,
+                    "radius": 6,
                     "value": "2 - 30%"
                 },
                 {
@@ -481,7 +481,7 @@ config.layers.push(
                     "fillColor": "#C70063",
                     "maxVal": 45.0,
                     "minVal": 30.01,
-                    "radius": 12,
+                    "radius": 8,
                     "value": "31 - 45%"
                 },
                 {
@@ -489,7 +489,7 @@ config.layers.push(
                     "fillColor": "#C70063",
                     "maxVal": 70.0,
                     "minVal": 45.01,
-                    "radius": 17,
+                    "radius": 10,
                     "value": "46 - 70%"
                 },
                 {
@@ -497,12 +497,13 @@ config.layers.push(
                     "fillColor": "#C70063",
                     "maxVal": 95.0,
                     "minVal": 70.01,
-                    "radius": 23,
+                    "radius": 12,
                     "value": "71 - 95%"
                 }
             ],
             "type": "classBreaks"
         },
+        "defQuery": "FREELUNCHP < 100",
         "name": "Percent Students Eligible for Free or Reduced Price Lunch by school - Points",
         "popupTemplate": "<b>School Name: </b>{{NAME}}<br/><b>Percent Students Eligible for Free or Reduced Price Lunch (by school): </b>{{FREELUNCHP}}%",
         "source": "Equity Atlas",

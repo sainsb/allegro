@@ -117,7 +117,7 @@ config.layers.push({
     'theme': 'Transportation'
 },
 {
-    'name': 'Commmunity Development Grants',
+    'name': 'Community Development Grants',
     'url': 'data/RISE/community_development_grants.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',
@@ -138,7 +138,7 @@ config.layers.push({
 { type: 'heatmap', theme: 'TOD', thumb: 'img/heatmap.jpg', nodata: 0, ul: [-123.1787600372, 45.6955761882], step: 0.0008000000, file: 'data/rise/tod.png', source: 'RISE', name: 'TOD Revitalization Projects heatmap', width: 1330, height: 708 },
 { type: 'heatmap', theme: 'General', thumb: 'img/heatmap.jpg', nodata: 0, ul: [-123.51819289449999, 46.0676384925], step: 0.000885099, file: 'data/rise/points.png', source: 'RISE', name: 'Direct Assets heatmap', width: 1330, height: 708 },
 {
-    'name': 'Commmunity Enhancement Grants',
+    'name': 'Community Enhancement Grants',
     'url': 'data/RISE/community_enhancement_grants.zip',
     'type': 'shapefile',
     'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png',

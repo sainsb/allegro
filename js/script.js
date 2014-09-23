@@ -468,7 +468,7 @@ var App = {
         /* Parse geojson into Leaflet, include legend creation */
         parse: {
 
-            geoJSON: function (data, layer) {
+            geoJSON: function (data, layer, override) {
 
                 //Sometimes the Shapefile parser will find multiple objects in a zipped shapefile
                 //We could prompt the user...but this works for the time being...
@@ -517,10 +517,10 @@ var App = {
                 switch (layer.geom) {
                     case App.GEOM_TYPES.POINT:
                     case App.GEOM_TYPES.MULTIPOINT:
-                        if(data.features.length>100){
+                        if(data.features.length>100 && typeof(override) == 'undefined'){
                             
                             //prompt user heatmap or markercollection?
-                            $('#dialogModal .modal-content').html('That\'s a lot of points. <br/>How would you like to render these?<br/><button class="btn btn-sm" id="btnHeatmap" style="margin:10px;" data-dismiss="modal">Heatmap</button><button class="btn btn-sm" id="btnCluster" style="margin:10px;" data-dismiss="modal">Cluster</button>');
+                            $('#dialogModal .modal-content').html('That\'s a lot of points. <br/>How would you like to render these?<br/><button class="btn btn-sm" id="btnHeatmap" style="margin:10px;" data-dismiss="modal">Heatmap</button><button class="btn btn-sm" id="btnCluster" style="margin:10px;" data-dismiss="modal">Cluster</button><button class="btn btn-sm" id="btnDeal" style="margin:10px;" data-dismiss="modal">I\'ll deal with it</button>');
 
                             $('#btnHeatmap').on('click', function(){
                                 //if (typeof (App.heatmap.rasters[App.util.getLayerId(layer.name)]) != 'undefined') {
@@ -574,6 +574,10 @@ var App = {
                                 $('#ulVectorLegend').prepend(layer.HTMLLegend);
                             });
 
+                            $('#btnDeal').on('click', function() {
+                                App.data.parse.geoJSON(data, layer, true);
+                            });
+
                             $('#dialogModal').modal('show');
 
                             //if it's something that's been dropped
@@ -582,7 +586,7 @@ var App = {
                             }
 
                             return false;
-                        }else{
+                        } else {
                         geoJson = L.geoJson(data, {
                             pointToLayer:
                                 function (feature, latlng) {
@@ -607,7 +611,7 @@ var App = {
 
                 //**going to need some additional logic here
                 //to handle offensive characters in layer names
-                var id = App.util.getLayerId(layer.name);
+                //var id = App.util.getLayerId(layer.name);
 
                 //parse fields and add to layer object
                 //This is used in the layer symbology dialog when applying a renderer
@@ -1743,7 +1747,7 @@ var App = {
         blur: .65,
         gradientIndex: 4,
         gradients: [
-                {'.55': '#278590','.85': '#F9FBBD','1': '#9D5923'},
+                {'.55': '#278590','.85': '#F9FBBD','.95': '#0000FF', '1.1': '#9D5923'},
                 {'.55':'#0C307A','.85':'#76EC00', '1':'#C2523C'},
                 {'0':'#3562CF','.5':'#FFFFBF', '1':'#C44539'},
                 {'0':'#FFDFDF', '1':'#8F0C0A'},
@@ -1762,7 +1766,7 @@ var App = {
                 "maxOpacity": this.maxOpacity,
                 "minOpacity": this.minOpacity,
                 "scaleRadius": true,
-                "useLocalExtrema": true,
+                "useLocalExtrema": false,
                 "blur":this.blur,
                 "gradient":this.gradients[this.gradientIndex],
                 "latField": 'lat',
@@ -1771,7 +1775,7 @@ var App = {
             },
 
             App.heatmap.layer = new HeatmapOverlay(this.config);
-
+            
             App.map.addLayer(this.layer);
 
             $('#sliRadius').val(this.radius);
@@ -1961,8 +1965,12 @@ var App = {
             
             for (var id in colGeojson) {
                 var features = App.heatmap.rasters[colGeojson[id]].features;
+                var counter = 0;
                 for (var point in features) {
-                    this.pngdata.push({ lat: features[point].geometry.coordinates[1], lng: features[point].geometry.coordinates[0], count: 1 * this.rasterMultiplier[colGeojson[id]] });
+                    if (counter % 10 == 0) {
+                        this.pngdata.push({ lat: features[point].geometry.coordinates[1], lng: features[point].geometry.coordinates[0], count: 1 * this.rasterMultiplier[colGeojson[id]] });
+                    }
+                    counter += 1;
                 }
             }
         },
@@ -2134,6 +2142,7 @@ var App = {
             var trgid = dropped[0].id;
             var id = trgid.replace('li', '');
             var layer = this.getLayerById(id);
+            console.log(layer.mapLayer);
             layer.mapLayer.bringToFront();
             //var trgkey = trgid.substring(2, trgid.length);
 
