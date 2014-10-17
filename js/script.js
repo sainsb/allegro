@@ -379,7 +379,7 @@ var App = {
                 var url = '';
 
                 if (typeof (layer.proxyUrl) != 'undefined') {
-                    url = layer.proxyUrl + encodeURIComponent(layer.url);
+                    url = './proxy/?url=' + encodeURIComponent(layer.url);
                 } else {
                     url = layer.url;
                 }
@@ -1781,7 +1781,7 @@ var App = {
             
             App.map.addLayer(this.layer);
 
-            this.tooltip = L.popup()
+            this.tooltip = L.popup({autoPan:false});
 
             $('#sliRadius').val(this.radius);
             $('#txtRadius').html(this.radius);
@@ -1844,7 +1844,6 @@ var App = {
                     if(App.heatmap.heattip_enabled){
 
                     $(map).on('mousemove.heat', function(e){
-                        //console.log(event);
 
                         var containerPoint = map.mouseEventToContainerPoint(event)
                         //console.log(containerPoint);
