@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("RLISTiles")]
-[assembly: AssemblyDescription("A simple tileserver for mbtiles files.")]
+[assembly: AssemblyTitle("Allegro")]
+[assembly: AssemblyDescription("A simple js map viewer")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Oregon Metro")]
-[assembly: AssemblyProduct("RLISTiles")]
+[assembly: AssemblyProduct("Allegro")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
