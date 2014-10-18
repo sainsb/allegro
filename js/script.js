@@ -143,10 +143,29 @@ var App = {
             var layer = App.util.getLayerById(id);
             if ($(this).is(':checked')) {
                 //we'll need to bring stuff to back and front
-                if (layer.type == App.LAYER_TYPES.geojson || layer.type == App.LAYER_TYPES.shapefile) {
+                if (layer.type == App.LAYER_TYPES.GEOJSON || layer.type == App.LAYER_TYPES.SHAPEFILE) {
+
+                    /* Enter Layer order z-index hell */
+                    //Just bring any layers to the front that are above in the TOC after bringing this one to the front.
+
                     layer.mapLayer.addTo(map).bringToFront();
+                    var other_layers = [];
+                    $.each($('.legend-check'), function(i,v){
+                        var iid = $(v).prop('id').replace('chk','');
+                        if (iid != id){
+                            if($(v).is(':checked')){
+                                other_layers.push(iid);
+                            }
+                        } else {
+                            return false;
+                        }
+                    });
+                    other_layers.reverse();
+                    for(var l=0;l<other_layers.length;l++){
+                        App.util.getLayerById(other_layers[l]).mapLayer.bringToFront();
+                    }
                 } else {
-                    layer.mapLayer.addTo(map);
+                  layer.mapLayer.addTo(map);
                 }
             } else {
                 map.removeLayer(layer.mapLayer);
@@ -250,20 +269,31 @@ var App = {
         if (typeof (this.QueryString.l) != 'undefined' && this.QueryString.l.trim() != '') {
            
             var l = decodeURIComponent(this.QueryString.l);
-            var layer = this.util.getLayerByName(l);
-            if (layer != null) {
-                this.data.add(layer);
-            }
+            App.boot_layers = l.split(',');
+            App.load_layers(0);
         }
 
         this.util.dragHandler();
 
     },
 
+    boot_layers : [],
+    load_layers : function(layerIndex){
+      if (layerIndex<App.boot_layers.length){
+        //RECURSION!!
+        
+        var layer = this.util.getLayerByName(App.boot_layers[layerIndex].trim());
+        if (layer != null) {
+        setTimeout(function(layer){return function(){App.data.add(layer,
+         App.load_layers(layerIndex+1))};}(layer), 1000);
+        }
+       }
+      },
+
     data: {
 
         /* event handler for add data button */
-        add: function (layer) {
+        add: function (layer, cb) {
             switch (layer.type) {
                 case App.LAYER_TYPES.GEOJSON:
                     this.load.geoJSON(layer);
@@ -284,7 +314,7 @@ var App = {
                     break;
                 case App.LAYER_TYPES.SHAPEFILE:
                     this.load.shapefile(layer, function (data) {
-                        App.data.parse.geoJSON(data, layer);
+                        App.data.parse.geoJSON(data, layer, cb);
                     });
             }
         },
@@ -505,7 +535,7 @@ var App = {
                      }
                 : function (feature, slayer) {
                     if (feature.properties) {
-                        slayer.bindPopup(Object.keys(feature.properties).map(function (k) {
+                        slayer.bindPopup('<h5>'+layer.name+'</h5>'+Object.keys(feature.properties).map(function (k) {
                             if ($.inArray(k, App.STYLE_KEYWORDS) == -1) {
                                 return '<strong>' + k + "</strong>: " + feature.properties[k] + '<br/>';
                             }
@@ -518,76 +548,76 @@ var App = {
                 switch (layer.geom) {
                     case App.GEOM_TYPES.POINT:
                     case App.GEOM_TYPES.MULTIPOINT:
-                        if(data.features.length>100 && typeof(override) == 'undefined'){
+                        // if(data.features.length>100 && typeof(override) == 'undefined'){
                             
-                            //prompt user heatmap or markercollection?
-                            $('#dialogModal .modal-content').html('That\'s a lot of points. <br/>How would you like to render these?<br/><button class="btn btn-sm" id="btnHeatmap" style="margin:10px;" data-dismiss="modal">Heatmap</button><button class="btn btn-sm" id="btnCluster" style="margin:10px;" data-dismiss="modal">Cluster</button><button class="btn btn-sm" id="btnDeal" style="margin:10px;" data-dismiss="modal">I\'ll deal with it</button>');
+                        //     //prompt user heatmap or markercollection?
+                        //     $('#dialogModal .modal-content').html('That\'s a lot of points. <br/>How would you like to render these?<br/><button class="btn btn-sm" id="btnHeatmap" style="margin:10px;" data-dismiss="modal">Heatmap</button><button class="btn btn-sm" id="btnCluster" style="margin:10px;" data-dismiss="modal">Cluster</button><button class="btn btn-sm" id="btnDeal" style="margin:10px;" data-dismiss="modal">I\'ll deal with it</button>');
 
-                            $('#btnHeatmap').on('click', function(){
-                                //if (typeof (App.heatmap.rasters[App.util.getLayerId(layer.name)]) != 'undefined') {
+                        //     $('#btnHeatmap').on('click', function(){
+                        //         //if (typeof (App.heatmap.rasters[App.util.getLayerId(layer.name)]) != 'undefined') {
 
-                                //    $('#ulHeatmapLegend').append($(layer.HTMLLegend));
+                        //         //    $('#ulHeatmapLegend').append($(layer.HTMLLegend));
 
-                                //    callback();
-                                //    return;
-                                //}
+                        //         //    callback();
+                        //         //    return;
+                        //         //}
 
-                                layer.HTMLLegend = App.legendFactory.createHeatmapLegend(layer.name);
+                        //         layer.HTMLLegend = App.legendFactory.createHeatmapLegend(layer.name);
 
-                                $('#ulHeatmapLegend').append($(layer.HTMLLegend));
+                        //         $('#ulHeatmapLegend').append($(layer.HTMLLegend));
 
-                                var id = App.util.getLayerId(layer.name);
+                        //         var id = App.util.getLayerId(layer.name);
 
-                                //how are we pushing this into the curRasters?
-                                App.heatmap.curRasters.push(layer);
-                                App.heatmap.rasters[id] = data;
-                                App.heatmap.rasterMultiplier[id] = 1;
+                        //         //how are we pushing this into the curRasters?
+                        //         App.heatmap.curRasters.push(layer);
+                        //         App.heatmap.rasters[id] = data;
+                        //         App.heatmap.rasterMultiplier[id] = 1;
                                 
-                                layer.type = 'heatmap';
+                        //         layer.type = 'heatmap';
 
-                                App.heatmap.render();
+                        //         App.heatmap.render();
 
-                            });
+                        //     });
 
-                            $('#btnCluster').off('click').on('click', function(){
-                                layer.mapLayer = L.markerClusterGroup({showCoverageOnHover:false});
+                        //     $('#btnCluster').off('click').on('click', function(){
+                        //         layer.mapLayer = L.markerClusterGroup({showCoverageOnHover:false});
                          
-                                for (var i = 0; i < data.features.length; i++) {
+                        //         for (var i = 0; i < data.features.length; i++) {
 
-                                    var marker = L.marker(new L.LatLng(data.features[i].geometry.coordinates[1], data.features[i].geometry.coordinates[0]));
+                        //             var marker = L.marker(new L.LatLng(data.features[i].geometry.coordinates[1], data.features[i].geometry.coordinates[0]));
 
-                                    marker.bindPopup(Object.keys(data.features[i].properties).map(function (k) {
-                                        if ($.inArray(k, App.STYLE_KEYWORDS) == -1) {
-                                            return '<strong>' + k + "</strong>: " + data.features[i].properties[k] + '<br/>';
-                                        }
-                                    }).join(""), { maxHeight: 200 });
+                        //             marker.bindPopup(Object.keys(data.features[i].properties).map(function (k) {
+                        //                 if ($.inArray(k, App.STYLE_KEYWORDS) == -1) {
+                        //                     return '<strong>' + k + "</strong>: " + data.features[i].properties[k] + '<br/>';
+                        //                 }
+                        //             }).join(""), { maxHeight: 200 });
 
-                                    layer.mapLayer.addLayer(marker);
-                                }
+                        //             layer.mapLayer.addLayer(marker);
+                        //         }
                                 
-                                App.map.addLayer(layer.mapLayer);
+                        //         App.map.addLayer(layer.mapLayer);
 
-                                layer.type = 'POINT_CLUSTER';
+                        //         layer.type = 'POINT_CLUSTER';
 
-                                //create the HTMLLegend from the jsonLegend property of the layer.
-                                layer.HTMLLegend = App.legendFactory.renderHTMLLegend(layer);
+                        //         //create the HTMLLegend from the jsonLegend property of the layer.
+                        //         layer.HTMLLegend = App.legendFactory.renderHTMLLegend(layer);
 
-                                $('#ulVectorLegend').prepend(layer.HTMLLegend);
-                            });
+                        //         $('#ulVectorLegend').prepend(layer.HTMLLegend);
+                        //     });
 
-                            $('#btnDeal').on('click', function() {
-                                App.data.parse.geoJSON(data, layer, true);
-                            });
+                        //     $('#btnDeal').on('click', function() {
+                        //         App.data.parse.geoJSON(data, layer, true);
+                        //     });
 
-                            $('#dialogModal').modal('show');
+                        //     $('#dialogModal').modal('show');
 
-                            //if it's something that's been dropped
-                            if (typeof (config.layers[App.util.getLayerId(layer.name)]) == 'undefined') {
-                                config.layers.push(layer);
-                            }
+                        //     //if it's something that's been dropped
+                        //     if (typeof (config.layers[App.util.getLayerId(layer.name)]) == 'undefined') {
+                        //         config.layers.push(layer);
+                        //     }
 
-                            return false;
-                        } else {
+                        //     return false;
+                        // } else {
                         geoJson = L.geoJson(data, {
                             pointToLayer:
                                 function (feature, latlng) {
@@ -595,7 +625,7 @@ var App = {
                                 },
                             onEachFeature: _onEachFeature
                         });
-                        }
+                        //}
                         break;
                     case App.GEOM_TYPES.MULTILINESTRING:
                     case App.GEOM_TYPES.LINESTRING:
@@ -2119,8 +2149,13 @@ var App = {
             return null;
         },
 
-        getRandomColor: function () {
-            return "#" + ((1 << 24) * Math.random() | 0).toString(16);
+        getRandomColor: function() {
+            var letters = '0123456789ABCDEF'.split('');
+            var color = '#';
+            for (var i = 0; i < 6; i++ ) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
         },
 
         export2CSV: function (data, quote) {
