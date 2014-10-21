@@ -88,6 +88,8 @@
     <None Include="build\build.js" />
     <Content Include="basemap_config.js" />
     <Content Include="civic_apps_config.js" />
+    <Content Include="css\bootstrap-select.min.css" />
+    <Content Include="css\bootstrap.min.css" />
     <Content Include="css\style.css" />
     <Content Include="equity_atlas_config.js" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -118,6 +120,8 @@
     <Content Include="img\rcs_land_cover.jpg" />
     <Content Include="img\trimet_logo.png" />
     <Content Include="index.htm" />
+    <Content Include="js\bootstrap-sortable.js" />
+    <Content Include="js\jquery.csvToTable.js" />
     <Content Include="js\script.js" />
     <Content Include="parks_config.js" />
     <Content Include="rise_config.js" />
