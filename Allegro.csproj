@@ -8,7 +8,7 @@
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{85D4B08E-96C0-48F3-B95B-5AB9257C3F0D}</ProjectGuid>
-    <ProjectTypeGuids>{E3E379DF-F4C6-4180-9B81-6769533ABE47};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Allegro</RootNamespace>
@@ -21,6 +21,7 @@
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>3711d025</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,7 +31,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -44,12 +45,24 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>packages\EntityFramework.6.1.1\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>packages\EntityFramework.6.1.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data.SQLite, Version=1.0.94.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Program Files (x86)\System.Data.SQLite\2008\bin\System.Data.SQLite.dll</HintPath>
+    <Reference Include="System.Data.SQLite">
+      <HintPath>packages\System.Data.SQLite.Core.1.0.94.0\lib\net45\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.EF6">
+      <HintPath>packages\System.Data.SQLite.EF6.1.0.94.0\lib\net45\System.Data.SQLite.EF6.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.Linq">
+      <HintPath>packages\System.Data.SQLite.Linq.1.0.94.1\lib\net45\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -73,31 +86,62 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="build\build.js" />
+    <Content Include="basemap_config.js" />
+    <Content Include="civic_apps_config.js" />
+    <Content Include="css\bootstrap-select.min.css" />
+    <Content Include="css\bootstrap.min.css" />
     <Content Include="css\style.css" />
+    <Content Include="embed.html" />
+    <Content Include="equity_atlas_config.js" />
+    <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="images\ajax-loader.gif" />
     <Content Include="images\avatar.png" />
     <Content Include="images\body-bg.png" />
     <Content Include="images\left-menu-bg.png" />
+    <Content Include="img\ajax-loader.gif" />
+    <Content Include="img\bridges.jpg" />
+    <Content Include="img\civicApps_logo.png" />
+    <Content Include="img\clf_logo.png" />
+    <Content Include="img\conservation_target.png" />
+    <Content Include="img\esriGray.png" />
+    <Content Include="img\esri_logo.png" />
+    <Content Include="img\esri_logo_mi.png" />
+    <Content Include="img\expand-collapse.png" />
+    <Content Include="img\expand-collapseL.png" />
+    <Content Include="img\heatmap.jpg" />
+    <Content Include="img\metro_base.JPG" />
+    <Content Include="img\metro_logo.png" />
+    <Content Include="img\photo2008.jpg" />
+    <Content Include="img\photo2009.jpg" />
+    <Content Include="img\photo2010.jpg" />
+    <Content Include="img\photo2011.jpg" />
+    <Content Include="img\photo2012.jpg" />
+    <Content Include="img\photo2013.png" />
+    <Content Include="img\rcs_land_cover.jpg" />
+    <Content Include="img\trimet_logo.png" />
+    <Content Include="js\bootstrap-sortable.js" />
+    <Content Include="js\jquery.csvToTable.js" />
     <Content Include="js\script.js" />
+    <Content Include="parks_config.js" />
+    <Content Include="rise_config.js" />
+    <Content Include="rlis_config.js" />
+    <Content Include="spatial_data_library_config.js" />
+    <Content Include="trimet_config.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="packages.config" />
+    <Content Include="img\Thumbs.db" />
+    <Content Include="fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="data\maps.sqlite" />
     <None Include="Properties\PublishProfiles\Query - Prod.pubxml" />
     <None Include="Properties\PublishProfiles\Query - QA.pubxml" />
-  </ItemGroup>
-  <ItemGroup>
-    <COMReference Include="MSUtil">
-      <Guid>{A7E75D86-41CD-4B6E-B4BD-CC2ED34B3FB0}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="python\" />
@@ -134,6 +178,13 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
+  <Import Project="packages\System.Data.SQLite.Core.1.0.94.0\build\net45\System.Data.SQLite.Core.targets" Condition="Exists('packages\System.Data.SQLite.Core.1.0.94.0\build\net45\System.Data.SQLite.Core.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\System.Data.SQLite.Core.1.0.94.0\build\net45\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\System.Data.SQLite.Core.1.0.94.0\build\net45\System.Data.SQLite.Core.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
