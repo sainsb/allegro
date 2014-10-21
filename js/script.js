@@ -122,6 +122,15 @@ var App = {
         }
       });
 
+      $('#btnShare').click(function () {
+        document.getElementById('shareLinkTb').value = location.href;
+
+        var embedhref = location.protocol + '//' + location.host + location.pathname.replace('/index.html$', '/') +
+          'embed.html' + location.search + location.hash;
+        document.getElementById('shareEmbedTb').value = embedhref;
+        $('#shareModal').modal('show');
+      });
+
       //assign handler to options	
       //not sure if will be modal or not yet...
       $('#selOptions').on('change.core', function (ev) {
