@@ -331,8 +331,32 @@ var App = {
     return map_opts;
   },
 
-  getEmbedUrl: function() {
+  addLayerToUrl: function(layerId) {
+    var opts = App.QueryString(), i;
+    var layers = (opts['l'] || '').split(',');
+    var layersById = {};
+    for (i = 0; i < layers.length; i++) {
+      if (layers[i].length > 0) {
+        layersById[decodeURIComponent(layers[i])] = true;
+      }
+    }
+    layersById[layerId] = true;
+    App.boot_layers = [];
+    for (i in layersById) {
+      App.boot_layers.push(i);
+    }
+    App.updateUrl.call(App.map);
+  },
 
+  removeLayerFromUrl: function(layerId) {
+    var activeLayers = [];
+    for (var i = 0; i < App.boot_layers.length; i++) {
+      if (App.boot_layers[i] !== layerId) {
+        activeLayers.push(App.boot_layers[i]);
+      }
+    }
+    App.boot_layers = activeLayers;
+    App.updateUrl.call(App.map);
   },
 
   boot_layers: [],
@@ -1061,6 +1085,7 @@ var App = {
         var layer = App.util.getLayerById(id);
         if ($(this).hasClass('active')) {
           $(this).removeClass('active');
+          App.removeLayerFromUrl(id);
 
           if (layer.type == 'heatmap') {
             var id = App.util.getLayerId(layer.name);
@@ -1069,11 +1094,12 @@ var App = {
           } else {
             map.removeLayer(layer.mapLayer);
           }
-
+          App.removeLayerFromUrl(id);
           $('#li' + id).remove();
         }
         else {
           $(this).addClass('active');
+          App.addLayerToUrl(id);
           if (typeof (layer.mapLayer) != 'undefined') {
             map.addLayer(layer.mapLayer);
             switch (layer.type) {
