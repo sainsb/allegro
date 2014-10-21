@@ -125,7 +125,7 @@ var App = {
       $('#btnShare').click(function () {
         document.getElementById('shareLinkTb').value = location.href;
 
-        var embedhref = location.protocol + '//' + location.host + location.pathname.replace('/index.html$', '/') +
+        var embedhref = location.protocol + '//' + location.host + location.pathname.replace('/index.htm', '/') +
           'embed.html' + location.search + location.hash;
         document.getElementById('shareEmbedTb').value = '<iframe width="100%" height="350" src="' + embedhref + '"></iframe>';
         $('#shareModal').modal('show');
@@ -323,7 +323,7 @@ var App = {
     for(var i in opts) {
       if (i === 'll') {
         var nums = opts[i].split(',');
-        map_opts['center'] = new L.LatLng(parseInt(nums[0], 10), parseInt(nums[1], 10));
+        map_opts['center'] = new L.LatLng(parseFloat(nums[0]), parseFloat(nums[1]));
       } else if (i === 'z') {
         map_opts['zoom'] = parseInt(opts[i], 10);
       }
@@ -1085,7 +1085,7 @@ var App = {
         var layer = App.util.getLayerById(id);
         if ($(this).hasClass('active')) {
           $(this).removeClass('active');
-          App.removeLayerFromUrl(id);
+          App.removeLayerFromUrl(layer.name);
 
           if (layer.type == 'heatmap') {
             var id = App.util.getLayerId(layer.name);
@@ -1094,12 +1094,12 @@ var App = {
           } else {
             map.removeLayer(layer.mapLayer);
           }
-          App.removeLayerFromUrl(id);
+          App.removeLayerFromUrl(layer.name);
           $('#li' + id).remove();
         }
         else {
           $(this).addClass('active');
-          App.addLayerToUrl(id);
+          App.addLayerToUrl(layer.name);
           if (typeof (layer.mapLayer) != 'undefined') {
             map.addLayer(layer.mapLayer);
             switch (layer.type) {
