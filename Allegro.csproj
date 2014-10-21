@@ -91,6 +91,7 @@
     <Content Include="css\bootstrap-select.min.css" />
     <Content Include="css\bootstrap.min.css" />
     <Content Include="css\style.css" />
+    <Content Include="embed.html" />
     <Content Include="equity_atlas_config.js" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
