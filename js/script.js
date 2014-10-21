@@ -26,7 +26,7 @@ var App = {
 
   QueryString: function () {
     var query_string = {};
-    var query = window.location.search.substring(1);
+    var query = location.hash.substring(2);
     var vars = query.split("&");
     for (var i = 0; i < vars.length; i++) {
       var pair = vars[i].split("=");
@@ -43,7 +43,7 @@ var App = {
       }
     }
     return query_string;
-  }(),
+  },
 
   init: function () {
     var isEmbeded = document.getElementById('legend') === null;
@@ -127,7 +127,7 @@ var App = {
 
         var embedhref = location.protocol + '//' + location.host + location.pathname.replace('/index.html$', '/') +
           'embed.html' + location.search + location.hash;
-        document.getElementById('shareEmbedTb').value = embedhref;
+        document.getElementById('shareEmbedTb').value = '<iframe width="100%" height="350" src="' + embedhref + '"></iframe>';
         $('#shareModal').modal('show');
       });
 
@@ -228,18 +228,24 @@ var App = {
       });
     }
 
-    this.map = new L.Map('map', {
+    var mapOpts = {
       center: new L.LatLng(45.44944, -122.67599),
       zoom: 10,
       minZoom: 3,
       maxZoom: 19,
       fullscreenControl: true,
-    });
+    };
+    $.extend(mapOpts, this.getMapOptsFromUrl());
+
+    this.map = new L.Map('map', mapOpts);
 
     map = this.map;
 
+    map.on('zoomend', this.updateUrl);
+    map.on('moveend', this.updateUrl);
+
     L.control.scale().addTo(this.map);
-    new L.Hash(this.map);
+    //new L.Hash(this.map);
 
     if (!isEmbeded) {
       // Initialize dialogs
@@ -281,15 +287,51 @@ var App = {
       });
     }
 
-    //Accept l param to load layers passed in querystring
-    if (typeof (this.QueryString.l) != 'undefined' && this.QueryString.l.trim() != '') {
-
-      var l = decodeURIComponent(this.QueryString.l);
+    var opts = this.QueryString();
+    if (opts.l) {
+      var l = decodeURIComponent(opts.l);
       App.boot_layers = l.split(',');
       App.load_layers(0);
     }
 
     this.util.dragHandler();
+  },
+
+  updateUrl: function() {
+    var opts = {}, i;
+    opts['z'] = this.getZoom();
+    opts['ll'] = (Math.round(this.getCenter().lat * 1000000) / 1000000) + ',' + (Math.round(this.getCenter().lng * 1000000) / 1000000);
+    if (App.boot_layers.length > 0) {
+      var layers = [];
+      for (i = 0; i < App.boot_layers.length; i++) {
+        layers.push(encodeURIComponent(App.boot_layers[i]));
+      }
+      opts['l'] = layers.join(',');
+    }
+
+    var opt_parts = [];
+    for (i in opts) {
+      opt_parts.push(i + '=' + opts[i]);
+    }
+    location.hash = '#!' + opt_parts.join('&');
+  },
+
+  getMapOptsFromUrl: function() {
+    var opts = this.QueryString();
+    var map_opts = {};
+
+    for(var i in opts) {
+      if (i === 'll') {
+        var nums = opts[i].split(',');
+        map_opts['center'] = new L.LatLng(parseInt(nums[0], 10), parseInt(nums[1], 10));
+      } else if (i === 'z') {
+        map_opts['zoom'] = parseInt(opts[i], 10);
+      }
+    }
+    return map_opts;
+  },
+
+  getEmbedUrl: function() {
 
   },
 
@@ -387,7 +429,9 @@ var App = {
 
           layer.HTMLLegend = legend;
 
-          App.contextMenu.apply(layer);
+          if (document.getElementById('legend')) {
+            App.contextMenu.apply(layer);
+          }
 
           //beware that this is based on my own spec of the tilejson
           //doesn't conform to other tilejson spec.
@@ -678,7 +722,9 @@ var App = {
 
         $('#ulVectorLegend').prepend(layer.HTMLLegend);
 
-        App.contextMenu.apply(layer);
+        if (document.getElementById('legend')) {
+          App.contextMenu.apply(layer);
+        }
 
         //init sortable functionality in TOC for this item
         $('.sortable').sortable().bind('sortupdate', function (e, ui) {
