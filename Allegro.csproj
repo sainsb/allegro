@@ -31,7 +31,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -120,7 +120,6 @@
     <Content Include="img\photo2013.png" />
     <Content Include="img\rcs_land_cover.jpg" />
     <Content Include="img\trimet_logo.png" />
-    <Content Include="index.htm" />
     <Content Include="js\bootstrap-sortable.js" />
     <Content Include="js\jquery.csvToTable.js" />
     <Content Include="js\script.js" />
