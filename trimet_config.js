@@ -23,7 +23,9 @@ config.layers.push(
     'source': 'TriMet',
     'theme': '',
     'metadataUrl': 'http://developer.trimet.org/gis/meta_tm_rail_lines.shtml',
-    'level': 2
+    'level': 2,
+  'symbolField':'STATUS',
+    "legend": { "symbols": [{ "value": "Existing", "opacity": 1, "color": "#a50026", "weight": 2 }, { "value": "UC", "opacity": 1, "color": "#313695", "weight": 2 }], "title": "Trimet Rail Lines", "type": "uniqueValue" }
 },
 {
     'name': 'Trimet Rail Stops',

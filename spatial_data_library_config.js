@@ -5,7 +5,7 @@ config.layers.push(
         'type': 'shapefile',
         'metadataUrl': 'http://developer.trimet.org/gis/meta_tm_boundary.shtml',
         'source': 'OSU',
-        'icon': 'http://spatialdata.oregonexplorer.info/geoportal/catalog/skins/themes/blue/images/OE_Logo.gif',
+        'icon': 'img/oe_Logo.png',
         'thumb' : 'http://spatialdata.oregonexplorer.info/Metadata/Thumbnails/mpo_2013.GIF',
         'theme': 'Administrative',
         'proxyUrl': './index.ashx?file=',

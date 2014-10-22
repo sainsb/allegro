@@ -395,3 +395,99 @@ input[type="range"]::-ms-thumb {
     cursor: pointer;
   background-image: linear-gradient(to bottom, #529de1 0, #245e8f 100%); /* W3C */
 }
+
+   .input-sm {
+              padding-left:6px !important;
+          }
+          #map {
+              border: solid #DDD 1px;
+          }
+
+          .ranger, .indlabel {
+              display: inline-block;
+          }
+
+          .panelyr.collapsed > .accordion-toggle:before {
+              /* symbol for "collapsed" panels */
+              content: "\e080";
+              cursor: pointer;
+              /* adjust as needed, taken from bootstrap.css */
+          }
+          
+          .panelyr > .accordion-toggle:before {
+              font-family: 'Glyphicons Halflings';
+              content: "\e114";
+              float: left;
+              color: #999;
+              margin-top: 3px;
+              font-size: 10px;
+              cursor: pointer;
+          }
+          
+          .liVectorLegend {
+              transition-property: border-color;
+              transition-duration: .2s;
+              transition-timing-function: linear;
+              transition-property: background-color;
+              transition-duration: .2s;
+              transition-timing-function: linear;
+              
+              overflow: auto;
+              margin-bottom: 2px;
+          }
+
+          .liVectorLegend:hover {
+              border-color: #CCC;
+              background-color: #FAFAFA;
+          }
+
+          .liTileLegend {
+              transition-property: border-color;
+              transition-duration: .2s;
+              transition-timing-function: linear;
+              overflow: auto;
+              margin-bottom: 2px;
+          }
+
+          .liTileLegend:hover {
+              border-color: #CCC;
+              background-color: #FAFAFA;
+          }
+
+          li.sortable-placeholder {
+              border: 1px dashed #CCC;
+              background: none;
+              height: 40px;
+              border-radius: 5px;
+              margin-bottom: 7px;
+          }
+
+          .btnRemove {
+              padding:3px 3px 4px 3px;
+              margin-right:2px;
+              margin-top:2px;
+              line-height:5px;
+              color:#ccc;
+              transition-property: color;
+              transition-duration: .2s;
+              transition-timing-function: linear;
+          }
+
+              .btnRemove:hover {
+                color:#555;
+              }
+
+          .nav-tabs > li > a {
+              margin-right: 4px;
+              line-height: 1.42857143;
+              border: 1px solid #EEE;
+              border-radius: 4px 4px 0 0;
+          }
+
+          .nav > li > a {
+              position: relative;
+              display: block;
+              padding: 8px 8px;
+          }
+
+     

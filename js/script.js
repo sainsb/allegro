@@ -1052,15 +1052,23 @@ var App = {
                 sourceTabString += 'class="active"';
             }
 
+          //Get out your hatchets@!!!
+          if (source == 'OSU') {
+            sourceTabString += '><a href="#' + safe_source + '" style="padding-top:4px;padding-bottom:12px;" data-toggle="tab">';
+          } else {
             sourceTabString += '><a href="#' + safe_source + '" data-toggle="tab">';
-
-            if (typeof (icon) != 'undefined') {
-                sourceTabString += '<img src="' + icon + '" align="left" style="margin-top:3px;"/>&nbsp;';
+          }
+          if (typeof (icon) != 'undefined') {
+                sourceTabString += '<img src="' + icon + '" align="left" />&nbsp;';
             } else {
                 sourceTabString += '<i class="fa fa-check-circle-o"></i>&nbsp;';
             }
 
-            sourceTabString += source + '</a></li>';
+          if (source != 'OSU') {
+            sourceTabString += source;
+          }
+
+          sourceTabString += '</a></li>';
 
             this.$ulSourceTabs.append(sourceTabString);
 

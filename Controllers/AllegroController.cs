@@ -135,7 +135,6 @@ namespace Allegro.Controllers
       return Content("Yay");
     }
 
-    [AcceptVerbs(HttpVerbs.Get)]
     public ActionResult PutMap()
     {
 
@@ -157,7 +156,9 @@ namespace Allegro.Controllers
         cmd.CommandText = dcmd;
         cmd.ExecuteNonQuery();
       }
-      return Content(id);
+
+      var err = "None";
+      return Json(new{id, err});
     }
 
     [AcceptVerbs(HttpVerbs.Get)]
