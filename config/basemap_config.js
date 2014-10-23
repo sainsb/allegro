@@ -96,8 +96,8 @@
             'name': 'Open Street Map',
             'url': 'http://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
             'type': 'basemap',
-            'thumb': 'img/esriGray.png',
-            'icon': 'img/esri_logo.png',
+            'thumb': 'img/osmbase.png',
+            'icon': 'img/osmbase.png',
             'source': 'OSM',
             'theme': 'Roads and Landscape'
         },

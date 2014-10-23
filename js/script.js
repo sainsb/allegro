@@ -23,7 +23,7 @@ var App = {
     DEFAULT_RADIUS: 7,
 
     locateMarker:null,
-
+    loading:true,
     QueryString: function () {
         var query_string = {};
         var query = window.location.search.substring(1);
@@ -76,6 +76,8 @@ var App = {
         //assign handle to add Data button
         //init image lazy loader
         $('#btnAddData').click(function () {
+
+          $('#imgLoadingData').hide();
 
             $('#dataModal').on('shown.bs.modal', function () {
 
@@ -216,6 +218,8 @@ var App = {
             "hide.bs.dropdown": function () { return this.closable; }
         });
 
+        L.Icon.Default.imagePath = '//library.oregonmetro.gov/libraries/leaflet/0.8-dev/images/';
+
         this.map = new L.Map('map', {
             center: new L.LatLng(45.44944, -122.67599),
             zoom: 10,
@@ -267,7 +271,6 @@ var App = {
         
         //Accept l param to load layers passed in querystring
         if (typeof (this.QueryString.l) != 'undefined' && this.QueryString.l.trim() != '') {
-           
             var l = decodeURIComponent(this.QueryString.l);
             App.boot_layers = l.split(',');
             App.load_layers(0);
@@ -278,22 +281,30 @@ var App = {
     },
 
     boot_layers : [],
-    load_layers : function(layerIndex){
-      if (layerIndex<App.boot_layers.length){
+    load_layers : function(layerIndex) {
+      if (layerIndex < App.boot_layers.length) {
         //RECURSION!!
-        
         var layer = this.util.getLayerByName(App.boot_layers[layerIndex].trim());
         if (layer != null) {
-        setTimeout(function(layer){return function(){App.data.add(layer,
-         App.load_layers(layerIndex+1))};}(layer), 1000);
+          App.data.add(layer, function () { App.load_layers(layerIndex + 1); });
+          $('.img-block.layer').each(function(i, v) {
+            var id = $(v).find('img').attr('id').replace('img', '');
+            //console.log(id);
+            if (id == App.util.getLayerId(layer.name)) {
+
+              $(v).addClass('active');
+            }
+          });
         }
-       }
-      },
+      } else {
+        $('#imgLoadingData').hide();
+      }
+    },
 
     data: {
 
         /* event handler for add data button */
-        add: function (layer, cb) {
+      add: function (layer, cb) {
             switch (layer.type) {
                 case App.LAYER_TYPES.GEOJSON:
                     this.load.geoJSON(layer);
@@ -312,10 +323,11 @@ var App = {
                         App.heatmap.render();
                     });
                     break;
-                case App.LAYER_TYPES.SHAPEFILE:
-                    this.load.shapefile(layer, function (data) {
+              case App.LAYER_TYPES.SHAPEFILE:
+                  this.load.shapefile(layer, function (data) {
                         App.data.parse.geoJSON(data, layer, cb);
-                    });
+                  });
+                  break;
             }
         },
 
@@ -399,7 +411,8 @@ var App = {
                 var localGeoJSON = localStorage.getObject(layer.url);
 
                 if (localGeoJSON != null) {
-                    App.data.parse.geoJSON(localGeoJSON, layer);
+                  callback(localGeoJSON);
+                    //App.data.parse.geoJSON(localGeoJSON, layer);
                     return;
                 }
 
@@ -408,7 +421,7 @@ var App = {
 
                 var url = '';
 
-                if (typeof (layer.proxyUrl) != 'undefined') {
+                if (typeof (layer.proxy) != 'undefined') {
                     url = './proxy/?url=' + encodeURIComponent(layer.url);
                 } else {
                     url = layer.url;
@@ -423,7 +436,7 @@ var App = {
                     if (xhr.status === 200) {
                         // onload needed since Google Chrome doesn't support addEventListener for FileReader
                         reader.onload = function (e) {
-                            var ext;
+                          
                             if (reader.readyState !== 2 || reader.error) {
                                 if (reader.error) {
                                     console.log(reader.error);
@@ -499,8 +512,7 @@ var App = {
         /* Parse geojson into Leaflet, include legend creation */
         parse: {
 
-            geoJSON: function (data, layer, override) {
-
+            geoJSON: function (data, layer, cb) {
                 //Sometimes the Shapefile parser will find multiple objects in a zipped shapefile
                 //We could prompt the user...but this works for the time being...
                 if ($.isArray(data)) {
@@ -652,13 +664,13 @@ var App = {
                     var fieldType = isNaN(data.features[0].properties[field]) ? 'string' : 'number';
                     layer.fields.push({ name: field, type: fieldType });
                 }
-
+              
                 //create the HTMLLegend from the jsonLegend property of the layer.
                 layer.HTMLLegend = App.legendFactory.renderHTMLLegend(layer);
 
                 $('#ulVectorLegend').prepend(layer.HTMLLegend);
-
-                App.contextMenu.apply(layer);
+         
+              App.contextMenu.apply(layer);
 
                 //init sortable functionality in TOC for this item
                 $('.sortable').sortable().bind('sortupdate', function (e, ui) {
@@ -671,12 +683,13 @@ var App = {
                     config.layers.push(layer);
                 }
 
-                //Add geojson layer to map
-                layer.mapLayer = geoJson.addTo(map);
-                
-                if ($('#imgLoadingData').is(':visible')) {
-                    $('#imgLoadingData').fadeOut(100);
-                };
+                layer.mapLayer = geoJson;
+                layer.mapLayer.addTo(map);
+             
+                $('#imgLoadingData').hide();
+              if (typeof(cb) != 'undefined') {
+                cb();
+              }
             },
 
             csv: function(csv){
@@ -977,12 +990,12 @@ var App = {
 
             //this.$ulSourceTabs.next().append("<div class='tab-pane fade' id='customData'>Data Source: &nbsp; <select class='selectpicker' id='selCustomData' data-style='btn-default' data-width='180'><option value='0'>GeoJSON</option><option value='1'>ArcGIS Server</option><option value='2'>Tile Layer</option><option value='3'>Shapefile</option><option value='4'>CSV</option></select></div>");
 
-            $('#ulSourceTabs > li > a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                $("img.lazy").lazyload({
-                    //effect: "fadeIn",
-                    container: $(".tab-content")
-                });
-            })
+          $('#ulSourceTabs > li > a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+            $("img.lazy").lazyload({
+              //effect: "fadeIn",
+              container: $(".tab-content")
+            });
+          });
 
             this.attachEventHandler();
         },
@@ -1171,7 +1184,7 @@ var App = {
             $('.img-block.basemap').on('click', function () {
                 var id = $(this).find('img').attr('id').replace('img', '');
 
-                basemap = App.util.getBasemapById(id);
+                var basemap = App.util.getBasemapById(id);
 
                 //We will need a lot of intelligence here.
                 //remove previous basemap
@@ -1179,20 +1192,20 @@ var App = {
 
 
                 //get existing basemap
-                var oldBasemapEl = $($('.img-block.basemap.active')[0])
+              var oldBasemapEl = $($('.img-block.basemap.active')[0]);
                 var oldBasemapId = oldBasemapEl.find('img').attr('id').replace('img', '');
                 var oldBasemap = App.util.getBasemapById(oldBasemapId);
 
                 //turned on labels first and then a photo layer or turned on a photo first and then labels
-                if ((oldBasemap.type == 'labels' && basemap.type == 'photo') ||
-                    (basemap.type == 'labels' && oldBasemap.type == 'photo')) {
+                //if ((oldBasemap.type == 'labels' && basemap.type == 'photo') ||
+                //    (basemap.type == 'labels' && oldBasemap.type == 'photo')) {
 
-                }
+                //}
                 // else if(basemap.type != 'photo' && map.hasLayer(App.util.getBasemapById('Photo_Labels').mapLayer){
-                //         oldBasemapEl.removeClass('active')
+              oldBasemapEl.removeClass('active');
                 //         console.log("rocky");
-                //         oldBasemap.active = false;
-                //         App.map.removeLayer(oldBasemap.mapLayer);
+                     oldBasemap.active = false;
+                       App.map.removeLayer(oldBasemap.mapLayer);
                 //     }
 
                 $(this).addClass('active');
@@ -1272,7 +1285,7 @@ var App = {
                     //if a ramp hasn't been set, set it to the default ramp in the dropdown.
                     //set a ramp in the selGradient combobox
                     if ($($('#selGradient').children()[0]).is('b')) {
-                        App.symbolDialog.ramps.default();
+                        App.symbolDialog.ramps.deefault();
                     }
 
                     App.symbolDialog.legends.uniqueValues.refresh(layer);
@@ -1349,7 +1362,7 @@ var App = {
 
             $('#selCatField').on('change.core', function () {
                 if (typeof (layer.ramp) == 'undefined') {
-                    App.symbolDialog.ramps.default();
+                    App.symbolDialog.ramps.deefault();
                 }
                 App.symbolDialog.legends.uniqueValues.refresh(layer);
             });
@@ -1432,7 +1445,7 @@ var App = {
                 return color;
             },
 
-            default: function () {
+            deefault: function () {
 
                 var $span = $('<span class="temppalette" title="' + App.DEFAULT_RAMP + '"></span>');
 
@@ -1740,14 +1753,13 @@ var App = {
                 case "geojson":
                     if (layer.geom != App.GEOM_TYPES.LINESTRING && layer.geom != App.GEOM_TYPES.MULTILINESTRING) {
                         contents.push({ header: 'Fill Opacity' }, {
-                            class: 'sliderFillOpacity',
+                            klass: 'sliderFillOpacity',
                             id: id,
                             value: (typeof (layer.fillOpacity) != 'undefined') ? layer.fillOpacity : 1
-                               
                         });
                     }
                     contents.push({ header: 'Stroke Opacity' }, {
-                        class: 'sliderStrokeOpacity',
+                        klass: 'sliderStrokeOpacity',
                         id: id,
                         value: (typeof (layer.strokeOpacity) != 'undefined') ? layer.strokeOpacity : 1
                     });
@@ -1755,7 +1767,7 @@ var App = {
                 case "tilejson":
                 case "tilelayer":
                     contents.push({ header: 'Opacity' }, {
-                        class: 'sliderFillOpacity',
+                        klass: 'sliderFillOpacity',
                         id: id,
                         value: (typeof (layer.fillOpacity) != 'undefined') ? layer.fillOpacity : 1
                     });
@@ -2218,14 +2230,36 @@ var App = {
         },
 
         sortHandler: function (e, ui) {
-
+          console.log('added to sorthandler');
             var dropped = ui.item;
 
             var trgid = dropped[0].id;
             var id = trgid.replace('li', '');
             var layer = this.getLayerById(id);
-            console.log(layer.mapLayer);
-            layer.mapLayer.bringToFront();
+
+            if (layer.type == App.LAYER_TYPES.GEOJSON || layer.type == App.LAYER_TYPES.SHAPEFILE) {
+
+              /* Enter Layer order z-index hell */
+              //Just bring any layers to the front that are above in the TOC after bringing this one to the front.
+
+              layer.mapLayer.addTo(map).bringToFront();
+              var other_layers = [];
+              $.each($('.legend-check'), function (i, v) {
+                var iid = $(v).prop('id').replace('chk', '');
+                if (iid != id) {
+                  if ($(v).is(':checked')) {
+                    other_layers.push(iid);
+                  }
+                } else {
+                  return false;
+                }
+              });
+              other_layers.reverse();
+              for (var l = 0; l < other_layers.length; l++) {
+                App.util.getLayerById(other_layers[l]).mapLayer.bringToFront();
+              }
+            }
+
             //var trgkey = trgid.substring(2, trgid.length);
 
             //if (dropped[0].previousSibling == null) { //At top

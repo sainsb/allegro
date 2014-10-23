@@ -12,7 +12,7 @@
     
 
     <link rel="stylesheet" href="./css/style.min.css" />
-    <link rel="stylesheet" href="./css/style.css" />
+    <!--<link rel="stylesheet" href="./css/style.css" />-->
     <!--  <link rel="stylesheet" href="//library.oregonmetro.gov/libraries/leaflet.draw/leaflet.draw.css" /> -->
     </head>
 <body>
@@ -47,7 +47,6 @@
                     <ul class="dropdown-menu" role="menu" style="margin:0;padding:10px 0px 10px 10px;width:250px;">
                         <li>
                             Radius<input class='ranger' type="range" min='0.001' max='.03' step='.00005' id='sliRadius'  />
-                          
                             <div id='txtRadius' class='ranger'></div>
                         </li>
                         <li>
@@ -313,7 +312,7 @@
     </div>
     <footer>
         <p class="muted text-center">
-            <a href="http://www.oregonmetro.gov/">&copy; 2013 Oregon Metro</a>
+            <a href="http://www.oregonmetro.gov/">&copy; 2014 Oregon Metro</a>
         </p>
     </footer>
     <script type="text/javascript">
@@ -321,22 +320,15 @@
         //all the config files simply add to this global object
         var config =  {'layers':[], 'token': 'jtJ3qevgR0oEBOZQVIrdF9nCWVlzEOnMqNi62askpes.'};
     </script>
-    <script src="js/script.min.js" type="text/javascript"></script>
+   
     <!--<script type="text/javascript" src="./js/rTree.js"></script>-->
     <!--<script type="text/javascript" src="//library.oregonmetro.gov/libraries/leaflet.coordinates/0.1.4/Leaflet.Coordinates.min.js"></script>-->
 
 
     <script src="//gis.oregonmetro.gov/rlisapi2/js/?token=jtJ3qevgR0oEBOZQVIrdF9nCWVlzEOnMqNi62askpes." type="text/javascript"></script>
  
-    <script type="text/javascript" src="./rlis_config.js"></script>
-    <script type="text/javascript" src="./basemap_config.js"></script>
-    <script type="text/javascript" src="./rise_config.js"></script>
-    <script type="text/javascript" src="./trimet_config.js"></script>
-    <!--<script type="text/javascript" src="./civic_apps_config.js"></script>-->
-    <!--<script type="text/javascript" src="./parks_config.js"></script>-->
-    <script type="text/javascript" src="./equity_atlas_config.js"></script>
-    <script type="text/javascript" src="./spatial_data_library_config.js"></script>
-    <!--<script type="text/javascript" src="./js/script.temp.js"></script>-->
-    <script type="text/javascript" src="./js/script.js"></script>
+  <script src="js/config.min.js" type="text/javascript"></script>
+  <script src="js/script.min.js" type="text/javascript"></script>
+  <!--<script src="js/script.js" type="text/javascript"></script>-->
    </body>
 </html>

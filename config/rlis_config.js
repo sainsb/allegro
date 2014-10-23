@@ -247,11 +247,12 @@
                 'theme': 'Boundary'
             }, {
                 'name': 'Urban Growth Boundary',
-                'url': '//library.oregonmetro.gov/rlisdiscovery/ugb.zip',
+                'url': 'http://library.oregonmetro.gov/rlisdiscovery/ugb.zip',
                 'type': 'shapefile',
                 'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/ugb.png',
                 'source': 'RLIS',
                 'theme': 'Boundary',
+                'proxy':true,
                 'clickable': false,
                 'level': 2,
                 'style': {
