@@ -106,6 +106,10 @@ var App = {
             $('#basemapModal').modal('show');
         });
 
+        $('#btnShare').click(function(){
+            App.mapState.save();
+        })
+
         //assign handler to Basemap button
         $('#btnOptions').click(function () {
             $('#optionsModal').modal('show');
@@ -281,7 +285,6 @@ var App = {
     load_layers : function(layerIndex){
       if (layerIndex<App.boot_layers.length){
         //RECURSION!!
-        
         var layer = this.util.getLayerByName(App.boot_layers[layerIndex].trim());
         if (layer != null) {
         setTimeout(function(layer){return function(){App.data.add(layer,
@@ -1584,6 +1587,72 @@ var App = {
 
     optionsDialog : {
         
+    },
+
+    mapState : {
+
+        save: function(){
+
+            //full screen checkbox?
+            //include RLIS search input box?
+
+            var map_state = {
+                layers : []
+
+            };
+
+            map_state.map ={
+                zoom : map.getZoom(),
+                center : map.getCenter(),
+            }
+
+            $.each($('.legend-check'), function(i,v){
+                var id = $(v).prop('id').replace('chk','');
+                var obj = {};
+                var layer = App.util.getLayerById(id);
+                for (var key in layer){
+                    if(key =='fillOpacity' || key == 'strokeOpacity' || key == 'legend' || key == 'ramp' || key == 'symbolField' || key =='name'){
+                        obj[key] = layer[key];
+                    }
+                }
+
+                map_state.layers.push(obj);
+            })
+
+            $.post('./putMap/',"map="+ JSON.stringify(map_state), function(data){
+                console.log(data);
+            }, 'json');
+
+        },
+        load: function(id, cb){
+            $.getJSON('./getMap/'+id, function(json){
+                map.setView(json.map.center, json.map.zoom);
+                $.each(json.layers, function(i,v){
+                    var id  = util.getLayerId(v.name);
+                    var core_layer = config.layers[id]
+
+                    if(typeof(v.legend) != 'undefined'){
+                        config.layers[id].legend = json.legend;
+                    }
+                    if(typeof(v.fillOpacity) != 'undefined'){
+                        config.layers[id].fillOpacity = v.fillOpacity;
+                    }
+                    if(typeof(v.strokeOpacity) != 'undefined'){
+                        config.layers[id].strokeOpacity = v.strokeOpacity;
+                    }
+                    if(typeof(v.ramp) != 'undefined'){
+                        config.layers[id].ramp = v.ramp;
+                    }
+                    if(typeof(v.symbolField) != 'undefined'){
+                        config.layers[id].symbolField = v.symbolField;
+                    }
+
+                    App.boot_layers.push(v.name);
+                });
+                App.load_layers(0);
+            });
+
+        }
     },
 
     contextMenu : {
