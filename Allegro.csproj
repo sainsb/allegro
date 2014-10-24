@@ -30,7 +30,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -44,13 +44,18 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="gdal_csharp">
+      <HintPath>..\..\Program Files\GDAL\csharp\gdal_csharp.dll</HintPath>
+    </Reference>
+    <Reference Include="ogr_csharp">
+      <HintPath>..\..\Program Files\GDAL\csharp\ogr_csharp.dll</HintPath>
+    </Reference>
+    <Reference Include="osr_csharp">
+      <HintPath>..\..\Program Files\GDAL\csharp\osr_csharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data.SQLite, Version=1.0.94.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Program Files (x86)\System.Data.SQLite\2008\bin\System.Data.SQLite.dll</HintPath>
-    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.Web.DynamicData" />
@@ -73,18 +78,58 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="build\build.js" />
+    <Content Include="config\basemap_config.js" />
+    <Content Include="config\civic_apps_config.js" />
+    <Content Include="config\equity_atlas_config.js" />
+    <Content Include="config\parks_config.js" />
+    <Content Include="config\rise_config.js" />
+    <Content Include="config\rlis_config.js" />
+    <Content Include="config\spatial_data_library_config.js" />
+    <Content Include="config\trimet_config.js" />
     <Content Include="css\style.css" />
     <Content Include="Global.asax" />
     <Content Include="images\ajax-loader.gif" />
     <Content Include="images\avatar.png" />
     <Content Include="images\body-bg.png" />
     <Content Include="images\left-menu-bg.png" />
+    <Content Include="img\ajax-loader.gif" />
+    <Content Include="img\bridges.jpg" />
+    <Content Include="img\civicApps_logo.png" />
+    <Content Include="img\clf_logo.png" />
+    <Content Include="img\conservation_target.png" />
+    <Content Include="img\esriGray.png" />
+    <Content Include="img\esri_logo.png" />
+    <Content Include="img\esri_logo_mi.png" />
+    <Content Include="img\expand-collapse.png" />
+    <Content Include="img\expand-collapseL.png" />
+    <Content Include="img\heatmap.jpg" />
+    <Content Include="img\metro_base.JPG" />
+    <Content Include="img\metro_logo.png" />
+    <Content Include="img\OE_Logo.gif" />
+    <Content Include="img\OE_Logo.png" />
+    <Content Include="img\osmbase.png" />
+    <Content Include="img\photo2008.jpg" />
+    <Content Include="img\photo2009.jpg" />
+    <Content Include="img\photo2010.jpg" />
+    <Content Include="img\photo2011.jpg" />
+    <Content Include="img\photo2012.jpg" />
+    <Content Include="img\photo2013.png" />
+    <Content Include="img\rcs_land_cover.jpg" />
+    <Content Include="img\trimet_logo.png" />
     <Content Include="js\script.js" />
+    <Content Include="lib\Microsoft.Web.Infrastructure.dll" />
+    <Content Include="lib\System.Web.Helpers.dll" />
+    <Content Include="lib\System.Web.Mvc.dll" />
+    <Content Include="lib\System.Web.Razor.dll" />
+    <Content Include="lib\System.Web.Razor.xml" />
+    <Content Include="lib\System.Web.WebPages.dll" />
+    <Content Include="lib\System.Web.WebPages.Razor.dll" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="img\Thumbs.db" />
     <None Include="Properties\PublishProfiles\Query - Prod.pubxml" />
     <None Include="Properties\PublishProfiles\Query - QA.pubxml" />
   </ItemGroup>

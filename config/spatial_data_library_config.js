@@ -16,6 +16,7 @@ config.layers.push({
   'type': 'shapefile',
   'metadataUrl': 'http://spatialdata.oregonexplorer.info/geoportal/rest/document?id=%7B8091C70C-2E73-47D4-BA0F-8D8D0C5647C0%7D',
   'source': 'OSU',
+  'simplify':true,
   'theme': 'Administrative',
   'thumb': 'http://spatialdata.oregonexplorer.info/Metadata/Thumbnails/WatershedCouncils2014.GIF',
   'proxy': true

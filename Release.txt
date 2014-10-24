@@ -1,0 +1,19 @@
+
+Allegro
+
+Current Build: 0.591.0
+Release Date: 2014-10-24T17:38:07.981Z
+
+App Notes:
+A simple map viewer that eats shapefiles and shows heatmaps.
+
+Initial Development: 
+	Developed by BNS
+	qa url: : http://qagis/allegro
+	prod url: https://gis.oregonmetro.gov/dev/allegro
+    Build scripts: \\alex\rlis\drctools\buildscripts\Allegro
+	issue tracking: 
+
+------------Oct 14, 2014, v 0.263.0 -------------------------
+
+- Initial release party.

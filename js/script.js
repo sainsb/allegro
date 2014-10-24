@@ -24,29 +24,18 @@ var App = {
 
     locateMarker:null,
     loading:true,
-    QueryString: function () {
-        var query_string = {};
-        var query = window.location.search.substring(1);
-        var vars = query.split("&");
-        for (var i = 0; i < vars.length; i++) {
-            var pair = vars[i].split("=");
-            // If first entry with this name
-            if (typeof query_string[pair[0]] === "undefined") {
-                query_string[pair[0]] = pair[1];
-                // If second entry with this name
-            } else if (typeof query_string[pair[0]] === "string") {
-                var arr = [query_string[pair[0]], pair[1]];
-                query_string[pair[0]] = arr;
-                // If third or later entry with this name
-            } else {
-                query_string[pair[0]].push(pair[1]);
-            }
-        }
-        return query_string;
-    }(),
+  
 
     init: function () {
 
+      "use strict";
+      
+      // Detecting IE
+      var oldIE;
+      if ($('html').is('.ie6, .ie7, .ie8, .ie9')) {
+        oldIE = true;
+        $('#browserModal').modal('show');
+      }
         //resizes the map and legend height upon page resize
         //width is taken care of by the DOM.
         //** will probably want to disable when the site goes into responsive mode..
@@ -122,6 +111,10 @@ var App = {
                 }
             }
         });
+
+      $('#btnShare').on('click', function() {
+        $('#browserDialog').modal('show');
+      });
 
         //assign handler to options	
         //not sure if will be modal or not yet...
@@ -269,22 +262,74 @@ var App = {
             App.map.setView([result[0].lat, result[0].lng], 15);
         });
         
-        //Accept l param to load layers passed in querystring
-        if (typeof (this.QueryString.l) != 'undefined' && this.QueryString.l.trim() != '') {
-            var l = decodeURIComponent(this.QueryString.l);
-            App.boot_layers = l.split(',');
+      //Accept l param to load layers passed in querystring
+        var hash = location.hash.split('/');
+   
+      if (hash.length > 3 && hash[3] != '') {
+            App.boot_layers = hash.slice(3, hash.length);
+            map.spin(true);
             App.load_layers(0);
         }
 
         this.util.dragHandler();
 
     },
+    
+    //  var opt_parts = [];
+    //  for (i in opts) {
+    //    opt_parts.push(i + '=' + opts[i]);
+    //  }
+    //  location.hash = '#!' + opt_parts.join('&');
+    //},
 
+    //getMapOptsFromUrl: function () {
+    //  var opts = this.QueryString();
+    //  var map_opts = {};
+
+    //  for (var i in opts) {
+    //    if (i === 'll') {
+    //      var nums = opts[i].split(',');
+    //      map_opts['center'] = new L.LatLng(parseFloat(nums[0]), parseFloat(nums[1]));
+    //    } else if (i === 'z') {
+    //      map_opts['zoom'] = parseInt(opts[i], 10);
+    //    }
+    //  }
+    //  return map_opts;
+    //},
+
+    //addLayerToUrl: function (layerId) {
+    //  var opts = App.QueryString(), i;
+    //  var layers = (opts['l'] || '').split(',');
+    //  var layersById = {};
+    //  for (i = 0; i < layers.length; i++) {
+    //    if (layers[i].length > 0) {
+    //      layersById[decodeURIComponent(layers[i])] = true;
+    //    }
+    //  }
+    //  layersById[layerId] = true;
+    //  App.boot_layers = [];
+    //  for (i in layersById) {
+    //    App.boot_layers.push(i);
+    //  }
+    //  App.updateUrl.call(App.map);
+    //},
+
+    //removeLayerFromUrl: function (layerId) {
+    //  var activeLayers = [];
+    //  for (var i = 0; i < App.boot_layers.length; i++) {
+    //    if (App.boot_layers[i] !== layerId) {
+    //      activeLayers.push(App.boot_layers[i]);
+    //    }
+    //  }
+    //  App.boot_layers = activeLayers;
+    //  App.updateUrl.call(App.map);
+    //},
     boot_layers : [],
     load_layers : function(layerIndex) {
       if (layerIndex < App.boot_layers.length) {
         //RECURSION!!
-        var layer = this.util.getLayerByName(App.boot_layers[layerIndex].trim());
+        var name = App.boot_layers[layerIndex].trim().replace(/\-/g, ' ');
+        var layer = this.util.getLayerByName(name);
         if (layer != null) {
           App.data.add(layer, function () { App.load_layers(layerIndex + 1); });
           $('.img-block.layer').each(function(i, v) {
@@ -298,6 +343,7 @@ var App = {
         }
       } else {
         $('#imgLoadingData').hide();
+        map.spin(false);
       }
     },
 
@@ -307,7 +353,7 @@ var App = {
       add: function (layer, cb) {
             switch (layer.type) {
                 case App.LAYER_TYPES.GEOJSON:
-                    this.load.geoJSON(layer);
+                    this.load.geoJSON(layer, cb);
                     break;
                 case App.LAYER_TYPES.DYNAMIC_LAYER:
                     console.log('Not implemented');
@@ -359,8 +405,9 @@ var App = {
             },
 
             tileJSON: function (layer) {
-                var url = layer.url + ((layer.requireToken == true) ? "?token=" + config.token : "");
-
+              
+              var url = layer.url + ((layer.requireToken == true) ? "?token=" + config.token : "");
+              console.log(url.trim());
                 $.getJSON(url, function (data) {
 
                     //Add to legend
@@ -396,82 +443,96 @@ var App = {
                 });
             },
 
-            geoJSON: function (layer) {
+            geoJSON: function (layer, callback) {
                 $.getJSON(layer.url, function (data) {
-                    App.data.parse.geoJSON(data, layer);
+                    App.data.parse.geoJSON(data, layer, callback);
                 });
             },
 
-            shapefile: function (layer, callback) {
+            shapefile: function(layer, callback) {
 
-                $('#txtLoadingData').html('Loading...');
-                $('#imgLoadingData').fadeIn(100);
+            $('#txtLoadingData').html('Loading...');
+            $('#imgLoadingData').fadeIn(100);
 
-                //Check in local storage first
-                var localGeoJSON = localStorage.getObject(layer.url);
 
-                if (localGeoJSON != null) {
-                  callback(localGeoJSON);
-                    //App.data.parse.geoJSON(localGeoJSON, layer);
-                    return;
-                }
+//Check in local storage first
+            var localGeoJSON = localStorage.getObject(layer.url);
 
-                var xhr = new XMLHttpRequest(),
-                        reader = new FileReader();
+            if (localGeoJSON != null) {
+              callback(localGeoJSON);
+              //App.data.parse.geoJSON(localGeoJSON, layer);
+              return;
+            }
+              if(1==2){
+           // if (typeof (FileReader) != 'undefined') {
+              var xhr = new XMLHttpRequest(), reader = new FileReader();
 
-                var url = '';
+              var url = '';
 
-                if (typeof (layer.proxy) != 'undefined') {
-                    url = './proxy/?url=' + encodeURIComponent(layer.url);
-                } else {
-                    url = layer.url;
-                }
+              if (typeof (layer.proxy) != 'undefined') {
+                url = './proxy/?url=' + encodeURIComponent(layer.url);
+              } else {
+                url = layer.url;
+              }
 
-                //url_prefix = 'data/';
-                xhr.open("GET", url, true);
-                // Set the responseType to blob
-                xhr.responseType = "blob";
+              //url_prefix = 'data/';
+              xhr.open("GET", url, true);
+              // Set the responseType to blob
+              xhr.responseType = "blob";
 
-                xhr.addEventListener("load", function () {
-                    if (xhr.status === 200) {
-                        // onload needed since Google Chrome doesn't support addEventListener for FileReader
-                        reader.onload = function (e) {
-                          
-                            if (reader.readyState !== 2 || reader.error) {
-                                if (reader.error) {
-                                    console.log(reader.error);
-                                }
-                                return;
-                            } else {
-                                
-                                shp(reader.result).then(function (data) {
-                                    //cache geojson in localstorage
-                                    try {
-                                        localStorage.setObject(layer.url, data);
-                                    }
-                                    catch (ex) {
-                                        console.log('unable to store this in local storage');
-                                    }
-                                    $('#txtLoadingData').html('Parsing...');
-                                    callback(data);
-                                });
-                                //this is worker code - currently not in web worker...
-                                //.then(function (data) {
-                                //console.log('bon');
-                                // console.log(z);
-                                //});
-                                //worker.data([reader.result, file.name.slice(0, (0 - (ext.length + 1)))], [reader.result]).then(function(data) {
-                                //  console.log(data);
-                                //  });
-                            }
+              xhr.addEventListener("load", function() {
+                if (xhr.status === 200) {
+                  // onload needed since Google Chrome doesn't support addEventListener for FileReader
+                  if (typeof(FileReader) == 'undefined') {
+
+                  } else {
+                    reader.onload = function(e) {
+
+                      if (reader.readyState !== 2 || reader.error) {
+                        if (reader.error) {
+                          console.log(reader.error);
                         }
-                        // Load blob as Data URL
-                        reader.readAsArrayBuffer(xhr.response);
+                        return;
+                      } else {
+
+                        shp(reader.result).then(function(data) {
+                          //cache geojson in localstorage
+                          try {
+                            localStorage.setObject(layer.url, data);
+                          } catch (ex) {
+                            console.log('unable to store this in local storage');
+                          }
+                          $('#txtLoadingData').html('Parsing...');
+                          callback(data);
+                        });
+                      }
                     }
-                }, false);
-                // Send XHR
-                xhr.send();
-            },
+                    // Load blob as Data URL
+                    reader.readAsArrayBuffer(xhr.response);
+                  }
+                }
+              }, false);
+              // Send XHR
+              xhr.send();
+            } else {
+                //$('#browserModal').modal('show');
+
+                var url = './polyfill/?url=' + encodeURIComponent(layer.url);
+                if (layer.simplify) {
+                  url += "&tolerance=.0005";
+                }
+              $.getJSON(url, function(data) {
+                try {
+                  localStorage.setObject(layer.url, data);
+                } catch (ex) {
+                  console.log('unable to store this in local storage');
+                }
+                $('#txtLoadingData').html('Parsing...');
+                callback(data);
+              });
+              //$('#imgLoadingData').hide();
+            }
+        },
 
             heatmap: function (layer, callback) {
 
@@ -1007,7 +1068,7 @@ var App = {
                 var layer = App.util.getLayerById(id);
                 if ($(this).hasClass('active')) {
                     $(this).removeClass('active');
-
+                    
                     if (layer.type == 'heatmap') {
                         var id = App.util.getLayerId(layer.name);
                         delete App.heatmap.rasterMultiplier[id];
@@ -1017,6 +1078,7 @@ var App = {
                     }
 
                     $('#li' + id).remove();
+                  App.util.updateURL();
                 }
                 else {
                     $(this).addClass('active');
@@ -1036,17 +1098,18 @@ var App = {
                                 break;
                         }
                     } else if (layer.type == 'heatmap' ) {
-                        var id = App.util.getLayerId(layer.name);
+                        id = App.util.getLayerId(layer.name);
                         if (typeof (App.heatmap.rasters[id]) != 'undefined') {
                             $('#ulHeatmapLegend').append($(layer.HTMLLegend));
                             App.heatmap.rasterMultiplier[id]=1;
                             App.heatmap.sync(id, true);
                         } else {
-                            App.data.add(layer);
+                          App.util.updateUrl();
+                          App.data.add(layer, function () { App.util.updateUrl();});
                         }
                     }
                     else {
-                        App.data.add(layer);
+                        App.data.add(layer, function() { App.util.updateUrl();});
                     }
                 }
             });
@@ -1313,10 +1376,7 @@ var App = {
 
                     $('#symbolTabs > li > a').first().tab('show');
                     $('#singleFill').addClass('active in');
-
-
-                    console.log(layer.legend.symbols[0]);
-
+                  
                     //match colors and stroke
                     $('#_colSingleFillColor').colorpicker('setValue', layer.legend.symbols[0].fillColor);
                     $('#_colSingleColor').colorpicker('setValue', layer.legend.symbols[0].color);
@@ -2122,7 +2182,6 @@ var App = {
 
         removeLayer: function (id) {
             var layer = this.getLayerById(id);
-            var id = this.getLayerId(layer.name);
             if (layer.type == 'heatmap') {
                 App.heatmap.sync(id, false);
             } else {
@@ -2130,6 +2189,8 @@ var App = {
             }
 
             $('#li' + id).remove();
+
+          App.util.updateUrl();
             $('.img-block.active').each(function (index) {
                 if ($(this).find('img').attr('id').replace('img', '') == id) {
                     $(this).removeClass('active');
@@ -2345,7 +2406,21 @@ var App = {
                     i++;
                 }
             }
-        }
+        },
+
+      updateUrl: function () {
+        //console.log(location.hash);
+        var temp_hash = location.hash.split('/').slice(0,3).join('/');
+        var _layers = [];
+        $('.legend-check').each(function(i, v) {
+          var id = $(v).prop('id').replace('chk', '');
+          var layer = App.util.getLayerById(id);
+          _layers.push(layer.name.replace(/\s/g,'-'));
+        });
+
+        location.hash = temp_hash+ '/'+_layers.join('/');
+      }
+
     }
 }
 

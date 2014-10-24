@@ -1,10 +1,15 @@
 ﻿
 using System;
-using System.Data.SQLite;
+using System.Collections.Generic;
+//using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Web.Mvc;
+using OSGeo.GDAL;
+using OSGeo.OGR;
+using OSGeo.OSR;
 
 namespace Allegro.Controllers
 {
@@ -13,13 +18,14 @@ namespace Allegro.Controllers
 
     //proxy/%2F%2Flibrary.oregonmetro.gov%2Frlisdiscovery%2Fcouncil1993.zip
     [AcceptVerbs(HttpVerbs.Get)]
-    public ActionResult Proxy()
+    public ActionResult Proxy(bool ie)
     {
 
       var request = Server.UrlDecode(Request.QueryString["url"]);
 
       //return Content(request);
-
+      //If IE, unzip, convert to GeoJSON, zip and send back down the line.
+      
       if (request.ToUpper().IndexOf("HTTP") != -1)
       {
 
@@ -28,9 +34,9 @@ namespace Allegro.Controllers
         // Important! Keeps the request from blocking after the first time!
         webRequest.KeepAlive = false;
         webRequest.Credentials = CredentialCache.DefaultCredentials;
-        using (HttpWebResponse backendResponse = (HttpWebResponse) webRequest.GetResponse())
+        using (var backendResponse = (HttpWebResponse) webRequest.GetResponse())
         {
-          Stream receiveStream = backendResponse.GetResponseStream();
+          var receiveStream = backendResponse.GetResponseStream();
 
           // Clear whatever is already sent
           Response.Clear();
@@ -40,17 +46,17 @@ namespace Allegro.Controllers
           // Copy headers
           // Check if header contains a contenth-lenght since IE
           // goes bananas if this is missing
-          bool contentLenghtFound = false;
+          var contentLengthFound = false;
           foreach (string header in backendResponse.Headers)
           {
             if (string.Compare(header, "CONTENT-LENGTH", true) == 0)
             {
-              contentLenghtFound = true;
+              contentLengthFound = true;
             }
             Response.AppendHeader(header, backendResponse.Headers[header]);
           }
           // Copy content           
-          byte[] buff = new byte[1024];
+          var buff = new byte[1024];
           long length = 0;
           int bytes;
           while ((bytes = receiveStream.Read(buff, 0, 1024)) > 0)
@@ -60,7 +66,7 @@ namespace Allegro.Controllers
           }
 
           // Manually add content-lenght header to satisfy IE
-          if (!contentLenghtFound)
+          if (!contentLengthFound)
           {
             Response.AppendHeader("Content-Length",
               length.ToString());
@@ -78,14 +84,14 @@ namespace Allegro.Controllers
       }
       else //FTP
       {
-        FtpWebRequest webRequest = FtpWebRequest.Create(request) as FtpWebRequest;
+        var webRequest = FtpWebRequest.Create(request) as FtpWebRequest;
 
         // Important! Keeps the request from blocking after the first time!
         webRequest.KeepAlive = false;
         //webRequest.Credentials = CredentialCache.DefaultCredentials;
-        using (FtpWebResponse backendResponse = (FtpWebResponse) webRequest.GetResponse())
+        using (var backendResponse = (FtpWebResponse) webRequest.GetResponse())
         {
-          Stream receiveStream = backendResponse.GetResponseStream();
+          var receiveStream = backendResponse.GetResponseStream();
 
           // Clear whatever is already sent
           Response.Clear();
@@ -95,17 +101,17 @@ namespace Allegro.Controllers
           // Copy headers
           // Check if header contains a contenth-lenght since IE
           // goes bananas if this is missing
-          bool contentLenghtFound = false;
+          var contentLengthFound = false;
           foreach (string header in backendResponse.Headers)
           {
             if (string.Compare(header, "CONTENT-LENGTH", true) == 0)
             {
-              contentLenghtFound = true;
+              contentLengthFound = true;
             }
             Response.AppendHeader(header, backendResponse.Headers[header]);
           }
           // Copy content           
-          byte[] buff = new byte[1024];
+          var buff = new byte[1024];
           long length = 0;
           int bytes;
           while ((bytes = receiveStream.Read(buff, 0, 1024)) > 0)
@@ -115,7 +121,7 @@ namespace Allegro.Controllers
           }
 
           // Manually add content-lenght header to satisfy IE
-          if (!contentLenghtFound)
+          if (!contentLengthFound)
           {
             Response.AppendHeader("Content-Length",
               length.ToString());
@@ -135,27 +141,117 @@ namespace Allegro.Controllers
       return Content("Yay");
     }
 
+
+      [AcceptVerbs(HttpVerbs.Get)]
+    public ActionResult Polyfill()
+    {
+
+      var request = Server.UrlDecode(Request.QueryString["url"]);
+        if (String.IsNullOrEmpty(request))
+        {
+          return Json(new {message = "Please specify a resource"}, JsonRequestBehavior.AllowGet);
+        }
+
+        if (request.Substring(0, 2) == "//")
+        {
+          request = "http:" + request;
+        }
+
+        var tolerance = Request.QueryString["tolerance"];
+        double _tolerance = .00000005;
+        if (!String.IsNullOrEmpty(tolerance))
+        {
+          _tolerance = Convert.ToDouble(tolerance);
+        }
+        
+      var fieldDefs = new List<KeyValuePair<string, FieldType>>();
+      var memFilename = "/vsizip/vsicurl/" + request;
+
+        try
+        {
+          Ogr.RegisterAll();
+          var drv = Ogr.GetDriverByName("ESRI Shapefile");
+          var ds = drv.Open(memFilename, 0);
+
+          var layer = ds.GetLayerByIndex(0);
+          var layerDef = layer.GetLayerDefn();
+          layer.ResetReading();
+
+          var sb = new string[layer.GetFeatureCount(0)];
+
+          var outsrs = new SpatialReference("");
+          outsrs.ImportFromEPSG(4326);
+
+          var insrs = layer.GetSpatialRef();
+
+          CoordinateTransformation coord_transform;
+          try
+          {
+            coord_transform = new CoordinateTransformation(insrs, outsrs);
+          }
+          catch (ApplicationException ex)
+          {
+            insrs = new SpatialReference("");
+            insrs.ImportFromEPSG(900913);
+            coord_transform = new CoordinateTransformation(insrs, outsrs);
+          }
+
+          for (var i = 0; i < layerDef.GetFieldCount(); i++)
+          {
+            var g = layerDef.GetFieldDefn(i);
+            fieldDefs.Add(new KeyValuePair<string, FieldType>(g.GetName(), g.GetFieldType()));
+          }
+
+          Feature f;
+          var index = 0;
+          while ((f = layer.GetNextFeature()) != null)
+          {
+            sb[index] = ("{\"type\":\"Feature\",\"geometry\":" + Geom(f, coord_transform, _tolerance).Replace(" ", "") +
+                         ",\"properties\":{" + Props(f, fieldDefs) + "}}");
+            index++;
+          }
+
+
+          var MIME = Request.QueryString["type"];
+          if (!String.IsNullOrEmpty(MIME) && MIME.ToUpper() == "FILE")
+          {
+            return File(Encoding.UTF8.GetBytes(" { \"type\": \"FeatureCollection\",\"features\": [" + String.Join(",", sb) + "]}"),"text/plain",layer.GetName()+".json" );
+          }
+
+          return Content(" { \"type\": \"FeatureCollection\",\"features\": [" + String.Join(",", sb) + "]}",
+            "application/json");
+        }
+        catch (Exception ex)
+        {
+          return Json(new {error = "Failed to locate file"}, JsonRequestBehavior.AllowGet);
+        }
+        finally
+        {
+          Gdal.Unlink(memFilename);
+        }
+    }
+
     public ActionResult PutMap()
     {
 
-      var path = Server.MapPath("..")+@"\data\maps.sqlite";
+      //var path = Server.MapPath("..")+@"\data\maps.sqlite";
 
-      var json = Request.Params["map"];
+      //var json = Request.Params["map"];
 
       var id = Guid.NewGuid().ToString().Substring(0, 8);
 
-      var maps = new SQLiteConnection(
-          @"Data Source="+path+";");
+      //var maps = new SQLiteConnection(
+      //    @"Data Source="+path+";");
 
-      maps.Open();
+      //maps.Open();
 
-      var dcmd = "insert into maps (json, id) values ('" + json + "', '" + id + "');";
+      //var dcmd = "insert into maps (json, id) values ('" + json + "', '" + id + "');";
 
-      using (var cmd = maps.CreateCommand())
-      {
-        cmd.CommandText = dcmd;
-        cmd.ExecuteNonQuery();
-      }
+      //using (var cmd = maps.CreateCommand())
+      //{
+      //  cmd.CommandText = dcmd;
+      //  cmd.ExecuteNonQuery();
+      //}
 
       var err = "None";
       return Json(new{id, err});
@@ -165,26 +261,84 @@ namespace Allegro.Controllers
     public ActionResult GetMap(string id)
     {
 
-      var path = Server.MapPath("..") + @"\data\maps.sqlite";
+      //var path = Server.MapPath("..") + @"\data\maps.sqlite";
 
-      var maps =
-        new SQLiteConnection(@"Data Source="+path+";");
+      //var maps =
+      //  new SQLiteConnection(@"Data Source="+path+";");
 
-      maps.Open();
-      string foo="";
-      using (var cmd = maps.CreateCommand())
-      {
-        cmd.CommandText = "select json from maps where id = '"+id+"'";
-        using (var rdr = cmd.ExecuteReader())
-        {
-          while (rdr.Read())
-          {
-            foo = rdr.GetString(0);
-          }
-        }
-      } 
+      //maps.Open();
+      string foo = "";
+      //using (var cmd = maps.CreateCommand())
+      //{
+      //  cmd.CommandText = "select json from maps where id = '"+id+"'";
+      //  using (var rdr = cmd.ExecuteReader())
+      //  {
+      //    while (rdr.Read())
+      //    {
+      //      foo = rdr.GetString(0);
+      //    }
+      //  }
+      //} 
 
       return Json(foo, JsonRequestBehavior.AllowGet);
+    }
+
+    private string Props(Feature f, IReadOnlyCollection<KeyValuePair<string, FieldType>> field_defs)
+    {
+
+      var index = 0;
+      var t = new string[field_defs.Count];
+
+      foreach (var kv in field_defs)
+      {
+        t[index] = "\"" + kv.Key + "\":";
+
+        switch (kv.Value)
+        {
+          case FieldType.OFTReal:
+            t[index] += (f.GetFieldAsDouble(index) + "");
+            break;
+          case FieldType.OFTInteger:
+            t[index] += (f.GetFieldAsInteger(index) + "");
+            break;
+          default:
+            t[index] += ("\"" + CleanString(f.GetFieldAsString(index)) + "\"");
+            break;
+        }
+        index++;
+      }
+
+      return  String.Join(",", t);
+    }
+
+    static string CleanString(string str)
+    {
+      return str.Replace("\"", "").TrimEnd('\r', '\n').Replace("\r", "").Replace("\n","");
+    }
+
+    static string Geom(Feature f, CoordinateTransformation ct, double tolerance, int coordinate_precision = 6)
+    {
+      var geom = f.GetGeometryRef();
+      geom.Transform(ct);
+
+      //if (simplification >0)
+     // {
+      
+      var temp_geom= geom.Simplify(tolerance);
+
+      var index = 0;
+      var tolerances = new[] {.00005, .000005, .0000005, .00000005};
+      while (temp_geom == null) //try decreasing tolerance to get a shape
+      {
+
+        temp_geom = geom.Simplify(tolerances[index]);
+       
+        index++;
+        if (index != tolerances.Length) continue;
+        temp_geom = geom; break;
+      }
+
+      return temp_geom != null ? temp_geom.ExportToJson(new[] { "COORDINATE_PRECISION=" + coordinate_precision }) : null;
     }
   }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -14,7 +15,11 @@ namespace Allegro
         internal static string APP_NAME;
         internal static string BASE_URL;
         internal static string MACH_PATH;
-        
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern bool
+          SetEnvironmentVariable(string lpName, string lpValue);
+
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
@@ -36,12 +41,22 @@ namespace Allegro
                "getMap/{id}", // URL with parameters
                new { controller = "Allegro", action = "GetMap" } // Parameter defaults
            );
+
+            routes.MapRoute(
+                "Polyfill", // Route name
+                "polyfill/", // URL with parameters
+                new { controller = "Allegro", action = "Polyfill" } // Parameter defaults
+            );
         }
 
         protected void Application_Start()
         {
 
           //put db in memory?
+          var GDAL_HOME = @"C:\Program Files\GDAL"; // for example
+          var path = Environment.GetEnvironmentVariable("PATH");
+          path += ";" + GDAL_HOME;
+          SetEnvironmentVariable("PATH", path);
 
             AreaRegistration.RegisterAllAreas();
 

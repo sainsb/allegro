@@ -8,65 +8,33 @@ var fs = require('fs'),
     //_ = require('underscore'),
     sys = require('sys');
 
-var version;
-var t = fs.readFileSync("../Properties/AssemblyInfo.cs", 'utf8');
-var s = t.split('\n');
-for (var i = 0; i < s.length; i++) {
-  if (s[i].indexOf('assembly: AssemblyVersion') != -1) {
-    version = s[i].replace('[assembly: AssemblyVersion("', "");
-    version = version.replace('")]', '');
-    version = version.replace(/(\r\n|\n|\r)/gm, "");
-    console.log('My Version number is:' + version);
-  }
-}
 
 //////////////////////
 // Update release.txt
 //////////////////////
 
-//var releaseText = fs.readFileSync("../release.txt", 'utf8');
+var releaseText = fs.readFileSync("../release.txt", 'utf8');
 
-//var cortex = releaseText.substring(releaseText.indexOf('App Notes:'), releaseText.length);
+var cortex = releaseText.substring(releaseText.indexOf('App Notes:'), releaseText.length);
 
-//var ws = fs.createWriteStream('../release.txt', { flags: 'r+', start: 0 });
-//ws.end('\r\nAllegro\r\n\r\nCurrent Build: ' + version + "\r\n" + "Release Date: " + new Date().toISOString() + "\r\n\r\n" + cortex, 'utf-8');
+var version = releaseText.substr(releaseText.indexOf('Current Build:'), 30);
 
-//function readFiles(paths) {
-//  return paths.map(function (file) {
-//    var t = fs.readFileSync(file, 'utf8');
-//    //(<\/?pre[^>]*>)
-//    t = t.replace(/^\uFEFF/, '');
-//    t = t.replace(/(\r\n|\n|\r)/gm, "");
-//    //t = t.replace(/>\s+</gm, "><");
-//    t = t.replace(/>\s+</gm, '><');
-//    for (var i = 0; i < 10; i++) {
-//      t = t.replace(/\s\s/gm, ' ');
-//    }
-//    //        t = t.replace(/\s</gm, '<');
-//    //        t = t.replace(/>\s/gm, '>');
+version = version.replace('Current Build: ', '');
+version = version.substr(0, version.indexOf('\r\n'));
 
-//    var source = _.template(t).source;
-//    var fu = file.split('/');
-//    fu = fu[fu.length - 1].split('.')[0];
-//    fu = fu.replace('vw_', '');
-//    var declaration = 'templates["' + fu + '"] = ' + source;
-//    return {
-//      'path': file,
-//      declaration: declaration
-//    };
-//  });
-//}
+version = version.split('.');
+var maj = version[0];
+var min = parseInt(version[1]);
+var patch = version[2];
 
-//function concat(templates) {
-//  return templates.reduce(function (previousValue, currentValue, index, array) {
-//    return previousValue + '\n' + currentValue.declaration;
-//  }, "var version='" + version + "';var templates = {};");
-//}
+//increment minor build
 
-//for (var i = 0; i < toutput.length; i++) {
-//  fs.writeFileSync(toutput[i].outfile, concat(readFiles(toutput[i].files)), 'utf8');
-//  console.log('File "' + toutput[i].outfile + '" has been created successfully.');
-//}
+if (process.argv[2] == '-v') { min += 1; console.log('Version rev: ' + maj + '.' + min + '.' + patch); }
+
+version = maj + '.' + min + '.' + patch;
+
+var ws = fs.createWriteStream('../release.txt', { flags: 'r+', start: 0 });
+ws.end('\r\nAllegro\r\n\r\nCurrent Build: ' + version + "\r\n" + "Release Date: " + new Date().toISOString() + "\r\n\r\n" + cortex, 'utf-8');
 
 // Output
 var output = [
@@ -75,27 +43,29 @@ var output = [
   {
     minified_output_file: 'script.min.js',
     files: [
-       '//atlas/www/prod/library/libraries/jquery/1.9.1/jquery.min.js',
-       '//atlas/www/prod/library/libraries/leaflet/0.8-dev/leaflet-src.js',
-       '//atlas/www/prod/library/libraries/bootstrap/3.0.3/js/bootstrap.min.js',
-       '//atlas/www/prod/library/libraries/leaflet.fullscreen/Control.FullScreen.js',
-       '//atlas/www/prod/library/libraries/leaflet-hash/leaflet-hash.js',
-        '//atlas/www/prod/library/libraries/leaflet.shapefile/shp.js',
+      '//atlas/www/prod/library/libraries/jquery/1.9.1/jquery.min.js',
+      '//atlas/www/prod/library/libraries/spin.js/spin.min.js',
+      '//atlas/www/prod/library/libraries/leaflet/0.8-dev/leaflet-src.js',
+      '//atlas/www/prod/library/libraries/leaflet-spin/leaflet.spin.js',
+      '//atlas/www/prod/library/libraries/bootstrap/3.0.3/js/bootstrap.min.js',
+      '//atlas/www/prod/library/libraries/leaflet.fullscreen/Control.FullScreen.js',
+      '//atlas/www/prod/library/libraries/metro/leaflet-hash/leaflet-hash.js',
+      '//atlas/www/prod/library/libraries/leaflet.shapefile/shp.js',
       '//atlas/www/prod/library/libraries/colorbrewer/colorbrewer.js',
       '//atlas/www/prod/library/libraries/metro/bootstrap-context/context.js',
       '//atlas/www/prod/library/libraries/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js',
       '//atlas/www/prod/library/libraries/bootstrap-select/1.3.1/js/bootstrap-select.min.js',
-    '//atlas/www/prod/library/libraries/leaflet.markercluster/0.4/leaflet.markercluster.js',
-    '//atlas/www/prod/library/libraries/mustache/mustache.min.js',
-    '//atlas/www/prod/library/libraries/chroma/chroma.min.js',
-     '//atlas/www/prod/library/libraries/bootstrap-sortable/bootstrap-sortable.js',
-     '//atlas/www/prod/library/libraries/html5sortable/jquery.sortable.min.js',
+      '//atlas/www/prod/library/libraries/leaflet.markercluster/0.4/leaflet.markercluster.js',
+      '//atlas/www/prod/library/libraries/mustache/mustache.min.js',
+      '//atlas/www/prod/library/libraries/chroma/chroma.min.js',
+      '//atlas/www/prod/library/libraries/bootstrap-sortable/bootstrap-sortable.js',
+      '//atlas/www/prod/library/libraries/html5sortable/jquery.sortable.min.js',
       '//atlas/www/prod/library/libraries/jquery.csvToTable/jquery.csvToTable.js',
       '//atlas/www/prod/library/libraries/jquery.lazyload/jquery.lazyload.min.js',
-  '//atlas/www/prod/library/libraries/PNG/PNG.js',
+      '//atlas/www/prod/library/libraries/PNG/PNG.js',
       '//atlas/www/prod/library/libraries/heatmapjs/heatmap.min.js',
       '//atlas/www/prod/library/libraries/leaflet.heatmapjs/leaflet-heatmap.js'
-    ,"../js/script.js"
+      //,"../js/script.js"
     ],
 
     isjs: true,
@@ -215,6 +185,8 @@ var deleteFileIfExists = function (filename) {
   }
 };
 
+//End function declarations
+
 if (output.length === 0) {
   console.log('No files specified to compile.');
 }
@@ -240,6 +212,7 @@ else {
     var build_file = 'build-' + (output_file || minified_file);
 
     deleteFileIfExists(build_file);
+
     (function (_output_obj, _build_file, _output_file, _minified_file, _output_path, _minified_path) {
       var file_stream = fs.createWriteStream(_build_file, streamOptions);
 
@@ -263,6 +236,7 @@ else {
         // Write data
         file_stream.write('/* ' + path.normalize(filename) + ' */\n\r' + data + '\n\r\n\r');
       }
+      file_stream.write('var version="'+version+'";');
       file_stream.end();
 
     })(output_obj, build_file, output_file, minified_file, output_path, minified_path);

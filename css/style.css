@@ -490,4 +490,13 @@ input[type="range"]::-ms-thumb {
               padding: 8px 8px;
           }
 
-     
+     #browserModal img {
+height: 40px;
+width: 40px;
+}
+
+      .browser {
+      float: left;
+      margin-right: 10px;
+      margin-top: 10px;
+    }
