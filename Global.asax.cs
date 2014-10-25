@@ -58,6 +58,8 @@ namespace Allegro
           path += ";" + GDAL_HOME;
           SetEnvironmentVariable("PATH", path);
 
+          SetEnvironmentVariable("GDAL_DATA",  @"C:\Program Files\GDAL\gdal-data");
+
             AreaRegistration.RegisterAllAreas();
 
             RegisterRoutes(RouteTable.Routes);

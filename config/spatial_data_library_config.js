@@ -11,7 +11,7 @@ config.layers.push({
   'symbolField': 'NAME'
 },
 {
-  'name': 'Oregon Watershed Councils-2014',
+  'name': 'Oregon Watershed Councils 2014',
   'url': 'http://oe.oregonexplorer.info/ExternalContent/SpatialDataforDownload/Oregon_Watershed_Councils_2014.zip',
   'type': 'shapefile',
   'metadataUrl': 'http://spatialdata.oregonexplorer.info/geoportal/rest/document?id=%7B8091C70C-2E73-47D4-BA0F-8D8D0C5647C0%7D',
@@ -69,23 +69,16 @@ config.layers.push({
 {
   'proxy': true,
   'theme': 'Administrative',
-  'name': "Community at Risk: Boundary",
-  'url': "http://navigator.state.or.us/sdl/data/shapefile/k24/community_boundary.zip",
-  'type': "shapefile",
-  "source": "OSU"
-},
-{
-  'proxy': true,
-  'theme': 'Administrative',
-  'name': "Township/Range 1:100,000",
+  'name': "Township and Range 1:100,000",
   'url': "http://navigator.state.or.us/sdl/data/shapefile/k100/township_range.zip",
   'type': "shapefile",
-  "source": "OSU"
+  "source": "OSU",
+  "simplify":true
 },
 {
   'proxy': true,
   'theme': 'Administrative',
-  'name': "Townships/Range, 1:2,000,000",
+  'name': "Township and Range, 1:2,000,000",
   'url': "http://navigator.state.or.us/sdl/data/shapefile/m2/townships.zip",
   'type': "shapefile",
   "source": "OSU"
@@ -104,7 +97,8 @@ config.layers.push({
   'name': "Land Ownership, BLM, 1:100,000",
   'url': "http://navigator.state.or.us/sdl/data/shapefile/k100/blmlands.zip",
   'type': "shapefile",
-  "source": "OSU"
+  "source": "OSU",
+  "simplify":true
 },
 {
   'proxy': true,

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 //using System.Data.SQLite;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -208,6 +209,7 @@ namespace Allegro.Controllers
           {
             sb[index] = ("{\"type\":\"Feature\",\"geometry\":" + Geom(f, coord_transform, _tolerance).Replace(" ", "") +
                          ",\"properties\":{" + Props(f, fieldDefs) + "}}");
+            Debug.WriteLine(index);
             index++;
           }
 
@@ -223,7 +225,7 @@ namespace Allegro.Controllers
         }
         catch (Exception ex)
         {
-          return Json(new {error = "Failed to locate file"}, JsonRequestBehavior.AllowGet);
+          return Json(new {error = "Failed to locate or corrupt file"+ex.Message}, JsonRequestBehavior.AllowGet);
         }
         finally
         {
@@ -326,19 +328,25 @@ namespace Allegro.Controllers
       
       var temp_geom= geom.Simplify(tolerance);
 
-      var index = 0;
-      var tolerances = new[] {.00005, .000005, .0000005, .00000005};
-      while (temp_geom == null) //try decreasing tolerance to get a shape
+      if (temp_geom.IsEmpty())
       {
+        var index = 0;
+        var tolerances = new[] { tolerance * .0001, tolerance * .00001, tolerance * .000001, tolerance * .0000001, tolerance * .00000001, tolerance * .000000001 };
 
-        temp_geom = geom.Simplify(tolerances[index]);
-       
-        index++;
-        if (index != tolerances.Length) continue;
-        temp_geom = geom; break;
+        foreach (double t in tolerances)
+        {
+          temp_geom = geom.Simplify(t);
+          Debug.WriteLine(t);
+          if (!temp_geom.IsEmpty())
+          {
+            Debug.WriteLine("Got it!");
+            break;
+          }
+          index++;
+        }
       }
 
-      return temp_geom != null ? temp_geom.ExportToJson(new[] { "COORDINATE_PRECISION=" + coordinate_precision }) : null;
+      return temp_geom != null ? temp_geom.ExportToJson(new[] { "COORDINATE_PRECISION=" + coordinate_precision }) : "";
     }
   }
 }

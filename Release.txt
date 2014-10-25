@@ -1,8 +1,8 @@
 
 Allegro
 
-Current Build: 0.591.0
-Release Date: 2014-10-24T17:38:07.981Z
+Current Build: 0.592.0
+Release Date: 2014-10-24T23:13:40.344Z
 
 App Notes:
 A simple map viewer that eats shapefiles and shows heatmaps.

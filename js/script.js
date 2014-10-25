@@ -326,8 +326,8 @@ var App = {
     //},
     boot_layers : [],
     load_layers : function(layerIndex) {
-      if (layerIndex < App.boot_layers.length) {
-        //RECURSION!!
+      if (layerIndex < App.boot_layers.length && App.boot_layers[layerIndex] != '') {
+       
         var name = App.boot_layers[layerIndex].trim().replace(/\-/g, ' ');
         var layer = this.util.getLayerByName(name);
         if (layer != null) {
@@ -522,11 +522,11 @@ var App = {
                   url += "&tolerance=.0005";
                 }
               $.getJSON(url, function(data) {
-                try {
-                  localStorage.setObject(layer.url, data);
-                } catch (ex) {
-                  console.log('unable to store this in local storage');
-                }
+                //try {
+                //  localStorage.setObject(layer.url, data);
+                //} catch (ex) {
+                //  console.log('unable to store this in local storage');
+                //}
                 $('#txtLoadingData').html('Parsing...');
                 callback(data);
               });
@@ -1713,24 +1713,33 @@ var App = {
                             }
                         },
                         {
-                            text: 'GeoJSON', action: function () {
-                                var foo = JSON.stringify(layer.mapLayer.toGeoJSON());
-                                var goo = new Blob([foo], { type: 'application/octet' });
+                          text: 'GeoJSON', action: function () {
+                            console.log('yaytime');
 
-                                if (window.navigator.msSaveBlob) {
-                                    window.navigator.msSaveBlob(goo, id + '.geojson');
-                                }
-                                else {
-                                    var blobUrl = URL.createObjectURL(goo);
-                                    var a = document.createElement("a");
-                                    document.body.appendChild(a);
-                                    a.style = "display: none";
-                                    a.href = blobUrl;
-                                    a.download = id + '.geojson';
-                                    a.click();
-                                    URL.revokeObjectURL(blobUrl);
-                                }
+                            if (typeof(Blob) != 'undefined') {
+                              var foo = JSON.stringify(layer.mapLayer.toGeoJSON());
+                              var goo = new Blob([foo], { type: 'application/octet' });
+
+                              if (window.navigator.msSaveBlob) {
+                                window.navigator.msSaveBlob(goo, id + '.geojson');
+                              } else {
+                                var blobUrl = URL.createObjectURL(goo);
+                                var a = document.createElement("a");
+                                document.body.appendChild(a);
+                                a.style = "display: none";
+                                a.href = blobUrl;
+                                a.download = id + '.geojson';
+                                a.click();
+                                URL.revokeObjectURL(blobUrl);
+                              }
+                            } else {
+                              var url = "./polyfill/?url=" + encodeURIComponent(layer.url) + "&type=file";
+                              if (layer.simplify) {
+                                url += '&tolerance=.005';
+                              }
+                              window.location = url;
                             }
+                          }
                         },
                         {
                             text: 'CSV', action: function () {
