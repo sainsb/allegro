@@ -1,7 +1,7 @@
-﻿
-
-//note that 'this' is used when able. 'this' refers to the owner of the method in which we are located
-//otherwise we assume that it is safe to refer to the global, static App object.
+﻿/* Allegro JS Map Viewer
+ Ben Sainsbury
+ http://github.com/sainsb/allegro
+ */
 
 var map = null;
 
@@ -23,19 +23,16 @@ var App = {
     DEFAULT_RADIUS: 7,
 
     locateMarker:null,
-    loading:true,
   
-
     init: function () {
 
-      "use strict";
-      
-      // Detecting IE
-      var oldIE;
-      if ($('html').is('.ie6, .ie7, .ie8, .ie9')) {
-        oldIE = true;
-        $('#browserModal').modal('show');
-      }
+        "use strict";
+
+        // Detect old IE
+        if ($('html').is('.ie6, .ie7, .ie8, .ie9')) {
+            $('#browserModal').modal('show');
+        }
+
         //resizes the map and legend height upon page resize
         //width is taken care of by the DOM.
         //** will probably want to disable when the site goes into responsive mode..
@@ -52,15 +49,11 @@ var App = {
             }
         });
 
-        //currently not using this but will want it/need it to handle responsive change
         if ($(window).width() >= 980) {
             $('#map,#legend').css("margin-bottom", 10);
         } else {
             $('#map,#legend').css("margin-bottom", -20);
         }
-
-        //init colorpickers
-        $('.color').colorpicker();
 
         //assign handle to add Data button
         //init image lazy loader
@@ -74,19 +67,6 @@ var App = {
                     effect: "fadeIn",
                     container: $(".tab-content")
                 });
-
-                // This is a fallback image lazy loader.	
-                //var imgs = $('#dataModal').find('img');
-                //// loop over each img
-                //imgs.each(function () {
-                //    var self = $(this);
-                //    var datasrc = self.attr('data-original');
-                //    if (datasrc) {
-                //        self.one('load')
-                //            .attr("src", datasrc)
-                //            .attr('data-original', '');
-                //    }
-                //});
             });
 
             $('#dataModal').modal('show');
@@ -102,34 +82,8 @@ var App = {
             $('#optionsModal').modal('show');
         });
 
-        //assign handler to Basemap opacity slider
-        $('#sliBasemap').on('input', function () {
-            //get active basemap
-            for (var b in config.basemaps) {
-                if (config.basemaps[b].active == true) {
-                    config.basemaps[b].mapLayer.setOpacity($(this).val() / 100);
-                }
-            }
-        });
-
-      $('#btnShare').on('click', function() {
-        $('#browserDialog').modal('show');
-      });
-
-        //assign handler to options	
-        //not sure if will be modal or not yet...
-        $('#selOptions').on('change.core', function (ev) {
-            // var opts = $('#selOptions').val();
-            // if ($.inArray('Show Coordinates', opts) > -1) {
-            //     if (typeof(map.coordControl) == 'undefined') {
-            //         map.coordControl = L.control.coordinates().addTo(map);
-            //     }
-            // } else {
-            //     if (typeof (map.coordControl) != 'undefined') {
-            //         map.coordControl.removeFrom(map);
-            //         map.coordControl = undefined;
-            //     }
-            // }
+        $('#btnShare').on('click', function() {
+            $('#browserDialog').modal('show');
         });
 
         //Attach behavior to legend checkboxes
@@ -137,14 +91,13 @@ var App = {
             var id = $(this).attr('id').replace('chk', '');
             var layer = App.util.getLayerById(id);
             if ($(this).is(':checked')) {
-                //we'll need to bring stuff to back and front
                 if (layer.type == App.LAYER_TYPES.GEOJSON || layer.type == App.LAYER_TYPES.SHAPEFILE) {
 
-                    /* Enter Layer order z-index hell */
-                    //Just bring any layers to the front that are above in the TOC after bringing this one to the front.
-
+                    /* Layer order z-index hell */
+                    
                     layer.mapLayer.addTo(map).bringToFront();
                     var other_layers = [];
+
                     $.each($('.legend-check'), function(i,v){
                         var iid = $(v).prop('id').replace('chk','');
                         if (iid != id){
@@ -176,7 +129,7 @@ var App = {
             }
         });
 
-        //Attach behavior to opacity sliders
+        //Fill opacity sliders
         $('body').on('input', '.sliderFillOpacity', function () {
             var id = $(this).attr('id').replace('sli', '');
             var layer = App.util.getLayerById(id);
@@ -195,6 +148,7 @@ var App = {
             }
         });
 
+        //Stroke opacity sliders
         $('body').on('input', '.sliderStrokeOpacity', function () {
             var id = $(this).attr('id').replace('sli', '');
             var layer = App.util.getLayerById(id);
@@ -204,6 +158,16 @@ var App = {
             });
         });
 
+        //Basemap opacity slider
+        $('#sliBasemap').on('input', function () {
+            //get active basemap
+            for (var b in config.basemaps) {
+                if (config.basemaps[b].active == true) {
+                    config.basemaps[b].mapLayer.setOpacity($(this).val() / 100);
+                }
+            }
+        });
+
         $('.dropdown.keep-open').on({
             "shown.bs.dropdown": function () { this.closable = false; },
             "mouseleave": function () {
@@ -211,6 +175,7 @@ var App = {
             "hide.bs.dropdown": function () { return this.closable; }
         });
 
+        //init map
         L.Icon.Default.imagePath = '//library.oregonmetro.gov/libraries/leaflet/0.8-dev/images/';
 
         this.map = new L.Map('map', {
@@ -226,15 +191,18 @@ var App = {
         L.control.scale().addTo(this.map);
         new L.Hash(this.map);
 
-        // Initialize dialogs
+        //init dialogs
         this.layersDialog.render();
 
         this.basemapDialog.render();
 
         this.symbolDialog.ramps.render();
 
-        //init bootstrap select controls
+        //init selectpickers
         $('.selectpicker').selectpicker();
+
+        //init colorpickers
+        $('.color').colorpicker();
 
         //init RLIS API autosuggest
         var x = new RLIS.Autosuggest("txtLocSearch", { "mode": 'locate', 'entries': 7 }, function (result, error) {
@@ -252,7 +220,7 @@ var App = {
             }
             else {
                 App.locateMarker = new L.marker([result[0].lat, result[0].lng], {
-                    draggable: true,
+                    draggable: false,
                     title: result[0].fullAddress
                 });
                 App.locateMarker.bindPopup(result[0].fullAddress);
@@ -262,69 +230,21 @@ var App = {
             App.map.setView([result[0].lat, result[0].lng], 15);
         });
         
-      //Accept l param to load layers passed in querystring
+        //load layers passed in hash
         var hash = location.hash.split('/');
    
-      if (hash.length > 3 && hash[3] != '') {
+        if (hash.length > 3 && hash[3] != '') {
             App.boot_layers = hash.slice(3, hash.length);
             map.spin(true);
             App.load_layers(0);
         }
 
+        //Add drag and drop shapefile functionality
         this.util.dragHandler();
-
     },
-    
-    //  var opt_parts = [];
-    //  for (i in opts) {
-    //    opt_parts.push(i + '=' + opts[i]);
-    //  }
-    //  location.hash = '#!' + opt_parts.join('&');
-    //},
 
-    //getMapOptsFromUrl: function () {
-    //  var opts = this.QueryString();
-    //  var map_opts = {};
-
-    //  for (var i in opts) {
-    //    if (i === 'll') {
-    //      var nums = opts[i].split(',');
-    //      map_opts['center'] = new L.LatLng(parseFloat(nums[0]), parseFloat(nums[1]));
-    //    } else if (i === 'z') {
-    //      map_opts['zoom'] = parseInt(opts[i], 10);
-    //    }
-    //  }
-    //  return map_opts;
-    //},
-
-    //addLayerToUrl: function (layerId) {
-    //  var opts = App.QueryString(), i;
-    //  var layers = (opts['l'] || '').split(',');
-    //  var layersById = {};
-    //  for (i = 0; i < layers.length; i++) {
-    //    if (layers[i].length > 0) {
-    //      layersById[decodeURIComponent(layers[i])] = true;
-    //    }
-    //  }
-    //  layersById[layerId] = true;
-    //  App.boot_layers = [];
-    //  for (i in layersById) {
-    //    App.boot_layers.push(i);
-    //  }
-    //  App.updateUrl.call(App.map);
-    //},
-
-    //removeLayerFromUrl: function (layerId) {
-    //  var activeLayers = [];
-    //  for (var i = 0; i < App.boot_layers.length; i++) {
-    //    if (App.boot_layers[i] !== layerId) {
-    //      activeLayers.push(App.boot_layers[i]);
-    //    }
-    //  }
-    //  App.boot_layers = activeLayers;
-    //  App.updateUrl.call(App.map);
-    //},
     boot_layers : [],
+
     load_layers : function(layerIndex) {
       if (layerIndex < App.boot_layers.length && App.boot_layers[layerIndex] != '') {
        
@@ -334,7 +254,7 @@ var App = {
           App.data.add(layer, function () { App.load_layers(layerIndex + 1); });
           $('.img-block.layer').each(function(i, v) {
             var id = $(v).find('img').attr('id').replace('img', '');
-            //console.log(id);
+            
             if (id == App.util.getLayerId(layer.name)) {
 
               $(v).addClass('active');
@@ -350,7 +270,7 @@ var App = {
     data: {
 
         /* event handler for add data button */
-      add: function (layer, cb) {
+        add: function (layer, cb) {
             switch (layer.type) {
                 case App.LAYER_TYPES.GEOJSON:
                     this.load.geoJSON(layer, cb);
@@ -401,7 +321,6 @@ var App = {
                 //** will need some sort of legend created.
                 layer.mapLayer = new L.TileLayer(layer.url, options);
                 layer.mapLayer.addTo(App.map);
-
             },
 
             tileJSON: function (layer) {
@@ -451,88 +370,87 @@ var App = {
 
             shapefile: function(layer, callback) {
 
-            $('#txtLoadingData').html('Loading...');
-            $('#imgLoadingData').fadeIn(100);
+                $('#txtLoadingData').html('Loading...');
+                $('#imgLoadingData').fadeIn(100);
 
 
-//Check in local storage first
-            var localGeoJSON = localStorage.getObject(layer.url);
+                //Check in local storage first
+                var localGeoJSON = localStorage.getObject(layer.url);
 
-            if (localGeoJSON != null) {
-              callback(localGeoJSON);
-              //App.data.parse.geoJSON(localGeoJSON, layer);
-              return;
-            }
-              if(1==2){
-           // if (typeof (FileReader) != 'undefined') {
-              var xhr = new XMLHttpRequest(), reader = new FileReader();
+                if (localGeoJSON != null) {
+                  callback(localGeoJSON);
+                  //App.data.parse.geoJSON(localGeoJSON, layer);
+                  return;
+                }
+                
+                if(typeof (FileReader) != 'undefined'){
+                // if (typeof (FileReader) != 'undefined') {
+                var xhr = new XMLHttpRequest(), reader = new FileReader();
 
-              var url = '';
+                  var url = '';
 
-              if (typeof (layer.proxy) != 'undefined') {
-                url = './proxy/?url=' + encodeURIComponent(layer.url);
-              } else {
-                url = layer.url;
-              }
-
-              //url_prefix = 'data/';
-              xhr.open("GET", url, true);
-              // Set the responseType to blob
-              xhr.responseType = "blob";
-
-              xhr.addEventListener("load", function() {
-                if (xhr.status === 200) {
-                  // onload needed since Google Chrome doesn't support addEventListener for FileReader
-                  if (typeof(FileReader) == 'undefined') {
-
+                  if (typeof (layer.proxy) != 'undefined') {
+                    url = './proxy/?url=' + encodeURIComponent(layer.url);
                   } else {
-                    reader.onload = function(e) {
+                    url = layer.url;
+                  }
 
-                      if (reader.readyState !== 2 || reader.error) {
-                        if (reader.error) {
-                          console.log(reader.error);
-                        }
-                        return;
+                  //url_prefix = 'data/';
+                  xhr.open("GET", url, true);
+                  // Set the responseType to blob
+                  xhr.responseType = "blob";
+
+                  xhr.addEventListener("load", function() {
+                    if (xhr.status === 200) {
+                      // onload needed since Google Chrome doesn't support addEventListener for FileReader
+                      if (typeof(FileReader) == 'undefined') {
+
                       } else {
+                        reader.onload = function(e) {
 
-                        shp(reader.result).then(function(data) {
-                          //cache geojson in localstorage
-                          try {
-                            localStorage.setObject(layer.url, data);
-                          } catch (ex) {
-                            console.log('unable to store this in local storage');
+                          if (reader.readyState !== 2 || reader.error) {
+                            if (reader.error) {
+                              console.log(reader.error);
+                            }
+                            return;
+                          } else {
+
+                            shp(reader.result).then(function(data) {
+                              //cache geojson in localstorage
+                              try {
+                                localStorage.setObject(layer.url, data);
+                              } catch (ex) {
+                                console.log('unable to store this in local storage');
+                              }
+                              $('#txtLoadingData').html('Parsing...');
+                              callback(data);
+                            });
                           }
-                          $('#txtLoadingData').html('Parsing...');
-                          callback(data);
-                        });
+                        }
+                        // Load blob as Data URL
+                        reader.readAsArrayBuffer(xhr.response);
                       }
                     }
-                    // Load blob as Data URL
-                    reader.readAsArrayBuffer(xhr.response);
-                  }
-                }
-              }, false);
-              // Send XHR
-              xhr.send();
-            } else {
-                //$('#browserModal').modal('show');
+                  }, false);
+                  // Send XHR
+                  xhr.send();
+                } else { //IE 9 or less polyfill
 
-                var url = './polyfill/?url=' + encodeURIComponent(layer.url);
-                if (layer.simplify) {
-                  url += "&tolerance=.0005";
+                    var url = './polyfill/?url=' + encodeURIComponent(layer.url);
+                    if (layer.simplify) {
+                      url += "&tolerance=.0005";
+                    }
+                    $.getJSON(url, function(data) {
+                    //try {
+                    //  localStorage.setObject(layer.url, data);
+                    //} catch (ex) {
+                    //  console.log('unable to store this in local storage');
+                    //}
+                    $('#txtLoadingData').html('Parsing...');
+                    callback(data);
+                  });
                 }
-              $.getJSON(url, function(data) {
-                //try {
-                //  localStorage.setObject(layer.url, data);
-                //} catch (ex) {
-                //  console.log('unable to store this in local storage');
-                //}
-                $('#txtLoadingData').html('Parsing...');
-                callback(data);
-              });
-              //$('#imgLoadingData').hide();
-            }
-        },
+            },
 
             heatmap: function (layer, callback) {
 
@@ -2330,6 +2248,8 @@ var App = {
               }
             }
 
+            App.util.updateUrl();
+
             //var trgkey = trgid.substring(2, trgid.length);
 
             //if (dropped[0].previousSibling == null) { //At top
@@ -2417,19 +2337,18 @@ var App = {
             }
         },
 
-      updateUrl: function () {
-        //console.log(location.hash);
-        var temp_hash = location.hash.split('/').slice(0,3).join('/');
-        var _layers = [];
-        $('.legend-check').each(function(i, v) {
-          var id = $(v).prop('id').replace('chk', '');
-          var layer = App.util.getLayerById(id);
-          _layers.push(layer.name.replace(/\s/g,'-'));
-        });
+        updateUrl: function () {
+            //console.log(location.hash);
+            var temp_hash = location.hash.split('/').slice(0,3).join('/');
+            var _layers = [];
+            $('.legend-check').each(function(i, v) {
+                var id = $(v).prop('id').replace('chk', '');
+                var layer = App.util.getLayerById(id);
+                _layers.push(layer.name.replace(/\s/g,'-'));
+            });
 
-        location.hash = temp_hash+ '/'+_layers.join('/');
-      }
-
+            location.hash = temp_hash+ '/'+_layers.join('/');
+        }
     }
 }
 

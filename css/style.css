@@ -500,3 +500,11 @@ width: 40px;
       margin-right: 10px;
       margin-top: 10px;
     }
+
+    .panelyr>.accordion-toggle:before{
+  transition: text-shadow 0.4s ease;
+}
+
+.panelyr>.accordion-toggle:hover:before{
+   text-shadow: 0px 0px 2px rgb(0,0,0);
+};

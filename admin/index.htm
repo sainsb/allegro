@@ -1,0 +1,306 @@
+<html>
+<head>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+<script src='https://code.jquery.com/jquery-2.1.1.min.js'></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<form class="form-horizontal">
+<fieldset>
+
+<!-- Form Name -->
+<legend>Layer Editor</legend>
+
+<!-- Prepended text-->
+<div class="form-group">
+  <div class="col-md-8">
+    <div class="input-group">
+      <span class="input-group-addon">Name</span>
+      <input id="lyrName" name="lyrName" class="form-control" placeholder="Name of layer" type="text" required="">
+    </div>
+  </div>
+</div>
+
+<!-- Prepended text-->
+<div class="form-group">
+  <div class="col-md-8">
+    <div class="input-group">
+      <span class="input-group-addon">URL</span>
+      <input id="lyrURL" name="lyrURL" class="form-control" placeholder="URL to data" type="text">
+    </div>
+  </div>
+</div>
+
+<!-- Select Basic -->
+<div class="form-group">
+  <div class="col-md-4">
+   <div class="input-group">
+  <span class="input-group-addon">Type</span>
+    <select id="lyrType" name="lyrType" class="form-control">
+      <option value="Shapefile">Shapefile</option>
+      <option value="GeoJSON">GeoJSON</option>
+      <option value="Heatmap">Heatmap</option>
+      <option value="Tilelayer">Tilelayer</option>
+      <option value="TileJSON">TileJSON</option>
+      <option value="ArcGIS Server Dynamic">ArcGIS Server Dynamic</option>
+      <option value="ArcGIS Server Tiled">ArcGIS Server Tiled</option>
+      <option value="CSV">CSV</option>
+    </select>
+  </div>
+  </div>
+</div>
+
+<!-- Prepended text-->
+<div class="form-group">
+  <div class="col-md-8">
+    <div class="input-group">
+      <span class="input-group-addon">Thumbnail URL</span>
+      <input id="lyrThumb" name="lyrThumb" class="form-control" placeholder="URL to thumbnail" type="text">
+    </div>
+    
+  </div>
+</div>
+
+<!-- Prepended text-->
+<div class="form-group">
+  <div class="col-md-8">
+    <div class="input-group">
+      <span class="input-group-addon">Metadata URL</span>
+      <input id="lyrMetadataUrl" name="lyrMetadataUrl" class="form-control" placeholder="URL to metadata document" type="text">
+    </div>
+    
+  </div>
+</div>
+
+<!-- Select Basic -->
+<div class="form-group">
+  <div class="col-md-5">
+  <div class="input-group">
+  <span class="input-group-addon">Theme</span>
+    <select id="lyrTheme" name="lyrTheme" class="form-control">
+      <option value="Administrative">Administrative</option>
+      <option value="Boundary">Boundary</option>
+      <option value="Census">Census</option>
+      <option value="Cities">Cities</option>
+      <option value="Community">Community</option>
+      <option value="Democratic Participation">Democratic Participation</option>
+      <option value="Demographics">Demographics</option>
+      <option value="Develop">Develop</option>
+      <option value="Ecology">Ecology</option>
+      <option value="Economic Opportunity">Economic Opportunity</option>
+      <option value="Education">Education</option>
+      <option value="Environment">Environment</option>
+      <option value="Food">Food</option>
+      <option value="General">General</option>
+      <option value="Government">Government</option>
+      <option value="Health Care">Health Care</option>
+      <option value="Health Outcomes">Health Outcomes</option>
+      <option value="Healthy Environment">Healthy Environment</option>
+      <option value="Housing">Housing</option>
+      <option value="Hydrology">Hydrology</option>
+      <option value="Land">Land</option>
+      <option value="Major Studies">Major Studies</option>
+      <option value="Parks and Natural Areas">Parks and Natural Areas</option>
+      <option value="Places">Places</option>
+      <option value="Planning">Planning</option>
+      <option value="Points of Interest">Points of Interest</option>
+      <option value="Population Overlays">Population Overlays</option>
+      <option value="Services and Amenities">Services and Amenities</option>
+      <option value="Streets">Streets</option>
+      <option value="TOD">TOD</option>
+      <option value="Taxlots">Taxlots</option>
+      <option value="Transit">Transit</option>
+      <option value="Transportation">Transportation</option>
+      <option value="Water">Water</option>
+    </select>
+  </div>
+  </div>
+</div>
+
+<!-- Prepended text-->
+<div class="form-group">
+  <div class="col-md-8">
+    <div class="input-group">
+      <span class="input-group-addon">Data Source</span>
+      <input id="lyrSource" name="lyrSource" class="form-control" placeholder="Metro, Oregon State, DOGAMI etc." type="text">
+    </div>
+    
+  </div>
+</div>
+
+<!-- Prepended text-->
+<div class="form-group">
+  <div class="col-md-8">
+    <div class="input-group">
+      <span class="input-group-addon">Data Source Icon</span>
+      <input id="lyrIcon" name="lyrIcon" class="form-control" placeholder="URL to data source icon" type="text">
+    </div>
+  </div>
+</div>
+
+
+
+<legend>Style Options</legend>
+<!-- Prepended text-->
+<div class="form-group">
+  <div class="col-md-8">
+    <div class="input-group">
+      <span class="input-group-addon">Symbol Field</span>
+      <input id="lyrSymbolField" name="lyrSymbolField" class="form-control" placeholder="field to symbolize on" type="text">
+    </div>
+  </div>
+</div>
+
+<!-- Select Basic -->
+<div class="form-group">
+  <div class="col-md-4">
+  <div class="input-group">
+      <span class="input-group-addon">Color Ramp</span>
+    <select id="lyrRamp" name="lyrRamp" class="form-control">
+      <option value="1">Option one</option>
+      <option value="2">Option two</option>
+    </select>
+  </div>
+  </div>
+</div>
+
+<!-- Textarea -->
+<div class="form-group">
+  <div class="col-md-8">   
+   <div class="input-group">
+  <span class="input-group-addon">Legend Object</span>                  
+    <textarea class="form-control" id="lyrLegend" name="lyrLegend">Legend Object (JSON)</textarea>
+    </div>
+  </div>
+</div>
+
+<!-- Textarea -->
+<div class="form-group">
+  <div class="col-md-8">   
+   <div class="input-group">
+  <span class="input-group-addon">Style Object</span>                  
+    <textarea class="form-control" id="lyrstyle" >Style Object (JSON) - An alternative style definition</textarea>
+    </div>
+  </div>
+</div>
+
+
+
+
+<legend>Other</legend>
+
+<!-- Textarea -->
+<div class="form-group">
+  <div class="col-md-8">  
+  <div class="input-group">
+  <span class="input-group-addon">Popup Template</span>                   
+    <textarea class="form-control" id="lyrPopupTemplate" name="lyrPopupTemplate">Mustache popup template</textarea>
+    </div>
+     <p class="help-block">help</p>
+  </div>
+</div>
+
+<!-- Prepended text-->
+<div class="form-group">
+  <div class="col-md-8">
+    <div class="input-group">
+      <span class="input-group-addon">Filter</span>
+      <input id="lyrDefQuery" name="lyrDefQuery" class="form-control" placeholder="STATUS=1 etc." type="text">
+    </div>
+    <p class="help-block">help</p>
+  </div>
+</div>
+
+<!-- Prepended text-->
+<div class="form-group">
+  <div class="col-md-3">
+    <div class="input-group">
+      <span class="input-group-addon">Z-Index</span>
+      <input id="lyrZIndex" name="lyrZIndex" class="form-control" placeholder="Tilelayer zIndex" type="text">
+    </div>
+  </div>
+</div>
+
+<!-- Multiple Checkboxes -->
+<div class="form-group">
+  <div class="col-md-4">
+  <div class="checkbox">
+    <label for="checkboxes-0">
+      <input type="checkbox" name="checkboxes" id="checkboxes-0" value="1">
+      Requires Proxy
+    </label>
+  </div>
+  <div class="checkbox">
+    <label for="checkboxes-1">
+      <input type="checkbox" name="checkboxes" id="checkboxes-1" value="2">
+      Requires Token
+    </label>
+  </div>
+  <div class="checkbox">
+    <label for="checkboxes-2">
+      <input type="checkbox" name="checkboxes" id="checkboxes-2" value="3">
+      Simplify Geometry
+    </label>
+  </div>
+  <div class="checkbox">
+    <label for="checkboxes-3">
+      <input type="checkbox" name="checkboxes" id="checkboxes-3" value="4">
+      Is Clickable
+    </label>
+  </div>
+  </div>
+</div>
+</fieldset>
+<legend>Heatmap Options</legend>
+<!-- Prepended text-->
+<div class="form-group">
+  <div class="col-md-5">
+    <div class="input-group">
+      <span class="input-group-addon">No data Value</span>
+      <input id="lyrHeight" name="lyrHeight" class="form-control" placeholder="Heatmap no data value" type="text">
+    </div>
+  </div>
+</div>
+<div class="form-group">
+  <div class="col-md-3">
+    <div class="input-group">
+      <span class="input-group-addon">Height</span>
+      <input id="lyrHeight" name="lyrHeight" class="form-control" placeholder="Heatmap height (int)" type="text">
+    </div>
+  </div>
+</div>
+<!-- Prepended text-->
+<div class="form-group">
+  <div class="col-md-3">
+    <div class="input-group">
+      <span class="input-group-addon">Width</span>
+      <input id="lyrWidth" class="form-control" placeholder="Heatmap width (int)" type="text">
+    </div>
+  </div>
+</div>
+<!-- Prepended text-->
+<div class="form-group">
+  <div class="col-md-7">
+    <div class="input-group">
+      <span class="input-group-addon">Upper Left Coordinates</span>
+      <input id="lyrUpperLeft"  class="form-control" placeholder="Upper Left Coordinates x,y" type="text">
+    </div>
+  </div>
+</div>
+<div class="form-group">
+  <div class="col-md-7">
+    <div class="input-group">
+      <span class="input-group-addon">Georeferencing 'Step'</span>
+      <input id="lyrStep"  class="form-control" placeholder="Step (double)" type="text">
+    </div>
+  </div>
+</div>
+</form>
+</body>
+</html>
