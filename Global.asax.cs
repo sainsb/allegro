@@ -43,6 +43,24 @@ namespace Allegro
            );
 
             routes.MapRoute(
+               "Get Layers by source", // Route name
+               "getLayersBySource/{source}", // URL with parameters
+               new { controller = "Allegro", action = "GetLayersBySource" } // Parameter defaults
+           );
+
+            routes.MapRoute(
+              "Get Layer by Name", // Route name
+              "getLayerByName/{name}", // URL with parameters
+              new { controller = "Allegro", action = "GetLayerByName" } // Parameter defaults
+          );
+
+            routes.MapRoute(
+              "Put Layer by Name", // Route name
+              "putLayerByName/{layerName}", // URL with parameters
+              new { controller = "Allegro", action = "PutLayerByName" } // Parameter defaults
+          );
+
+            routes.MapRoute(
                 "Polyfill", // Route name
                 "polyfill/", // URL with parameters
                 new { controller = "Allegro", action = "Polyfill" } // Parameter defaults
