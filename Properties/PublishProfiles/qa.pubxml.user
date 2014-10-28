@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit http://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_PublishTargetUrl>U:\inetpub\wwwroot\allegro</_PublishTargetUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="bin/Allegro.dll">
+      <publishTime>10/24/2014 14:16:44</publishTime>
+    </File>
+    <File Include="bin/Allegro.dll.config">
+      <publishTime>10/16/2014 07:01:53</publishTime>
+    </File>
+    <File Include="bin/config/basemap_config.js">
+      <publishTime>10/22/2014 16:22:29</publishTime>
+    </File>
+    <File Include="bin/gdal_csharp.dll">
+      <publishTime>10/23/2014 07:39:48</publishTime>
+    </File>
+    <File Include="bin/lib/Microsoft.Web.Infrastructure.dll">
+      <publishTime>07/08/2013 15:15:08</publishTime>
+    </File>
+    <File Include="bin/lib/System.Web.Helpers.dll">
+      <publishTime>07/09/2013 11:05:10</publishTime>
+    </File>
+    <File Include="bin/lib/System.Web.Razor.dll">
+      <publishTime>07/09/2013 11:05:12</publishTime>
+    </File>
+    <File Include="bin/lib/System.Web.WebPages.Deployment.dll">
+      <publishTime>07/09/2013 12:05:12</publishTime>
+    </File>
+    <File Include="bin/lib/System.Web.WebPages.dll">
+      <publishTime>07/09/2013 11:05:12</publishTime>
+    </File>
+    <File Include="bin/lib/System.Web.WebPages.Razor.dll">
+      <publishTime>07/09/2013 11:05:12</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Web.Infrastructure.dll">
+      <publishTime>07/08/2013 15:15:08</publishTime>
+    </File>
+    <File Include="bin/ogr_csharp.dll">
+      <publishTime>10/23/2014 07:39:48</publishTime>
+    </File>
+    <File Include="bin/osr_csharp.dll">
+      <publishTime>10/23/2014 07:39:48</publishTime>
+    </File>
+    <File Include="bin/System.Web.Helpers.dll">
+      <publishTime>07/09/2013 11:05:10</publishTime>
+    </File>
+    <File Include="bin/System.Web.Mvc.dll">
+      <publishTime>07/09/2013 11:04:28</publishTime>
+    </File>
+    <File Include="bin/System.Web.Razor.dll">
+      <publishTime>07/09/2013 11:05:12</publishTime>
+    </File>
+    <File Include="bin/System.Web.Routing.dll">
+      <publishTime>09/26/2012 03:16:08</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.Deployment.dll">
+      <publishTime>07/09/2013 12:05:12</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.dll">
+      <publishTime>07/09/2013 11:05:12</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.Razor.dll">
+      <publishTime>07/09/2013 11:05:12</publishTime>
+    </File>
+    <File Include="config/basemap_config.js">
+      <publishTime>10/22/2014 16:22:29</publishTime>
+    </File>
+    <File Include="config/civic_apps_config.js">
+      <publishTime>08/20/2014 11:17:28</publishTime>
+    </File>
+    <File Include="config/equity_atlas_config.js">
+      <publishTime>08/26/2014 09:13:13</publishTime>
+    </File>
+    <File Include="config/parks_config.js">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="config/rise_config.js">
+      <publishTime>10/17/2014 12:42:38</publishTime>
+    </File>
+    <File Include="config/rlis_config.js">
+      <publishTime>10/24/2014 09:41:49</publishTime>
+    </File>
+    <File Include="config/spatial_data_library_config.js">
+      <publishTime>10/24/2014 13:27:34</publishTime>
+    </File>
+    <File Include="config/trimet_config.js">
+      <publishTime>10/22/2014 09:20:51</publishTime>
+    </File>
+    <File Include="css/style.css">
+      <publishTime>10/23/2014 09:18:12</publishTime>
+    </File>
+    <File Include="css/style.min.css">
+      <publishTime>10/24/2014 10:38:10</publishTime>
+    </File>
+    <File Include="fonts/glyphicons-halflings-regular.eot">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="fonts/glyphicons-halflings-regular.svg">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="fonts/glyphicons-halflings-regular.ttf">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="fonts/glyphicons-halflings-regular.woff">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="Global.asax">
+      <publishTime>10/17/2014 12:42:58</publishTime>
+    </File>
+    <File Include="img/ajax-loader.gif">
+      <publishTime>08/20/2014 11:17:28</publishTime>
+    </File>
+    <File Include="img/bridges.jpg">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="img/civicApps_logo.png">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="img/clf_logo.png">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="img/conservation_target.png">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="img/esriGray.png">
+      <publishTime>10/25/2012 11:51:23</publishTime>
+    </File>
+    <File Include="img/esri_logo.png">
+      <publishTime>07/23/2014 16:12:49</publishTime>
+    </File>
+    <File Include="img/esri_logo_mi.png">
+      <publishTime>07/23/2014 16:11:59</publishTime>
+    </File>
+    <File Include="img/expand-collapse.png">
+      <publishTime>07/24/2014 17:21:29</publishTime>
+    </File>
+    <File Include="img/expand-collapseL.png">
+      <publishTime>07/24/2014 17:20:05</publishTime>
+    </File>
+    <File Include="img/heatmap.jpg">
+      <publishTime>08/26/2014 08:53:52</publishTime>
+    </File>
+    <File Include="img/metro_base.JPG">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="img/metro_logo.png">
+      <publishTime>07/23/2014 14:55:36</publishTime>
+    </File>
+    <File Include="img/OE_Logo.gif">
+      <publishTime>10/22/2014 15:10:35</publishTime>
+    </File>
+    <File Include="img/OE_Logo.png">
+      <publishTime>10/22/2014 15:10:46</publishTime>
+    </File>
+    <File Include="img/osmbase.png">
+      <publishTime>10/22/2014 16:21:26</publishTime>
+    </File>
+    <File Include="img/photo2008.jpg">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="img/photo2009.jpg">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="img/photo2010.jpg">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="img/photo2011.jpg">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="img/photo2012.jpg">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="img/photo2013.png">
+      <publishTime>07/22/2014 18:06:16</publishTime>
+    </File>
+    <File Include="img/rcs_land_cover.jpg">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="img/Thumbs.db">
+      <publishTime>08/13/2014 07:18:53</publishTime>
+    </File>
+    <File Include="img/trimet_logo.png">
+      <publishTime>07/23/2014 14:54:33</publishTime>
+    </File>
+    <File Include="index.htm">
+      <publishTime>10/24/2014 13:53:50</publishTime>
+    </File>
+    <File Include="js/config.min.js">
+      <publishTime>10/24/2014 10:38:10</publishTime>
+    </File>
+    <File Include="js/script.js">
+      <publishTime>10/24/2014 13:37:47</publishTime>
+    </File>
+    <File Include="js/script.min.js">
+      <publishTime>10/24/2014 10:38:11</publishTime>
+    </File>
+    <File Include="lib/Microsoft.Web.Infrastructure.dll">
+      <publishTime>07/08/2013 15:15:08</publishTime>
+    </File>
+    <File Include="lib/System.Web.Helpers.dll">
+      <publishTime>07/09/2013 11:05:10</publishTime>
+    </File>
+    <File Include="lib/System.Web.Mvc.dll">
+      <publishTime>10/15/2014 17:45:11</publishTime>
+    </File>
+    <File Include="lib/System.Web.Razor.dll">
+      <publishTime>07/09/2013 11:05:12</publishTime>
+    </File>
+    <File Include="lib/System.Web.WebPages.Deployment.dll">
+      <publishTime>07/09/2013 12:05:12</publishTime>
+    </File>
+    <File Include="lib/System.Web.WebPages.dll">
+      <publishTime>07/09/2013 11:05:12</publishTime>
+    </File>
+    <File Include="lib/System.Web.WebPages.Razor.dll">
+      <publishTime>07/09/2013 11:05:12</publishTime>
+    </File>
+    <File Include="Microsoft.Web.Infrastructure.dll">
+      <publishTime>07/08/2013 15:15:08</publishTime>
+    </File>
+    <File Include="Release.txt">
+      <publishTime>10/24/2014 10:38:08</publishTime>
+    </File>
+    <File Include="System.Web.Helpers.dll">
+      <publishTime>07/09/2013 11:05:10</publishTime>
+    </File>
+    <File Include="System.Web.Mvc.dll">
+      <publishTime>10/15/2014 17:45:11</publishTime>
+    </File>
+    <File Include="System.Web.Razor.dll">
+      <publishTime>07/09/2013 11:05:12</publishTime>
+    </File>
+    <File Include="System.Web.WebPages.Deployment.dll">
+      <publishTime>07/09/2013 12:05:12</publishTime>
+    </File>
+    <File Include="System.Web.WebPages.dll">
+      <publishTime>07/09/2013 11:05:12</publishTime>
+    </File>
+    <File Include="System.Web.WebPages.Razor.dll">
+      <publishTime>07/09/2013 11:05:12</publishTime>
+    </File>
+    <File Include="Web.config">
+      <publishTime>10/16/2014 07:01:53</publishTime>
+    </File>
+  </ItemGroup>
+</Project>

@@ -14,9 +14,9 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Collections.Generic;
 using System.Reflection;
-//using OSGeo.GDAL;
-//using OSGeo.OGR;
-//using OSGeo.OSR;
+using OSGeo.GDAL;
+using OSGeo.OGR;
+using OSGeo.OSR;
 
 
 namespace Allegro.Controllers
@@ -24,9 +24,8 @@ namespace Allegro.Controllers
   public class AllegroController : Controller
   {
 
-    //proxy/%2F%2Flibrary.oregonmetro.gov%2Frlisdiscovery%2Fcouncil1993.zip
     [AcceptVerbs(HttpVerbs.Get)]
-    public ActionResult Proxy(bool ie)
+    public ActionResult Proxy()
     {
 
       var request = Server.UrlDecode(Request.QueryString["url"]);
@@ -149,96 +148,95 @@ namespace Allegro.Controllers
       return Content("Yay");
     }
 
+    [AcceptVerbs(HttpVerbs.Get)]
+    public ActionResult Polyfill()
+    {
 
-    //  [AcceptVerbs(HttpVerbs.Get)]
-    //public ActionResult Polyfill()
-    //{
+      var request = Server.UrlDecode(Request.QueryString["url"]);
+      if (String.IsNullOrEmpty(request))
+      {
+        return Json(new { message = "Please specify a resource" }, JsonRequestBehavior.AllowGet);
+      }
 
-    //  var request = Server.UrlDecode(Request.QueryString["url"]);
-    //    if (String.IsNullOrEmpty(request))
-    //    {
-    //      return Json(new {message = "Please specify a resource"}, JsonRequestBehavior.AllowGet);
-    //    }
+      if (request.Substring(0, 2) == "//")
+      {
+        request = "http:" + request;
+      }
 
-    //    if (request.Substring(0, 2) == "//")
-    //    {
-    //      request = "http:" + request;
-    //    }
+      var tolerance = Request.QueryString["tolerance"];
+      double _tolerance = .00000005;
+      if (!String.IsNullOrEmpty(tolerance))
+      {
+        _tolerance = Convert.ToDouble(tolerance);
+      }
 
-    //    var tolerance = Request.QueryString["tolerance"];
-    //    double _tolerance = .00000005;
-    //    if (!String.IsNullOrEmpty(tolerance))
-    //    {
-    //      _tolerance = Convert.ToDouble(tolerance);
-    //    }
-        
-    //  var fieldDefs = new List<KeyValuePair<string, FieldType>>();
-    //  var memFilename = "/vsizip/vsicurl/" + request;
+      var fieldDefs = new List<KeyValuePair<string, FieldType>>();
+      var memFilename = "/vsizip/vsicurl/" + request;
 
-    //    try
-    //    {
-    //      Ogr.RegisterAll();
-    //      var drv = Ogr.GetDriverByName("ESRI Shapefile");
-    //      var ds = drv.Open(memFilename, 0);
+      try
+      {
+        Ogr.RegisterAll();
+        var drv = Ogr.GetDriverByName("ESRI Shapefile");
+        var ds = drv.Open(memFilename, 0);
 
-    //      var layer = ds.GetLayerByIndex(0);
-    //      var layerDef = layer.GetLayerDefn();
-    //      layer.ResetReading();
+        var layer = ds.GetLayerByIndex(0);
+        var layerDef = layer.GetLayerDefn();
+        layer.ResetReading();
 
-    //      var sb = new string[layer.GetFeatureCount(0)];
+        var sb = new string[layer.GetFeatureCount(0)];
 
-    //      var outsrs = new SpatialReference("");
-    //      outsrs.ImportFromEPSG(4326);
+        var outsrs = new SpatialReference("");
+        outsrs.ImportFromEPSG(4326);
 
-    //      var insrs = layer.GetSpatialRef();
+        var insrs = layer.GetSpatialRef();
 
-    //      CoordinateTransformation coord_transform;
-    //      try
-    //      {
-    //        coord_transform = new CoordinateTransformation(insrs, outsrs);
-    //      }
-    //      catch (ApplicationException ex)
-    //      {
-    //        insrs = new SpatialReference("");
-    //        insrs.ImportFromEPSG(900913);
-    //        coord_transform = new CoordinateTransformation(insrs, outsrs);
-    //      }
+        CoordinateTransformation coord_transform;
+        try
+        {
+          coord_transform = new CoordinateTransformation(insrs, outsrs);
+        }
+        catch (ApplicationException ex)
+        {
+          insrs = new SpatialReference("");
+          insrs.ImportFromEPSG(900913);
+          coord_transform = new CoordinateTransformation(insrs, outsrs);
+        }
 
-    //      for (var i = 0; i < layerDef.GetFieldCount(); i++)
-    //      {
-    //        var g = layerDef.GetFieldDefn(i);
-    //        fieldDefs.Add(new KeyValuePair<string, FieldType>(g.GetName(), g.GetFieldType()));
-    //      }
+        for (var i = 0; i < layerDef.GetFieldCount(); i++)
+        {
+          var g = layerDef.GetFieldDefn(i);
+          fieldDefs.Add(new KeyValuePair<string, FieldType>(g.GetName(), g.GetFieldType()));
+        }
 
-    //      Feature f;
-    //      var index = 0;
-    //      while ((f = layer.GetNextFeature()) != null)
-    //      {
-    //        sb[index] = ("{\"type\":\"Feature\",\"geometry\":" + Geom(f, coord_transform, _tolerance).Replace(" ", "") +
-    //                     ",\"properties\":{" + Props(f, fieldDefs) + "}}");
-    //        Debug.WriteLine(index);
-    //        index++;
-    //      }
+        Feature f;
+        var index = 0;
+        while ((f = layer.GetNextFeature()) != null)
+        {
+          sb[index] = ("{\"type\":\"Feature\",\"geometry\":" + Geom(f, coord_transform, _tolerance).Replace(" ", "") +
+                       ",\"properties\":{" + Props(f, fieldDefs) + "}}");
+          Debug.WriteLine(index);
+          index++;
+        }
 
 
-    //      var MIME = Request.QueryString["type"];
-    //      if (!String.IsNullOrEmpty(MIME) && MIME.ToUpper() == "FILE")
-    //      {
-    //        return File(Encoding.UTF8.GetBytes(" { \"type\": \"FeatureCollection\",\"features\": [" + String.Join(",", sb) + "]}"),"text/plain",layer.GetName()+".json" );
-    //      }
+        var MIME = Request.QueryString["type"];
+        if (!String.IsNullOrEmpty(MIME) && MIME.ToUpper() == "FILE")
+        {
+          return File(Encoding.UTF8.GetBytes(" { \"type\": \"FeatureCollection\",\"features\": [" + String.Join(",", sb) + "]}"), "text/plain", layer.GetName() + ".json");
+        }
 
-    //      return Content(" { \"type\": \"FeatureCollection\",\"features\": [" + String.Join(",", sb) + "]}",
-    //        "application/json");
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //      return Json(new {error = "Failed to locate or corrupt file"+ex.Message}, JsonRequestBehavior.AllowGet);
-    //    }
-    //    finally
-    //    {
-    //      Gdal.Unlink(memFilename);
-    //    }
-    //}
+        return Content(" { \"type\": \"FeatureCollection\",\"features\": [" + String.Join(",", sb) + "]}",
+          "application/json");
+      }
+      catch (Exception ex)
+      {
+        return Json(new { error = "Failed to locate or corrupt file" + ex.Message }, JsonRequestBehavior.AllowGet);
+      }
+      finally
+      {
+        Gdal.Unlink(memFilename);
+      }
+    }
 
     public ActionResult PutMap()
     {
@@ -310,9 +308,9 @@ namespace Allegro.Controllers
               while (rdr.Read())
               {
                   var foo = new Dictionary<string, object>();
-                  int fields = rdr.FieldCount;
+                  var fields = rdr.FieldCount;
 
-                  for (int i = 0; i < fields; i++)
+                  for (var i = 0; i < fields; i++)
                   {
                       if (rdr[i] != DBNull.Value)
                       {
@@ -402,7 +400,7 @@ namespace Allegro.Controllers
                 }
             }
         }
-        sql+=String.Join(",", cols)+";";
+        sql+=String.Join(",", cols)+" where name='"+id+"';";
 
         try
         {
@@ -422,75 +420,120 @@ namespace Allegro.Controllers
         //return Content(sql.ToString());
     }
 
-    //private string Props(Feature f, IReadOnlyCollection<KeyValuePair<string, FieldType>> field_defs)
-    //{
+    [AcceptVerbs(HttpVerbs.Get)]
+    public ActionResult GetAllLayers(string source)
+    {
+      var path = Server.MapPath("..") + @"\data\allegro.sqlite";
 
-    //  var index = 0;
-    //  var t = new string[field_defs.Count];
+      var maps = new SQLiteConnection(@"Data Source=" + path + ";");
 
-    //  foreach (var kv in field_defs)
-    //  {
-    //    t[index] = "\"" + kv.Key + "\":";
+      maps.Open();
 
-    //    switch (kv.Value)
-    //    {
-    //      case FieldType.OFTReal:
-    //        t[index] += (f.GetFieldAsDouble(index) + "");
-    //        break;
-    //      case FieldType.OFTInteger:
-    //        t[index] += (f.GetFieldAsInteger(index) + "");
-    //        break;
-    //      default:
-    //        t[index] += ("\"" + CleanString(f.GetFieldAsString(index)) + "\"");
-    //        break;
-    //    }
-    //    index++;
-    //  }
+      var goo = new List<Dictionary<string, object>>();
+      using (var cmd = maps.CreateCommand())
+      {
+        cmd.CommandText = "select * from layers";
 
-    //  return  String.Join(",", t);
-    //}
+        var rdr = cmd.ExecuteReader();
+
+        while (rdr.Read())
+        {
+          var foo = new Dictionary<string, object>();
+          var fields = rdr.FieldCount;
+
+          for (var i = 0; i < fields; i++)
+          {
+            if (rdr[i] != DBNull.Value)
+            {
+              switch (rdr.GetName(i))
+              {
+                case "legend":
+                  foo.Add("legend", DeserializeJson<Legend>((string)rdr[i]));
+                  break;
+                case "style":
+                  foo.Add("style", DeserializeJson<Style>((string)rdr[i]));
+                  break;
+                default:
+                  foo.Add(rdr.GetName(i), rdr[i]);
+                  break;
+              }
+            }
+          }
+          goo.Add(foo);
+        }
+      }
+      return Json(goo, JsonRequestBehavior.AllowGet);
+    }
+
+    private string Props(Feature f, IReadOnlyCollection<KeyValuePair<string, FieldType>> field_defs)
+    {
+
+      var index = 0;
+      var t = new string[field_defs.Count];
+
+      foreach (var kv in field_defs)
+      {
+        t[index] = "\"" + kv.Key + "\":";
+
+        switch (kv.Value)
+        {
+          case FieldType.OFTReal:
+            t[index] += (f.GetFieldAsDouble(index) + "");
+            break;
+          case FieldType.OFTInteger:
+            t[index] += (f.GetFieldAsInteger(index) + "");
+            break;
+          default:
+            t[index] += ("\"" + CleanString(f.GetFieldAsString(index)) + "\"");
+            break;
+        }
+        index++;
+      }
+
+      return String.Join(",", t);
+    }
 
     static string CleanString(string str)
     {
       return str.Replace("\"", "").TrimEnd('\r', '\n').Replace("\r", "").Replace("\n","");
     }
 
-    //static string Geom(Feature f, CoordinateTransformation ct, double tolerance, int coordinate_precision = 6)
-    //{
-    //  var geom = f.GetGeometryRef();
-    //  geom.Transform(ct);
+    static string Geom(Feature f, CoordinateTransformation ct, double tolerance, int coordinate_precision = 6)
+    {
+      var geom = f.GetGeometryRef();
+      geom.Transform(ct);
 
-    //  //if (simplification >0)
-    // // {
-      
-    //  var temp_geom= geom.Simplify(tolerance);
+      //if (simplification >0)
+      // {
 
-    //  if (temp_geom.IsEmpty())
-    //  {
-    //    var index = 0;
-    //    var tolerances = new[] { tolerance * .0001, tolerance * .00001, tolerance * .000001, tolerance * .0000001, tolerance * .00000001, tolerance * .000000001 };
+      var temp_geom = geom.Simplify(tolerance);
 
-    //    foreach (double t in tolerances)
-    //    {
-    //      temp_geom = geom.Simplify(t);
-    //      Debug.WriteLine(t);
-    //      if (!temp_geom.IsEmpty())
-    //      {
-    //        Debug.WriteLine("Got it!");
-    //        break;
-    //      }
-    //      index++;
-    //    }
-    //  }
+      if (temp_geom.IsEmpty())
+      {
+        var index = 0;
+        var tolerances = new[] { tolerance * .0001, tolerance * .00001, tolerance * .000001, tolerance * .0000001, tolerance * .00000001, tolerance * .000000001 };
 
-    //  return temp_geom != null ? temp_geom.ExportToJson(new[] { "COORDINATE_PRECISION=" + coordinate_precision }) : "";
-    //}
+        foreach (double t in tolerances)
+        {
+          temp_geom = geom.Simplify(t);
+          Debug.WriteLine(t);
+          if (!temp_geom.IsEmpty())
+          {
+            Debug.WriteLine("Got it!");
+            break;
+          }
+          index++;
+        }
+      }
+
+      return temp_geom != null ? temp_geom.ExportToJson(new[] { "COORDINATE_PRECISION=" + coordinate_precision }) : "";
+    }
 
     private static T DeserializeJson<T>(string json)
     {
-        T obj = Activator.CreateInstance<T>();
-        MemoryStream ms = new MemoryStream(Encoding.Unicode.GetBytes(json));
-        DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
+        var obj = Activator.CreateInstance<T>();
+        var ms = new MemoryStream(Encoding.Unicode.GetBytes(json));
+        var serializer = new DataContractJsonSerializer(obj.GetType());
         obj = (T)serializer.ReadObject(ms);
         ms.Close();
         return obj;

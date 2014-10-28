@@ -28,7 +28,7 @@ namespace Allegro
                "Proxy", // Route name
                "proxy/", // URL with parameters
                new { controller = "Allegro", action = "Proxy" } // Parameter defaults
-           );
+            );
 
             routes.MapRoute(
                "Put map", // Route name
@@ -49,10 +49,16 @@ namespace Allegro
            );
 
             routes.MapRoute(
-              "Get Layer by Name", // Route name
-              "getLayerByName/{name}", // URL with parameters
-              new { controller = "Allegro", action = "GetLayerByName" } // Parameter defaults
+              "Get All Layers", // Route name
+              "getAllLayers/", // URL with parameters
+              new { controller = "Allegro", action = "GetAllLayers" } // Parameter defaults
           );
+
+            routes.MapRoute(
+                "Get Layer by Name", // Route name
+                "getLayerByName/{name}", // URL with parameters
+                new { controller = "Allegro", action = "GetLayerByName" } // Parameter defaults
+            );
 
             routes.MapRoute(
               "Put Layer by Name", // Route name

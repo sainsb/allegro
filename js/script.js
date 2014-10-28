@@ -33,6 +33,9 @@ var App = {
             $('#browserModal').modal('show');
         }
 
+        //Put the version in the top banner
+        $('#txtVersion').html(version);
+
         //resizes the map and legend height upon page resize
         //width is taken care of by the DOM.
         //** will probably want to disable when the site goes into responsive mode..
@@ -77,6 +80,10 @@ var App = {
             $('#basemapModal').modal('show');
         });
 
+        $('#btnAdmin').on('click', function() {
+          window.location='./admin/';
+        });
+
         //assign handler to Basemap button
         $('#btnOptions').click(function () {
             $('#optionsModal').modal('show');
@@ -96,21 +103,21 @@ var App = {
                     /* Layer order z-index hell */
                     
                     layer.mapLayer.addTo(map).bringToFront();
-                    var other_layers = [];
+                    var otherLayers = [];
 
                     $.each($('.legend-check'), function(i,v){
                         var iid = $(v).prop('id').replace('chk','');
                         if (iid != id){
                             if($(v).is(':checked')){
-                                other_layers.push(iid);
+                                otherLayers.push(iid);
                             }
                         } else {
                             return false;
                         }
                     });
-                    other_layers.reverse();
-                    for(var l=0;l<other_layers.length;l++){
-                        App.util.getLayerById(other_layers[l]).mapLayer.bringToFront();
+                    otherLayers.reverse();
+                    for(var l=0;l<otherLayers.length;l++){
+                        App.util.getLayerById(otherLayers[l]).mapLayer.bringToFront();
                     }
                 } else {
                   layer.mapLayer.addTo(map);
@@ -118,7 +125,6 @@ var App = {
             } else {
                 map.removeLayer(layer.mapLayer);
             }
-
             //with this logic, the layer legend is dumb to the checkbox state.
 
             if (evt.stopPropagation) {
@@ -191,8 +197,21 @@ var App = {
         L.control.scale().addTo(this.map);
         new L.Hash(this.map);
 
-        //init dialogs
-        this.layersDialog.render();
+        //Get all the meta for each data source specified in the index.htm
+        var deferreds = this.layersDialog.getDataSources();
+
+        $.when.apply(null, deferreds).done(function () {
+          App.layersDialog.render();
+
+          //load layers passed in hash
+          var hash = location.hash.split('/');
+
+          if (hash.length > 3 && hash[3] != '') {
+            App.boot_layers = hash.slice(3, hash.length);
+            map.spin(true);
+            App.load_layers(0);
+          }
+        });
 
         this.basemapDialog.render();
 
@@ -230,15 +249,6 @@ var App = {
             App.map.setView([result[0].lat, result[0].lng], 15);
         });
         
-        //load layers passed in hash
-        var hash = location.hash.split('/');
-   
-        if (hash.length > 3 && hash[3] != '') {
-            App.boot_layers = hash.slice(3, hash.length);
-            map.spin(true);
-            App.load_layers(0);
-        }
-
         //Add drag and drop shapefile functionality
         this.util.dragHandler();
     },
@@ -250,18 +260,25 @@ var App = {
        
         var name = App.boot_layers[layerIndex].trim().replace(/\-/g, ' ');
         var layer = this.util.getLayerByName(name);
+        
         if (layer != null) {
-          App.data.add(layer, function () { App.load_layers(layerIndex + 1); });
+          App.data.add(layer, function() { App.load_layers(layerIndex + 1); });
           $('.img-block.layer').each(function(i, v) {
             var id = $(v).find('img').attr('id').replace('img', '');
-            
+
             if (id == App.util.getLayerId(layer.name)) {
 
               $(v).addClass('active');
             }
           });
+        } else {
+          console.log(name + ' layer not recognized...sorry brah');
+          App.load_layers(layerIndex + 1);
         }
       } else {
+        //alert('yaytime');
+        //$('#dialogModal .modal-content').html('I don\'t recognize the layer: ' + name);
+        //$('#dialogModal').modal('show');
         $('#imgLoadingData').hide();
         map.spin(false);
       }
@@ -326,7 +343,7 @@ var App = {
             tileJSON: function (layer) {
               
               var url = layer.url + ((layer.requireToken == true) ? "?token=" + config.token : "");
-              console.log(url.trim());
+              
                 $.getJSON(url, function (data) {
 
                     //Add to legend
@@ -373,7 +390,6 @@ var App = {
                 $('#txtLoadingData').html('Loading...');
                 $('#imgLoadingData').fadeIn(100);
 
-
                 //Check in local storage first
                 var localGeoJSON = localStorage.getObject(layer.url);
 
@@ -383,7 +399,7 @@ var App = {
                   return;
                 }
                 
-                if(typeof (FileReader) != 'undefined'){
+                if(typeof (FileReader) != 'undefined' && typeof(layer.simplify) != 'undefined' && layer.simplify==false){
                 // if (typeof (FileReader) != 'undefined') {
                 var xhr = new XMLHttpRequest(), reader = new FileReader();
 
@@ -440,12 +456,12 @@ var App = {
                     if (layer.simplify) {
                       url += "&tolerance=.0005";
                     }
-                    $.getJSON(url, function(data) {
-                    //try {
-                    //  localStorage.setObject(layer.url, data);
-                    //} catch (ex) {
-                    //  console.log('unable to store this in local storage');
-                    //}
+                    $.getJSON(url, function (data) {
+                    try {
+                      localStorage.setObject(layer.url, data);
+                    } catch (ex) {
+                      console.log('unable to store this in local storage');
+                    }
                     $('#txtLoadingData').html('Parsing...');
                     callback(data);
                   });
@@ -467,7 +483,7 @@ var App = {
                 $('#ulHeatmapLegend').append($(layer.HTMLLegend));
 
                 var xhr = new XMLHttpRequest();
-                xhr.open('GET', layer.file, true);
+                xhr.open('GET', layer.url, true);
                 xhr.responseType = 'arraybuffer';
                 pngdata = [];
                 xhr.onload = function (e) {
@@ -479,6 +495,7 @@ var App = {
                             App.heatmap.curRasters.push(layer);
                             App.heatmap.rasters[id] = png;
                             App.heatmap.rasterMultiplier[id] = 1;
+
                             callback();
                         });
                     }
@@ -935,9 +952,22 @@ var App = {
         /* DOM object for the <ul> element that contains the tabs */
         $ulSourceTabs: null,
 
+        getDataSources : function() {
+          var deferreds = [];
+
+          //iterate data sources
+          for (var i in data_sources) {
+            deferreds.push(
+              $.getJSON('./getLayersBySource/' + data_sources[i]).success(function (data) {
+                //console.log(data);
+                config.layers.push.apply(config.layers, data);
+              }));
+          }
+          return deferreds;
+        },
+
         /* Render the entire layer tabs collection */
         render: function () {
-
             this.$ulSourceTabs = $('#ulSourceTabs');
 
             for (var _layer in config.layers) {
@@ -996,7 +1026,7 @@ var App = {
                     }
 
                     $('#li' + id).remove();
-                  App.util.updateURL();
+                    App.util.updateURL();
                 }
                 else {
                     $(this).addClass('active');
@@ -1027,7 +1057,8 @@ var App = {
                         }
                     }
                     else {
-                        App.data.add(layer, function() { App.util.updateUrl();});
+                        App.data.add(layer, function() {
+                          console.log('yay');App.util.updateUrl();});
                     }
                 }
             });
@@ -1047,7 +1078,7 @@ var App = {
             }
 
           //Get out your hatchets@!!!
-          if (source == 'OSU') {
+          if (source == 'OSDL') {
             sourceTabString += '><a href="#' + safe_source + '" style="padding-top:4px;padding-bottom:12px;" data-toggle="tab">';
           } else {
             sourceTabString += '><a href="#' + safe_source + '" data-toggle="tab">';
@@ -1058,7 +1089,7 @@ var App = {
                 sourceTabString += '<i class="fa fa-check-circle-o"></i>&nbsp;';
             }
 
-          if (source != 'OSU') {
+          if (source != 'OSDL') {
             sourceTabString += source;
           }
 
@@ -1677,24 +1708,15 @@ var App = {
                          }
                  }
                 );
-            }
-            // contents.push(
 
-            //{
-            //    text: "Select...",
-            //    subMenu:
-            //    [
-            //        {
-            //            text: 'By Attributes...', action: function () {
-            //                window.open(layer.url);
-            //            } },
-            //        {
-            //            text: 'By Location...', action: function () {
-            //                window.open("data:text/plain;charset=utf-8," + JSON.stringify(layer.mapLayer.toGeoJSON()));
-            //            } },
-            //    ]
-            //}
-            // );
+                contents.push({
+                text: "Filter...",
+                action: function(){
+                        $('#selectModal').modal('show');
+                      }
+                }
+               );
+            }
 
             if (layer.type == 'shapefile' || layer.type == 'geojson') {
                 contents.push({
@@ -2027,6 +2049,7 @@ var App = {
                 if (dims == 'geojson') {
                     this._crush_geojson(rManager.geojson.rasters);
                 } else {
+                	alert('yay');
                     this._crush(rManager[dims]);
                 }
             }
@@ -2052,8 +2075,9 @@ var App = {
         },
 
         _crush: function (colRasters) {
-            var curlng = colRasters.ul[0];
-            var curlat = colRasters.ul[1];
+
+            var curlng = colRasters.upperLeft[0];
+            var curlat = colRasters.upperLeft[1];
 
             for (var x = 0; x < colRasters.width - this.resolution; x += this.resolution) {
                 for (var y = 0; y < colRasters.height - this.resolution; y += this.resolution) {
@@ -2075,7 +2099,7 @@ var App = {
                     curlat -= (colRasters.step * this.resolution);
                 }
                 curlng += (colRasters.step * this.resolution);
-                curlat = colRasters.ul[1];
+                curlat = colRasters.upperLeft[1];
             }
         }
     },
