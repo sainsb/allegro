@@ -13,17 +13,26 @@ $(function(){
           layersDialog.render();
         });
 
-    // $('#layerTime input,select').change(function () {
-        
-    //     var fc = $(this).prop('id').toLowerCase().replace("lyr", "");
-    //     fieldsChanged.push(fc);
-    //     console.log(fc);
-    //     $('.btnSave').removeAttr('disabled');
-    // });
+    $('body').on('click', '.mute.edit', function() {
+            //alert('yaytime');
+        console.log($(this).prop('id'));
+        //hide
+        $('#layerSelect').fadeOut();
+        $('#editbox').html(templates['layer']());
+        $('#layerEdit').fadeIn();
+        });
 
-    // $(".btnSave").on('click', function () {
-    //     saveData();
-    // });
+    $('body').on('change','#layerTime input,select', function () {
+        
+         var fc = $(this).prop('id').toLowerCase().replace("lyr", "");
+         fieldsChanged.push(fc);
+         console.log(fc);
+         $('.btnSave').removeAttr('disabled');
+     });
+
+     $(".btnSave").on('click', function () {
+         saveData();
+     });
 
 });
     
@@ -75,8 +84,6 @@ var layersDialog= {
                 var elem = this.renderLayerElement(layer);
 
                 $('#' + source + '_' + theme).append(elem);
-
-                 
             }
 
             ////Put the custom tab at the end.
@@ -84,69 +91,20 @@ var layersDialog= {
 
             //this.$ulSourceTabs.next().append("<div class='tab-pane fade' id='customData'>Data Source: &nbsp; <select class='selectpicker' id='selCustomData' data-style='btn-default' data-width='180'><option value='0'>GeoJSON</option><option value='1'>ArcGIS Server</option><option value='2'>Tile Layer</option><option value='3'>Shapefile</option><option value='4'>CSV</option></select></div>");
 
-          $('#ulSourceTabs > li > a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+          //$('#ulSourceTabs > li > a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
             $("img.lazy").lazyload({
               //effect: "fadeIn",
               container: $(".tab-content")
             });
+            $('#ulSourceTabs > li > a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+                $("img.lazy").lazyload({
+                    //effect: "fadeIn",
+                    container: $(".tab-content")
+                });
           });
-            //this.attachEventHandler();
         },
 
-        attachEventHandler: function () {
-            //Attach behavior to items in Add Data Modal
-            $('.img-block.layer').on('click', function () {
-                var id = $(this).find('img').attr('id').replace('img', '');
-                var layer = App.util.getLayerById(id);
-                if ($(this).hasClass('active')) {
-                    $(this).removeClass('active');
-                    
-                    if (layer.type == 'heatmap') {
-                        var id = App.util.getLayerId(layer.name);
-                        delete App.heatmap.rasterMultiplier[id];
-                        App.heatmap.sync(id, false);
-                    } else {
-                        map.removeLayer(layer.mapLayer);
-                    }
-
-                    $('#li' + id).remove();
-                    App.util.updateURL();
-                }
-                else {
-                    $(this).addClass('active');
-                    if (typeof (layer.mapLayer) != 'undefined') {
-                        map.addLayer(layer.mapLayer);
-                        switch (layer.type) {
-                            case App.LAYER_TYPES.GEOJSON:
-                            case App.LAYER_TYPES.SHAPEFILE:
-                                //apply context menu,
-                                //wire up behavior of close button.
-                                //the layer.HTMLLegend is a div not an li.
-                                $('#ulVectorLegend').prepend(layer.HTMLLegend);
-                                break;
-                            case App.LAYER_TYPES.TILELAYER:
-                            case App.LAYER_TYPES.TILEJSON:
-                                $('#ulTileLegend').prepend(layer.HTMLLegend);
-                                break;
-                        }
-                    } else if (layer.type == 'heatmap' ) {
-                        id = App.util.getLayerId(layer.name);
-                        if (typeof (App.heatmap.rasters[id]) != 'undefined') {
-                            $('#ulHeatmapLegend').append($(layer.HTMLLegend));
-                            App.heatmap.rasterMultiplier[id]=1;
-                            App.heatmap.sync(id, true);
-                        } else {
-                          App.util.updateUrl();
-                          App.data.add(layer, function () { App.util.updateUrl();});
-                        }
-                    }
-                    else {
-                        App.data.add(layer, function() {
-                          console.log('yay');App.util.updateUrl();});
-                    }
-                }
-            });
-        },
+     
 
         /* Render a tab for a given source 
         returns:: @void; appends source tab to ulSourceTabs
@@ -162,11 +120,12 @@ var layersDialog= {
             }
 
             //Get out your hatchets@!!!
-            if (source == 'OSDL') {
+            //if (source == 'OSDL') {
               sourceTabString += '><a href="#' + safe_source + '" style="padding-top:4px;padding-bottom:12px;" data-toggle="tab">';
-            } else {
-              sourceTabString += '><a href="#' + safe_source + '" data-toggle="tab">';
-            }
+            //} else {
+            //  sourceTabString += '><a href="#' + safe_source + '" data-toggle="tab">';
+            //}
+
             if (typeof (icon) != 'undefined') {
                   sourceTabString += '<img src="' + icon + '" align="left" />&nbsp;';
               } else {
@@ -205,41 +164,14 @@ var layersDialog= {
                 var thumb = '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png';
             }
 
-            var elem = "<div class='layer img-block ";
-
-            if (layer.level == 2) {
-                elem += "img-block-m";
-            }
-
-            if (layer.level == 3) {
-                elem += "img-block-lg";
-            }
-
-            elem += "'><div class='caption ";
-
-            if (layer.level == 2) {
-                elem += "caption-m";
-            }
-
-            if (layer.level == 3) {
-                elem += "caption-lg";
-            }
-
-            elem += "'>" + layer.name + "</div><img ";
-
-            if (layer.level == 2 || layer.level == 3) {
-                elem += "width='190' height='130'";
-            } else {
-                elem += "width='82' height='62'";
-            }
-
-            elem += " class='lazy' data-original='" + thumb + "' alt='" + layer.name + "' id='img" + id + "'/></div>";
+            var elem = "<div class='layer img-block '>";
+            elem += "<div class='caption'>" + layer.name + "</div><img width='82' height='62'";
+            elem += " class='lazy' data-original='" + thumb + "' alt='" + layer.name + "' id='img" + id + "' style='vertical-align:top;float:left;'/>&nbsp;<span class='mute edit' id='" + layer.name.replace(/\s/g, '-') + "' style='float:right;' alt='edit' title='edit'><i class='glyphicon glyphicon-edit'></i></span><br/><a class='mute' href='../#10/45.4115/-122.6569/" + layer.name.replace(/\s/g, '-') + "' style='float:right;' alt='view' title='view'><i class='glyphicon glyphicon-play'></i></a></div>";
 
             return elem;
 
         }
     }
-
 
 function saveData() {
     for (var t in fieldsChanged) {
@@ -259,7 +191,7 @@ function toTitleCase(str)
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
-   getLayerId= function (name) {
+getLayerId= function (name) {
             //name need lots more here to make safe
             return name.replace(/[\s,\/\:\%\.\(\)\+]/g, '_');
         },

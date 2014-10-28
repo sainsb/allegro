@@ -14,10 +14,12 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Collections.Generic;
 using System.Reflection;
+
+#if polyfill
 using OSGeo.GDAL;
 using OSGeo.OGR;
 using OSGeo.OSR;
-
+#endif
 
 namespace Allegro.Controllers
 {
@@ -148,6 +150,7 @@ namespace Allegro.Controllers
       return Content("Yay");
     }
 
+#if polyfill
     [AcceptVerbs(HttpVerbs.Get)]
     public ActionResult Polyfill()
     {
@@ -237,6 +240,7 @@ namespace Allegro.Controllers
         Gdal.Unlink(memFilename);
       }
     }
+#endif
 
     public ActionResult PutMap()
     {
@@ -420,51 +424,7 @@ namespace Allegro.Controllers
         //return Content(sql.ToString());
     }
 
-    [AcceptVerbs(HttpVerbs.Get)]
-    public ActionResult GetAllLayers(string source)
-    {
-      var path = Server.MapPath("..") + @"\data\allegro.sqlite";
-
-      var maps = new SQLiteConnection(@"Data Source=" + path + ";");
-
-      maps.Open();
-
-      var goo = new List<Dictionary<string, object>>();
-      using (var cmd = maps.CreateCommand())
-      {
-        cmd.CommandText = "select * from layers";
-
-        var rdr = cmd.ExecuteReader();
-
-        while (rdr.Read())
-        {
-          var foo = new Dictionary<string, object>();
-          var fields = rdr.FieldCount;
-
-          for (var i = 0; i < fields; i++)
-          {
-            if (rdr[i] != DBNull.Value)
-            {
-              switch (rdr.GetName(i))
-              {
-                case "legend":
-                  foo.Add("legend", DeserializeJson<Legend>((string)rdr[i]));
-                  break;
-                case "style":
-                  foo.Add("style", DeserializeJson<Style>((string)rdr[i]));
-                  break;
-                default:
-                  foo.Add(rdr.GetName(i), rdr[i]);
-                  break;
-              }
-            }
-          }
-          goo.Add(foo);
-        }
-      }
-      return Json(goo, JsonRequestBehavior.AllowGet);
-    }
-
+#if polyfill
     private string Props(Feature f, IReadOnlyCollection<KeyValuePair<string, FieldType>> field_defs)
     {
 
@@ -528,6 +488,7 @@ namespace Allegro.Controllers
 
       return temp_geom != null ? temp_geom.ExportToJson(new[] { "COORDINATE_PRECISION=" + coordinate_precision }) : "";
     }
+#endif
 
     private static T DeserializeJson<T>(string json)
     {

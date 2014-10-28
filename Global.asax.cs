@@ -66,11 +66,13 @@ namespace Allegro
               new { controller = "Allegro", action = "PutLayerByName" } // Parameter defaults
           );
 
+#if polyfill
             routes.MapRoute(
                 "Polyfill", // Route name
                 "polyfill/", // URL with parameters
                 new { controller = "Allegro", action = "Polyfill" } // Parameter defaults
             );
+#endif
         }
 
         protected void Application_Start()
