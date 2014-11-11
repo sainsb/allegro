@@ -16,9 +16,11 @@ namespace Allegro
         internal static string BASE_URL;
         internal static string MACH_PATH;
 
+#if polyfill
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern bool
           SetEnvironmentVariable(string lpName, string lpValue);
+#endif
 
         public static void RegisterRoutes(RouteCollection routes)
         {
@@ -47,6 +49,12 @@ namespace Allegro
                "getLayersBySource/{source}", // URL with parameters
                new { controller = "Allegro", action = "GetLayersBySource" } // Parameter defaults
            );
+
+            routes.MapRoute(
+                "Get JSON Layers by source", // Route name
+                "getJSONLayersBySource/{source}", // URL with parameters
+                new { controller = "Allegro", action = "GetJSONLayersBySource" } // Parameter defaults
+            );
 
             routes.MapRoute(
               "Get All Layers", // Route name

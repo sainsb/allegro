@@ -9,10 +9,7 @@ using System.Data;
 using System.Net;
 using System.Text;
 using System.Web.Mvc;
-using System.Xml;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
-using System.Collections.Generic;
 using System.Reflection;
 
 #if polyfill
@@ -302,40 +299,51 @@ namespace Allegro.Controllers
 
           maps.Open();
 
+        try
+        {
           var goo = new List<Dictionary<string, object>>();
           using (var cmd = maps.CreateCommand())
           {
-              cmd.CommandText = "select * from layers where source = '" + source+"'";
+            cmd.CommandText = "select * from layers where source = '" + source + "'";
 
-              var rdr = cmd.ExecuteReader();
-              
-              while (rdr.Read())
+            var rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+              var foo = new Dictionary<string, object>();
+              var fields = rdr.FieldCount;
+
+              for (var i = 0; i < fields; i++)
               {
-                  var foo = new Dictionary<string, object>();
-                  var fields = rdr.FieldCount;
-
-                  for (var i = 0; i < fields; i++)
+                if (rdr[i] != DBNull.Value)
+                {
+                  switch (rdr.GetName(i))
                   {
-                      if (rdr[i] != DBNull.Value)
-                      {
-                          switch (rdr.GetName(i))
-                          {
-                              case "legend":
-                                  foo.Add("legend", DeserializeJson<Legend>((string)rdr[i]));
-                                  break;
-                              case "style":
-                                  foo.Add("style", DeserializeJson<Style>((string)rdr[i]));
-                                  break;
-                              default:
-                                  foo.Add(rdr.GetName(i), rdr[i]);
-                                  break;
-                          }
-                      }
+                    case "legend":
+                      foo.Add("legend", DeserializeJson<Legend>((string) rdr[i]));
+                      break;
+                    case "style":
+                      foo.Add("style", DeserializeJson<Style>((string) rdr[i]));
+                      break;
+                    default:
+                      foo.Add(rdr.GetName(i), rdr[i]);
+                      break;
                   }
-                  goo.Add(foo);
+                }
               }
+              goo.Add(foo);
+            }
           }
           return Json(goo, JsonRequestBehavior.AllowGet);
+        }
+        catch (Exception ex)
+        {
+          return Json(new {error="No Layers found. Error: "+ex.Message}, JsonRequestBehavior.AllowGet);
+        }
+        finally
+        {
+          maps.Close();
+        }
       }
 
     [AcceptVerbs(HttpVerbs.Get)]

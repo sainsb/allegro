@@ -25,17 +25,13 @@ var App = {
     locateMarker:null,
   
     init: function () {
-
-        "use strict";
-
-        // Detect old IE
-        if ($('html').is('.ie6, .ie7, .ie8, .ie9')) {
-            $('#browserModal').modal('show');
-        }
-
-        //Put the version in the top banner
-        $('#txtVersion').html(version);
-
+      "use strict";
+      if ($('html').is('.ie6, .ie7, .ie8, .ie9')) {
+        $('#browserModal').modal('show');
+      }
+      
+       //Put the version in the top banner
+       $('#txtVersion').html(version);
         //resizes the map and legend height upon page resize
         //width is taken care of by the DOM.
         //** will probably want to disable when the site goes into responsive mode..
@@ -52,6 +48,7 @@ var App = {
             }
         });
 
+        //currently not using this but will want it/need it to handle responsive change
         if ($(window).width() >= 980) {
             $('#map,#legend').css("margin-bottom", 10);
         } else {
@@ -99,25 +96,21 @@ var App = {
             var layer = App.util.getLayerById(id);
             if ($(this).is(':checked')) {
                 if (layer.type == App.LAYER_TYPES.GEOJSON || layer.type == App.LAYER_TYPES.SHAPEFILE) {
-
-                    /* Layer order z-index hell */
-                    
                     layer.mapLayer.addTo(map).bringToFront();
-                    var otherLayers = [];
-
+                    var other_layers = [];
                     $.each($('.legend-check'), function(i,v){
                         var iid = $(v).prop('id').replace('chk','');
                         if (iid != id){
                             if($(v).is(':checked')){
-                                otherLayers.push(iid);
+                                other_layers.push(iid);
                             }
                         } else {
                             return false;
                         }
                     });
-                    otherLayers.reverse();
-                    for(var l=0;l<otherLayers.length;l++){
-                        App.util.getLayerById(otherLayers[l]).mapLayer.bringToFront();
+                    other_layers.reverse();
+                    for(var l=0;l<other_layers.length;l++){
+                        App.util.getLayerById(other_layers[l]).mapLayer.bringToFront();
                     }
                 } else {
                   layer.mapLayer.addTo(map);
@@ -135,8 +128,17 @@ var App = {
             }
         });
 
+        //Basemap opacity slider
+        $('#sliBasemap').on('change input', function () {
+            //get active basemap
+            for (var b in config.basemaps) {
+                if (config.basemaps[b].active == true) {
+                    config.basemaps[b].mapLayer.setOpacity($(this).val() / 100);
+                }
+            }
+        });
         //Fill opacity sliders
-        $('body').on('input', '.sliderFillOpacity', function () {
+        $('body').on('change input', '.sliderFillOpacity', function () {
             var id = $(this).attr('id').replace('sli', '');
             var layer = App.util.getLayerById(id);
             layer.fillOpacity = $(this).val();
@@ -155,7 +157,7 @@ var App = {
         });
 
         //Stroke opacity sliders
-        $('body').on('input', '.sliderStrokeOpacity', function () {
+        $('body').on('change input', '.sliderStrokeOpacity', function () {
             var id = $(this).attr('id').replace('sli', '');
             var layer = App.util.getLayerById(id);
             layer.strokeOpacity = $(this).val();
@@ -163,17 +165,6 @@ var App = {
                 opacity: layer.strokeOpacity
             });
         });
-
-        //Basemap opacity slider
-        $('#sliBasemap').on('input', function () {
-            //get active basemap
-            for (var b in config.basemaps) {
-                if (config.basemaps[b].active == true) {
-                    config.basemaps[b].mapLayer.setOpacity($(this).val() / 100);
-                }
-            }
-        });
-
         $('.dropdown.keep-open').on({
             "shown.bs.dropdown": function () { this.closable = false; },
             "mouseleave": function () {
@@ -207,7 +198,7 @@ var App = {
           var hash = location.hash.split('/');
 
           if (hash.length > 3 && hash[3] != '') {
-            App.boot_layers = hash.slice(3, hash.length);
+            App.boot_layers = hash.slice(3, hash.length).reverse();
             map.spin(true);
             App.load_layers(0);
           }
@@ -265,20 +256,15 @@ var App = {
           App.data.add(layer, function() { App.load_layers(layerIndex + 1); });
           $('.img-block.layer').each(function(i, v) {
             var id = $(v).find('img').attr('id').replace('img', '');
-
             if (id == App.util.getLayerId(layer.name)) {
-
               $(v).addClass('active');
             }
           });
         } else {
-          console.log(name + ' layer not recognized...sorry brah');
+          console.log(name + ' layer not recognized...sorry');
           App.load_layers(layerIndex + 1);
         }
       } else {
-        //alert('yaytime');
-        //$('#dialogModal .modal-content').html('I don\'t recognize the layer: ' + name);
-        //$('#dialogModal').modal('show');
         $('#imgLoadingData').hide();
         map.spin(false);
       }
@@ -456,15 +442,15 @@ var App = {
                     if (layer.simplify) {
                       url += "&tolerance=.0005";
                     }
-                    $.getJSON(url, function (data) {
-                    try {
-                      localStorage.setObject(layer.url, data);
-                    } catch (ex) {
-                      console.log('unable to store this in local storage');
-                    }
-                    $('#txtLoadingData').html('Parsing...');
-                    callback(data);
-                  });
+                    $.getJSON(url, function(data) {
+                        try {
+                          localStorage.setObject(layer.url, data);
+                        } catch (ex) {
+                          console.log('unable to store this in local storage');
+                        }
+                        $('#txtLoadingData').html('Parsing...');
+                        callback(data);
+                    });
                 }
             },
 
@@ -527,7 +513,17 @@ var App = {
                     var newFeatures = [];
                     //for(var f=data.features.length;f in data.features)
                     newFeatures = $.grep(data.features, function (feature, i) {
-                        return eval('feature.properties.' + layer.defQuery);
+                        var clause='';
+                        if($.isArray(layer.defQuery)){
+                           
+                            for(var cl in layer.defQuery){
+                                clause+= 'feature.properties.'+layer.defQuery[cl];
+                            }
+                            return eval(clause)
+                        }
+                        else{clause='feature.properties.' + layer.defQuery}
+
+                        return eval(clause);
                     });
 
                     data.features = newFeatures;
@@ -666,7 +662,7 @@ var App = {
 
                 $('#ulVectorLegend').prepend(layer.HTMLLegend);
          
-              App.contextMenu.apply(layer);
+                App.contextMenu.apply(layer);
 
                 //init sortable functionality in TOC for this item
                 $('.sortable').sortable().bind('sortupdate', function (e, ui) {
@@ -941,6 +937,9 @@ var App = {
             style.radius = (typeof sym.radius != 'undefined') ? sym.radius : App.DEFAULT_RADIUS;
         }
 
+        if (feature.geometry.type == 'LineString') {
+            style.dashArray = (typeof sym.dashArray != 'undefined') ? sym.dashArray : "";
+        }
         return style;
     },
 
@@ -1026,7 +1025,7 @@ var App = {
                     }
 
                     $('#li' + id).remove();
-                    App.util.updateURL();
+                    App.util.updateUrl();
                 }
                 else {
                     $(this).addClass('active');
@@ -1057,8 +1056,7 @@ var App = {
                         }
                     }
                     else {
-                        App.data.add(layer, function() {
-                          console.log('yay');App.util.updateUrl();});
+                        App.data.add(layer, function() { App.util.updateUrl();});
                     }
                 }
             });
@@ -1616,6 +1614,99 @@ var App = {
         
     },
 
+    selectDialog: {
+
+        init: function(layer){
+
+            //push layer's fields into selSelectFields
+            $('#selSelectFields').empty();
+
+            for(var field in layer.fields){
+                $('#selSelectFields').append('<option value="'+layer.fields[field].name+'">'+layer.fields[field].name+'</option>')
+            }
+
+            $('#selSelectFields').selectpicker('refresh');
+            $('#selectModal').modal('show');
+
+
+            $('#selSelectFields').on('change', function(){
+                //remove numeric comparator symbols from selSQLOps
+
+            });
+            
+            $('#btnApplySelect').off('click').on('click', function(){
+
+                var op = $('#selSQLOps').val();
+
+                var field = $('#selSelectFields').val();
+
+                var value = $('#txtSelection').val();
+
+                var layerField = null;
+                for (var fieldx in layer.fields){
+
+                    if (layer.fields[fieldx].name==field){
+                        layerField =layer.fields[fieldx];
+                    }
+                }
+
+                if ((op=='gt' || op == 'lt') && layerField.type != 'number'){
+                    alert('Unable to use greater or lesser with text values');
+                    return;
+                }
+
+                if ((op=='l' || op == 'nl') && layerField.type != 'string'){
+                    alert('Unable to use like/not like with numbers');
+                    return;
+                }
+
+                if(typeof (layer.selection) != 'undefined'){
+                    map.removeLayer(layer.selection);
+                    layer.selection = {};
+                }
+
+                map.removeLayer(layer.mapLayer);
+
+                var newoptions = $.extend(layer.mapLayer.options, {
+                    filter: function(feature, layer) {
+                        var bool = false;
+                        switch(op){
+                            case 'eq':
+                                bool = feature.properties[field]==value;
+                                break;
+                            case 'neq':
+                                bool = feature.properties[field]!=value;
+                                break;
+                            case 'l':
+                                bool = feature.properties[field].indexOf(value) != -1;
+                                break;
+                            case 'gt':
+                                bool = feature.properties[field] > parseInt(value);
+                                break;
+                            case 'lt':
+                                bool = feature.properties[field] < parseInt(value);
+                                break;
+                        }
+
+                        return bool;
+                    }});
+
+                layer.selection =  L.geoJson(layer.mapLayer.toGeoJSON(), newoptions).addTo(map);
+            });
+
+            $('#btnClearSelect').off('click').on('click', function(){
+                App.selectDialog.clear(layer);
+            });
+        },
+        clear: function(layer){
+           if(typeof(layer.selection) != 'undefined'){
+                map.removeLayer(layer.selection);
+                map.addLayer(layer.mapLayer);
+                layer.selection = {};
+            }
+        }
+    },
+
     contextMenu : {
 
         apply: function (layer) {
@@ -1663,7 +1754,6 @@ var App = {
                         },
                         {
                           text: 'GeoJSON', action: function () {
-                            console.log('yaytime');
 
                             if (typeof(Blob) != 'undefined') {
                               var foo = JSON.stringify(layer.mapLayer.toGeoJSON());
@@ -1706,16 +1796,13 @@ var App = {
                          function (e) {
                              map.fitBounds(layer.mapLayer.getBounds());
                          }
-                 }
+                 },
+                 {
+                            text: 'Filter...', action: function () {
+                                App.selectDialog.init(layer);
+                            }
+                        }
                 );
-
-                contents.push({
-                text: "Filter...",
-                action: function(){
-                        $('#selectModal').modal('show');
-                      }
-                }
-               );
             }
 
             if (layer.type == 'shapefile' || layer.type == 'geojson') {
@@ -1723,13 +1810,13 @@ var App = {
                     text: 'View Table...',
                     action:
                         function () {
-                            var str = App.util.export2CSV(layer.mapLayer._layers);
+                            var str = App.util.export2CSV(layer.mapLayer._layers, true);
                             $('#tableDiv').CSVToTable(str);
                             $('#tableModalHeader').html(layer.name + ' Table');
                             $.bootstrapSortable();
 
                             $('#btnExportToCSV').off('click').on('click', function () {
-                                var str = export2CSV(layer.mapLayer._layers, true);
+                                var str = App.util.export2CSV(layer.mapLayer._layers, true);
                                 //DBF files are generally in the ISO8859-1
                                 //http://gis.stackexchange.com/questions/3529/which-character-encoding-is-used-by-the-dbf-file-in-shapefiles
                                 window.open("data:text/plain;charset=iso-8859-1," + escape(str));
@@ -2049,7 +2136,6 @@ var App = {
                 if (dims == 'geojson') {
                     this._crush_geojson(rManager.geojson.rasters);
                 } else {
-                	alert('yay');
                     this._crush(rManager[dims]);
                 }
             }
@@ -2214,13 +2300,14 @@ var App = {
                 array = $.map(array, function (value) {
                     return [value];
                 });
-                //console.log(array);
+                
                 var line = '';
                 for (var i = 0; i < array.length; i++) {
                     if (typeof (array[i]) == 'undefined') {
                         line += '"",';
                     }
                     if (typeof (array[i]) == 'string') {
+
                         if (typeof (quote) !== undefined && quote == true) {
                             line += '"' + array[i].replace(/"/g, '""').replace(/,/g, '') + '",';
                         } else {
@@ -2230,10 +2317,10 @@ var App = {
                         line += array[i] + ',';
                     }
                 }
-                line = line.slice(0, -1);
+                line = line.slice(0, -1).replace(/(\r\n|\n|\r)/gm,"");
+
                 str += line + '\r\n';
             }
-
             return str;
         },
 
@@ -2242,76 +2329,39 @@ var App = {
         },
 
         sortHandler: function (e, ui) {
-          console.log('added to sorthandler');
+          //console.log('added to sorthandler');
             var dropped = ui.item;
 
             var trgid = dropped[0].id;
             var id = trgid.replace('li', '');
-            var layer = this.getLayerById(id);
+            if($('#chk'+id).is(':checked')){
+                var layer = this.getLayerById(id);
 
-            if (layer.type == App.LAYER_TYPES.GEOJSON || layer.type == App.LAYER_TYPES.SHAPEFILE) {
+                if (layer.type == App.LAYER_TYPES.GEOJSON || layer.type == App.LAYER_TYPES.SHAPEFILE) {
 
-              /* Enter Layer order z-index hell */
-              //Just bring any layers to the front that are above in the TOC after bringing this one to the front.
+                  /* Enter Layer order z-index hell */
+                  //Just bring any layers to the front that are above in the TOC after bringing this one to the front.
 
-              layer.mapLayer.addTo(map).bringToFront();
-              var other_layers = [];
-              $.each($('.legend-check'), function (i, v) {
-                var iid = $(v).prop('id').replace('chk', '');
-                if (iid != id) {
-                  if ($(v).is(':checked')) {
-                    other_layers.push(iid);
+                  layer.mapLayer.addTo(map).bringToFront();
+                  var other_layers = [];
+                  $.each($('.legend-check'), function (i, v) {
+                    var iid = $(v).prop('id').replace('chk', '');
+                    if (iid != id) {
+                      if ($(v).is(':checked')) {
+                        other_layers.push(iid);
+                      }
+                    } else {
+                      return false;
+                    }
+                  });
+                  other_layers.reverse();
+                  for (var l = 0; l < other_layers.length; l++) {
+                    App.util.getLayerById(other_layers[l]).mapLayer.bringToFront();
                   }
-                } else {
-                  return false;
                 }
-              });
-              other_layers.reverse();
-              for (var l = 0; l < other_layers.length; l++) {
-                App.util.getLayerById(other_layers[l]).mapLayer.bringToFront();
-              }
             }
 
             App.util.updateUrl();
-
-            //var trgkey = trgid.substring(2, trgid.length);
-
-            //if (dropped[0].previousSibling == null) { //At top
-            //    var srcid = dropped[0].nextSibling.id;
-            //    var srckey = srcid.substring(2, srcid.length);
-            //    var srcz = maplayers.layers[srckey].source.options.zIndex;
-            //    var newz = srcz + 1;
-            //} else if (dropped[0].nextSibling == null) {
-            //    srcid = dropped[0].previousSibling.id;
-            //    srckey = srcid.substring(2, srcid.length);
-            //    srcz = maplayers.layers[srckey].source.options.zIndex;
-            //    newz = srcz - 1;
-            //} else {
-            //    //somehow iterate all the zindex values for this group.
-
-
-            //    var topsrcid = dropped[0].previousSibling.id;
-            //    var topsrckey = topsrcid.substring(2, topsrcid.length);
-            //    var topsrcz = maplayers.layers[topsrckey].source.options.zIndex;
-            //    var botsrcid = dropped[0].nextSibling.id;
-            //    var botsrckey = botsrcid.substring(2, botsrcid.length);
-            //    var botsrcz = maplayers.layers[botsrckey].source.options.zIndex;
-            //    newz = botsrcz + (Math.abs(topsrcz - botsrcz) / 2);
-            //}
-
-            //maplayers.layers[trgkey].source.options.zIndex = newz;
-
-            //if (map.hasLayer(maplayers.layers[trgkey].source)) {
-            //    map.removeLayer(maplayers.layers[trgkey].source);
-            //    map.addLayer(maplayers.layers[trgkey].source);
-            //}
-
-            //map._resetView(map.getCenter(), map.getZoom(), true);
-            //if prev element is null then at top
-
-            //if nextsibling element is null then at bottom.
-
-            //get prev element id, zIndex increment 1;
         },
 
         dragHandler: function () {
