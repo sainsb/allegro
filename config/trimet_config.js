@@ -32,7 +32,6 @@ config.layers.push(
     'url': '//developer.trimet.org/gis/data/tm_rail_stops.zip',
     'type': 'shapefile',
     'source': 'TriMet',
-    'thumb':'./img/trimet_layer.jpg',
     'theme': '',
     'level': 2,
     'metadataUrl': 'http://developer.trimet.org/gis/meta_tm_rail_stops.shtml'

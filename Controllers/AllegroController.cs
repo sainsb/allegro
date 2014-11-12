@@ -5,7 +5,6 @@ using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Data;
 using System.Net;
 using System.Text;
 using System.Web.Mvc;
@@ -428,7 +427,7 @@ namespace Allegro.Controllers
         {
             return Json(new { error = ex.Message });
         }
-        return Json(new { success = "True" });
+        return Json(new { success = "Truth" });
         //return Content(sql.ToString());
     }
 

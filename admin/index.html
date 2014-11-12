@@ -12,15 +12,12 @@
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width">
 
-	
-	<link href='//library.oregonmetro.gov/libraries/bootstrap/3.2.0/css/bootstrap.min.css' rel='stylesheet'/>
-
-	<link href='css/style.css' rel='stylesheet'/>
+    <link href='css/style.min.css' rel='stylesheet'/>
+    <link href='css/style.css' rel='stylesheet'/>
 	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 <style>
 body{
 font-family: 'Open Sans', sans-serif;
-
 }
 
 .row-fluid :first-child {clear:both;}
@@ -30,6 +27,10 @@ font-family: 'Open Sans', sans-serif;
       height: 16px;
       margin-right: 5px;
      }
+
+     .btn-margin{
+margin:3px;
+  }
 </style>
 
 </head>
@@ -43,11 +44,11 @@ font-family: 'Open Sans', sans-serif;
 	</div>
 	<nav id="left-panel" style='padding-top:30px;' >
 		<div id="left-panel-content">
-			<ul style='padding-left:0;'>
-				<li class="active">
+			<ul style='padding-left:0;' id="leftNav">
+				<li class="active" id="aLayers">
 					<a href="./"><span class="glyphicon glyphicon-dashboard"></span>Layers</a>
 				</li>
-			<li>
+			<li id="aEditLayers">
 					<a href="#"><span class="glyphicon glyphicon-edit"></span>Layer Edit</a>
 				</li>
 				<!--	<li>
@@ -75,7 +76,8 @@ font-family: 'Open Sans', sans-serif;
 	</nav>
 
     <div class="container-fluid">
-        <div class="row-fluid" id="layerSelect">
+
+        <div class="row-fluid" id="layerSelect" style="display:none;">
             <div class="col-md-12">
                 <h3 class="box-header">
                     <i class="glyphicon glyphicon-user"></i>
@@ -83,13 +85,32 @@ font-family: 'Open Sans', sans-serif;
                     <a data-toggle="collapse" data-target="#dbbox" href='#' class="box-collapse pull-right">hide&nbsp;&nbsp;<i class="caret"> </i></a>
                 </h3>
                 <div class="box panel-collapse in" id='dbbox'>
-
-                    <ul class="nav nav-tabs box-wide" id='ulSourceTabs'></ul>
-                    <div class="tab-content box-wide box-no-bottom-padding">
+                    <div class="row-fluid">  
+                          <i class='glyphicon glyphicon-filter'></i> Data Source &nbsp;&nbsp;
+                          <select class='selectpicker' data-width='140' id='selDataSources' >
+                            <option value='0'>All</option>
+                          </select><br/>
+                           <i class='glyphicon glyphicon-filter'></i> Category &nbsp;&nbsp;
+                          <select class='btn-margin selectpicker margin' data-width='180' data-style='btn-margin' id='selCategories'>
+                            <option value='0'>All</option>
+                          </select><br/>
+                           <i class='glyphicon glyphicon-sort'></i> Sort By &nbsp;&nbsp;
+                            <select class="selectpicker sort-options" data-style='btn-margin' data-width='150'>
+                                <option value="">Default</option>
+                                <option value="title">Title</option>
+                                <option value="theme">Category</option>
+                                <option value="source">Source</option>
+                                <option value="date-created">Date Updated</option>
+                              </select>
+                          <input class='form-control' id='txtLayerFilter' type='text' placeholder='Start typing to filter...' style='width:269px;margin:5px;'/>
+                          <div id='scrollWrapper' style='overflow-y:scroll !important;'>
+                            <div id='layers' style='line-height:1;' ></div>
+                            </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
         <div class="row-fluid" id="layerEdit" style="display:none;">
             <div class="col-md-12">
                 <h3 class="box-header">
@@ -98,13 +119,14 @@ font-family: 'Open Sans', sans-serif;
                     <a data-toggle="collapse" data-target="#dbbox" href='#' class="box-collapse pull-right">hide&nbsp;&nbsp;<i class="caret"> </i></a>
                 </h3>
                 <div class="box panel-collapse in" id='editbox'></div>
-                </div>
+            </div>
         </div>
 
             </div>
             <script type='text/javascript'>
-                var data_sources = ['Metro', 'Equity Atlas', 'OSDL', 'Civic Apps'];
+                var data_sources = ['Metro', 'Equity Atlas'];//, 'OSDL', 'Civic Apps'];
             </script>
+            <script src='views/views.min.js' type='text/javascript'></script>
             <script src='js/script.min.js' type='text/javascript'></script>
             <script src='js/script.js' type='text/javascript'></script>
 </body>

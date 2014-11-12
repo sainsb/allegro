@@ -17,17 +17,6 @@
   height:20px;
   margin:2px;
 }
-#legend{
-padding:10px;
-overflow-y:auto;
-
-border: solid 1px #EEE;
-    border-radius: 5px;
-}
-
-.legend {
-margin-left: 5px;
-}
 
 .legend-item{
 margin-left:5px;
@@ -42,8 +31,8 @@ vertical-align: top;
   border: 2px solid #eee;
   padding:7px;
   margin:5px;
-  width:99px;
-  height:124px;
+  width:265px;
+  height:auto;
   position: relative;
   cursor:pointer;
   float: left;
@@ -60,77 +49,11 @@ vertical-align: top;
   box-shadow: 0px 0px 2px 2px #ddd;
   }
 
-  .img-block-tall{
-    height:174px;
-  }
-
- .caption {
-  opacity: .9;
-  transition: background-color 0.2s linear;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  color:#222;
-  border-bottom-right-radius: 9px;
-  border-bottom-left-radius: 9px;
-  background-color:#fff;
-  width: 95px;
-  height: 45px;
-  padding-left:6px;
-  font-size:11px;
-  line-height:13px;
-  padding-top:3px;
-  z-index:1;
-}
-
-  .caption-tall{
-height:95px;
-  }
-
- .img-block-m {
-       width:209px;
- }
- 
- .caption-m {
-      width:208px;
-     font-size: 18px;
-     padding-top: 9px;
- }
- 
-.idata{
-  width:82px;
-  height:62px;
-}
-
-.idata-lg {
-     width: 190px;
-    height: 130px;
-}
- /*.img-block.shapefile {
-     border: 2px solid #C59497
- }
-
- .img-block.tilejson {
-     border: 2px solid #0E613B
- }*/
-
-
-
   .img-block.active{
-  border:2px solid #6896AC;
-      /*background-color: #999;*/
+  border:2px solid #F7E4C5;
+  background-color: oldlace;
   }
 
-
-
-caption.active{
-opacity: 1;
-
-}
-
-.caption.hover{
-background-color:#EEE;
-}
 
 .palette {
 cursor: pointer;
@@ -514,3 +437,109 @@ width: 40px;
     padding-top:160px !important;
   }
 }
+
+/* Sliding divs CSS */
+.nav-expanded a.nav-expander.fixed {
+  right: 20em;
+}
+
+#addDataNav {
+  background: #fff;
+  display: block;
+  border:1px solid #DDD;
+  overflow: auto;
+  position: fixed;
+  right: -21em;
+  font-size: 15px;
+  top: 210px;
+  bottom:48px;
+  width: 20em;
+  z-index: 1000;
+  margin-right:.5em;
+  padding:3px;
+  transition: right 0.3s ease-in-out 0s;
+  -webkit-transition: right 0.3s ease-in-out 0s;
+  -moz-transition: right 0.3s ease-in-out 0s;
+  -o-transition: right 0.3s ease-in-out 0s;
+}
+
+#legend {
+  background: #fff;
+  display: block;
+  border:1px solid #DDD;
+  overflow: auto;
+  position: fixed;
+  left: -21em;
+  font-size: 15px;
+  top: 210px;
+  bottom:48px;
+  width: 17em;
+  z-index: 1000;
+  margin-left:.5em;
+  padding:5px;
+  
+  transition: left 0.3s ease-in-out 0s;
+  -webkit-transition: left 0.3s ease-in-out 0s;
+  -moz-transition: left 0.3s ease-in-out 0s;
+  -o-transition: left 0.3s ease-in-out 0s;
+}
+
+#btnToggleLegend{
+  position:absolute;
+  top:320px;
+  left:15px;
+  z-index:1000;
+ transition: left 0.3s ease-in-out 0s;
+  -webkit-transition: left 0.3s ease-in-out 0s;
+  -moz-transition: left 0.3s ease-in-out 0s;
+  -o-transition: left 0.3s ease-in-out 0s;
+}
+
+#btnToggleAddData{
+  position:absolute;
+  top:225px;
+  right:15px;
+  z-index:1000;
+ transition: right 0.3s ease-in-out 0s;
+  -webkit-transition: right 0.3s ease-in-out 0s;
+  -moz-transition: right 0.3s ease-in-out 0s;
+  -o-transition: right 0.3s ease-in-out 0s;
+}
+
+.nav-addDataExpanded #addDataNav {
+  right: 0;
+}
+
+.nav-legendExpanded #legend {
+  left: 0;
+}
+
+.nav-legendExpanded #btnToggleLegend {
+  left: 263px;
+}
+
+.nav-addDataExpanded #btnToggleAddData {
+  right: 311px;
+}
+
+body.nav-addDataExpanded {
+  margin-left: 0em;
+}
+
+body.nav-legendExpanded {
+  margin-right: 0em;
+}
+
+.btn-margin{
+margin:3px;
+  }
+
+  .lazy{
+    float:left;
+    margin:7px;
+    vertical-align:top;
+  }
+
+  .dropdown-menu{
+    z-index:3000;
+  }

@@ -70,7 +70,7 @@ namespace Allegro
 
             routes.MapRoute(
               "Put Layer by Name", // Route name
-              "putLayerByName/{layerName}", // URL with parameters
+              "putLayerByName/{id}", // URL with parameters
               new { controller = "Allegro", action = "PutLayerByName" } // Parameter defaults
           );
 

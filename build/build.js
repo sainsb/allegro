@@ -61,7 +61,7 @@ var output = [
       '//atlas/www/prod/library/libraries/bootstrap-sortable/bootstrap-sortable.js',
       '//atlas/www/prod/library/libraries/html5sortable/jquery.sortable.min.js',
       '//atlas/www/prod/library/libraries/jquery.csvToTable/jquery.csvToTable.js',
-      '//atlas/www/prod/library/libraries/jquery.lazyload/jquery.lazyload.min.js',
+    '//atlas/www/prod/library/libraries/jquery.lazyload/jquery.lazyload.js',
       '//atlas/www/prod/library/libraries/PNG/PNG.js',
       '//atlas/www/prod/library/libraries/heatmapjs/heatmap.min.js',
       '//atlas/www/prod/library/libraries/leaflet.heatmapjs/leaflet-heatmap.js'
@@ -71,22 +71,6 @@ var output = [
     isjs: true,
     output_directory: '../js'
   },
-   {
-     minified_output_file: 'config.min.js',
-     files: [
-      "../config/rlis_config.js",
-      "../config/basemap_config.js",
-      "../config/rise_config.js",
-      "../config/trimet_config.js",
-     // "../config/civic_apps_config.js",
-     // "../config/parks_config.js",
-      "../config/equity_atlas_config.js",
-      "../config/spatial_data_library_config.js"
-     ],
-
-     isjs: true,
-     output_directory: '../js'
-   },
 
 ////CSS
     {
@@ -103,8 +87,8 @@ var output = [
     '//atlas/www/prod/library/libraries/bootstrap-context/context.bootstrap.css',
     '//atlas/www/prod/library/libraries/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css',
     '//atlas/www/prod/library/libraries/leaflet.coordinates/0.1.4/Leaflet.Coordinates.css',
-    '../css/bootstrap-select.min.css',
-    '../css/style.css'
+    '../css/bootstrap-select.min.css'
+    //,'../css/style.css'
       ],
       isjs: false,
       output_directory: '../css'

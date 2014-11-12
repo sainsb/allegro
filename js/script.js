@@ -37,40 +37,44 @@ var App = {
         //** will probably want to disable when the site goes into responsive mode..
         var mapmargin = parseInt($("#map").css("margin-bottom"), 10) + 258;
 
-        $('#map,#legend').css("height", ($(window).height() - mapmargin));
+        $('#map').css("height", ($(window).height() - mapmargin));
+        $('#scrollWrapper').css("height", ($(window).height() - 480));
 
         $(window).on("resize", function (e) {
-            $('#map,#legend').css("height", ($(window).height() - mapmargin));
+            
+            $('#scrollWrapper').css("height", ($(window).height() - 480));
+            $('#map').css("height", ($(window).height() - mapmargin));
+
             if ($(window).width() >= 980) {
-                $('#map,#legend').css("margin-bottom", 10);
+                $('#map').css("margin-bottom", 10);
             } else {
-                $('#map,#legend').css("margin-bottom", -20);
+                $('#map').css("margin-bottom", -20);
             }
         });
 
         //currently not using this but will want it/need it to handle responsive change
-        if ($(window).width() >= 980) {
-            $('#map,#legend').css("margin-bottom", 10);
-        } else {
-            $('#map,#legend').css("margin-bottom", -20);
-        }
+        // if ($(window).width() >= 980) {
+        //     $('#map,#legend').css("margin-bottom", 10);
+        // } else {
+        //     $('#map,#legend').css("margin-bottom", -20);
+        // }
 
         //assign handle to add Data button
         //init image lazy loader
-        $('#btnAddData').click(function () {
+        // $('#btnAddData').click(function () {
 
-          $('#imgLoadingData').hide();
+        //   $('#imgLoadingData').hide();
 
-            $('#dataModal').on('shown.bs.modal', function () {
+        //     $('#dataModal').on('shown.bs.modal', function () {
 
-                $("img.lazy").lazyload({
-                    effect: "fadeIn",
-                    container: $(".tab-content")
-                });
-            });
+        //         $("img.lazy").lazyload({
+        //             effect: "fadeIn",
+        //             container: $(".tab-content")
+        //         });
+        //     });
 
-            $('#dataModal').modal('show');
-        });
+        //     $('#dataModal').modal('show');
+        // });
 
         //assign handler to Basemap button
         $('#btnBasemap').click(function () {
@@ -137,6 +141,7 @@ var App = {
                 }
             }
         });
+
         //Fill opacity sliders
         $('body').on('change input', '.sliderFillOpacity', function () {
             var id = $(this).attr('id').replace('sli', '');
@@ -165,6 +170,7 @@ var App = {
                 opacity: layer.strokeOpacity
             });
         });
+
         $('.dropdown.keep-open').on({
             "shown.bs.dropdown": function () { this.closable = false; },
             "mouseleave": function () {
@@ -255,8 +261,7 @@ var App = {
         if (layer != null) {
           App.data.add(layer, function() { App.load_layers(layerIndex + 1); });
           $('.img-block.layer').each(function(i, v) {
-            var id = $(v).find('img').attr('id').replace('img', '');
-            if (id == App.util.getLayerId(layer.name)) {
+            if ($(v).data('title') == layer.name) {
               $(v).addClass('active');
             }
           });
@@ -324,6 +329,7 @@ var App = {
                 //** will need some sort of legend created.
                 layer.mapLayer = new L.TileLayer(layer.url, options);
                 layer.mapLayer.addTo(App.map);
+                map.spin(false);
             },
 
             tileJSON: function (layer) {
@@ -362,6 +368,7 @@ var App = {
                     layer.mapLayer = new L.TileLayer(url, { subdomains: data.subdomains, zIndex: (typeof layer.zIndex != 'undefined') ? layer.zIndex : 70, maxZoom: 19, reuseTiles: true });
 
                     layer.mapLayer.addTo(map);
+                    map.spin(false);
                 });
             },
 
@@ -678,7 +685,7 @@ var App = {
                 layer.mapLayer = geoJson;
                 layer.mapLayer.addTo(map);
              
-                $('#imgLoadingData').hide();
+                map.spin(false);
               if (typeof(cb) != 'undefined') {
                 cb();
               }
@@ -830,6 +837,8 @@ var App = {
                     break;
                 case App.GEOM_TYPES.LINESTRING:
                 case App.GEOM_TYPES.MULTILINESTRING:
+                if (isNaN(symbol.weight)) {
+                        symbol.weight = 1;}
                     legendItem += '<rect width="12" height="' + (symbol.weight + 1) + '" fill=' + symbol.color + ' stroke-width="0" />';
                     break;
             }
@@ -945,11 +954,9 @@ var App = {
 
     layersDialog: {
 
-        /* We keep track of this in order to apply the active class to the first tab */
-        madeFirstTab: false,
-
-        /* DOM object for the <ul> element that contains the tabs */
-        $ulSourceTabs: null,
+        $grid: null,
+        data_sources : [],
+        categories : [],
 
         getDataSources : function() {
           var deferreds = [];
@@ -967,43 +974,120 @@ var App = {
 
         /* Render the entire layer tabs collection */
         render: function () {
-            this.$ulSourceTabs = $('#ulSourceTabs');
+            this.$grid = $('#layers');
 
-            for (var _layer in config.layers) {
+            for(var lyr in config.layers){
+                var l = config.layers[lyr];
+                var thumb = (typeof(l.thumb)=='undefined') ? 'img/placeholder.png': l.thumb;
 
-                var layer = config.layers[_layer];
+                //var theme = (typeof(l.theme)=='undefined') ? "" : l.theme;
 
-                //If the layers source tab doesn't exist, create it.
-                var source = layer.source.replace(/\s/g, '_');
+                var $div = $('<div class="layer img-block col-xs-6 col-sm-4" data-groups=\'["'+l.theme+'"]\' data-title=\'["'+l.name+'"]\' data-theme=\'["'+l.theme+'"]\' data-source=\'["'+l.source+'"]\'"><img width="82" height="62" class="lazy" data-original="'+thumb+'"/>'+l.name+'<br/><span style="font-size:11px;"><b>Source: </b>'+l.source+'<br/><b>Category: </b>'+l.theme+'<b><br/>Data URL: </b><a href="'+l.url+'">'+l.url+'</a></span></div>');
 
-                if (!$('#' + source).length) {
-                    this.renderSourceTab(layer.source, layer.icon);
+                if (this.data_sources.indexOf(l.source) == -1){
+                    
+                    this.data_sources.push(l.source);
                 }
 
-                //If the layers theme section doesn't exist in the source tab content,
-                //create it.
-                var theme = (typeof layer.theme == 'undefined') ? '' : layer.theme.replace(/\s/g, '_');
-
-                if (!$('#' + source + '_' + theme).length) {
-                    $('#' + source).append('<div style="clear:both;" id="' + source + '_' + theme + '"><h4 style="margin:0;">' + layer.theme + '</h4><hr style="margin:0;padding:0;"/></div');
+                if (this.categories.indexOf(l.theme) == -1){
+                    
+                    this.categories.push(l.theme);
                 }
 
-                var elem = this.renderLayerElement(layer);
-
-                $('#' + source + '_' + theme).append(elem);
+                this.$grid.append($div);
             }
 
-            ////Put the custom tab at the end.
-            //this.$ulSourceTabs.append('  <li><a href="#customData" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Custom</a></li>')
+            this.data_sources.sort();
+            this.categories.sort();
 
-            //this.$ulSourceTabs.next().append("<div class='tab-pane fade' id='customData'>Data Source: &nbsp; <select class='selectpicker' id='selCustomData' data-style='btn-default' data-width='180'><option value='0'>GeoJSON</option><option value='1'>ArcGIS Server</option><option value='2'>Tile Layer</option><option value='3'>Shapefile</option><option value='4'>CSV</option></select></div>");
+            if(this.categories[0].trim()==''){
+                this.categories.splice(0,1);
+            }
 
-          $('#ulSourceTabs > li > a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
-            $("img.lazy").lazyload({
-              //effect: "fadeIn",
-              container: $(".tab-content")
+            for(var c in this.categories){
+                $('#selCategories').append('<option value="'+this.categories[c]+'">'+this.categories[c]+'</option>');
+            }
+
+            for(var ds in this.data_sources){
+                $('#selDataSources').append('<option value="'+this.data_sources[ds]+'">'+this.data_sources[ds]+'</option>');
+            }
+
+            $('#selCategories').selectpicker('refresh');
+            $('#selDataSources').selectpicker('refresh');
+
+            this.$grid.shuffle({
+                itemSelector: '.img-block'
             });
-          });
+
+            $('.sort-options').on('change', function() {
+              var sort = $(this).val(),
+                  opts = {};
+              // We're given the element wrapped in jQuery
+              if ( sort === 'date-created' ) {
+                opts = {
+                  reverse: true,
+                  by: function($el) {
+                    return $el.data('date-created');
+                  }
+                };
+              } else if ( sort === 'title' ) {
+                opts = {
+                  by: function($el) {
+                    return $el.data('title').toString().toLowerCase();
+                  }
+                };
+              }
+              // Filter elements
+              App.layersDialog.$grid.shuffle('sort', opts);
+               setTimeout(function(){
+                   $("img.lazy").lazyload('update');
+                   },500);
+            });
+
+            $('#txtLayerFilter').keyup($.debounce(250, function() {
+                var val = $(this).val().toLowerCase();
+                App.layersDialog.$grid.shuffle('shuffle', function($el, shuffle) {
+
+                //Only search elements in the current group
+                if (shuffle.group !== 'all' && $.inArray(shuffle.group, $el.data('groups')) === -1) {
+                  return false;
+                }
+
+                var text = $.trim($el.data('title') ).toLowerCase();
+
+                return text.indexOf(val) !== -1;
+                });
+
+                //refresh lazy Images;
+                setTimeout(function(){
+                $("img.lazy").lazyload('update');
+                },500);
+            }));
+
+            $('#selCategories').on('change', function(){
+
+                var val = $(this).val();
+                App.layersDialog.$grid.shuffle('shuffle', function($el, shuffle) {
+                   
+                  return $el.data('theme').indexOf(val) != -1;
+                });
+                setTimeout(function(){
+                $("img.lazy").lazyload('update');
+                },500);
+            })
+
+            $('#selDataSources').on('change', function(){
+
+                var val = $(this).val();
+                App.layersDialog.$grid.shuffle('shuffle', function($el, shuffle) {
+                   
+                  return $el.data('source').indexOf(val) != -1;
+                });
+                setTimeout(function(){
+                $("img.lazy").lazyload('update');
+                },500);
+            })
+
 
             this.attachEventHandler();
         },
@@ -1011,8 +1095,8 @@ var App = {
         attachEventHandler: function () {
             //Attach behavior to items in Add Data Modal
             $('.img-block.layer').on('click', function () {
-                var id = $(this).find('img').attr('id').replace('img', '');
-                var layer = App.util.getLayerById(id);
+                var name = $(this).data('title');
+                var layer = App.util.getLayerByName(name);
                 if ($(this).hasClass('active')) {
                     $(this).removeClass('active');
                     
@@ -1024,13 +1108,14 @@ var App = {
                         map.removeLayer(layer.mapLayer);
                     }
 
-                    $('#li' + id).remove();
+                    $('#li' + App.util.getLayerId(layer.name)).remove();
                     App.util.updateUrl();
                 }
                 else {
                     $(this).addClass('active');
                     if (typeof (layer.mapLayer) != 'undefined') {
                         map.addLayer(layer.mapLayer);
+                        App.contextMenu.apply(layer);
                         switch (layer.type) {
                             case App.LAYER_TYPES.GEOJSON:
                             case App.LAYER_TYPES.SHAPEFILE:
@@ -1056,101 +1141,11 @@ var App = {
                         }
                     }
                     else {
+                        map.spin(true);
                         App.data.add(layer, function() { App.util.updateUrl();});
                     }
                 }
             });
-        },
-
-        /* Render a tab for a given source 
-        returns:: @void; appends source tab to ulSourceTabs
-        */
-        renderSourceTab: function (source, icon) {
-
-            var safe_source = source.replace(/\s/g, '_');
-
-            var sourceTabString = '<li ';
-
-            if (!this.madeFirstTab) {
-                sourceTabString += 'class="active"';
-            }
-
-          //Get out your hatchets@!!!
-          if (source == 'OSDL') {
-            sourceTabString += '><a href="#' + safe_source + '" style="padding-top:4px;padding-bottom:12px;" data-toggle="tab">';
-          } else {
-            sourceTabString += '><a href="#' + safe_source + '" data-toggle="tab">';
-          }
-          if (typeof (icon) != 'undefined') {
-                sourceTabString += '<img src="' + icon + '" align="left" />&nbsp;';
-            } else {
-                sourceTabString += '<i class="fa fa-check-circle-o"></i>&nbsp;';
-            }
-
-          if (source != 'OSDL') {
-            sourceTabString += source;
-          }
-
-          sourceTabString += '</a></li>';
-
-            this.$ulSourceTabs.append(sourceTabString);
-
-            var tabstring = '<div class="tab-pane fade ';
-
-            if (!this.madeFirstTab) {
-                tabstring += 'active in';
-                this.madeFirstTab = true;
-            }
-
-            tabstring += '" id="' + safe_source + '"></div>';
-
-            this.$ulSourceTabs.next().append(tabstring);
-        },
-
-        /* Render individual data/layer item */
-        renderLayerElement: function (layer) {
-
-            var id = App.util.getLayerId(layer.name);
-
-            if (typeof (layer.thumb) != 'undefined') {
-                var thumb = layer.thumb;
-            }
-            else {
-                var thumb = '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png';
-            }
-
-            var elem = "<div class='layer img-block ";
-
-            if (layer.level == 2) {
-                elem += "img-block-m";
-            }
-
-            if (layer.level == 3) {
-                elem += "img-block-lg";
-            }
-
-            elem += "'><div class='caption ";
-
-            if (layer.level == 2) {
-                elem += "caption-m";
-            }
-
-            if (layer.level == 3) {
-                elem += "caption-lg";
-            }
-
-            elem += "'>" + layer.name + "</div><img ";
-
-            if (layer.level == 2 || layer.level == 3) {
-                elem += "width='190' height='130'";
-            } else {
-                elem += "width='82' height='62'";
-            }
-
-            elem += " class='lazy' data-original='" + thumb + "' alt='" + layer.name + "' id='img" + id + "'/></div>";
-
-            return elem;
-
         }
     },
 
@@ -1177,7 +1172,7 @@ var App = {
                 if (basemap.active == true) {
                     imgBlockText += ' active';
                     basemap.zIndex = 0;
-                    App.data.load.tileLayer(basemap);
+                    //App.data.load.tileLayer(basemap);
                 }
 
                 imgBlockText += "'><div class='caption caption-sm'>" + basemap.name + "</div><img class='idata' src='" + thumb + "' alt='" + basemap.name + "' id='img" + id + "'/></div>";
@@ -1192,6 +1187,7 @@ var App = {
         attachEventHandlers: function () {
 
             $('.img-block.basemap').on('click', function () {
+
                 var id = $(this).find('img').attr('id').replace('img', '');
 
                 var basemap = App.util.getBasemapById(id);
@@ -1202,7 +1198,7 @@ var App = {
 
 
                 //get existing basemap
-              var oldBasemapEl = $($('.img-block.basemap.active')[0]);
+                var oldBasemapEl = $($('.img-block.basemap.active')[0]);
                 var oldBasemapId = oldBasemapEl.find('img').attr('id').replace('img', '');
                 var oldBasemap = App.util.getBasemapById(oldBasemapId);
 
@@ -1212,10 +1208,12 @@ var App = {
 
                 //}
                 // else if(basemap.type != 'photo' && map.hasLayer(App.util.getBasemapById('Photo_Labels').mapLayer){
-              oldBasemapEl.removeClass('active');
+                oldBasemapEl.removeClass('active');
                 //         console.log("rocky");
                      oldBasemap.active = false;
+                     try{
                        App.map.removeLayer(oldBasemap.mapLayer);
+                   }catch(ex){}
                 //     }
 
                 $(this).addClass('active');
@@ -1404,7 +1402,7 @@ var App = {
             refresh: function (layer) {
 
                 if (typeof (layer.ramp) != 'undefined') {
-
+                    
                     var _ramp = layer.ramp;
 
                     //set a ramp in the selGradient combobox
@@ -1533,6 +1531,7 @@ var App = {
                         //load the values with the values from the legend.
                         for (var i = 0; i < layer.legend.symbols.length; i++) {
                             //support labels
+
                             var obj = { value: layer.legend.symbols[i].value };
                             if (typeof (layer.legend.symbols[i].label) != undefined) {
                                 obj.label = layer.legend.symbols[i].label;
@@ -1558,7 +1557,7 @@ var App = {
                         //keep fillcolor the same here but alter weight and color....
                         for (var s in layer.legend.symbols) {
                             var sym = layer.legend.symbols[s];
-                            var obj = { value: sym.value, fillColor: sym.fillColor, color: color, weight: weight, opacity: layer.strokeOpacity, fillOpacity: layer.fillOpacity };
+                            var obj = { value: sym.value, fillColor: sym.fillColor, color: sym.color, weight: weight, opacity: layer.strokeOpacity, fillOpacity: layer.fillOpacity };
                             //if (typeof(symbol.label) != 'undefined'){obj.label = symbol.label;}
                             phantomSymbols.push(obj);
                         }
@@ -1881,7 +1880,8 @@ var App = {
                 }
             });
 
-            context.attach('#li' + id, contents);
+            //attach the id of the context menu to the layer;
+            layer.context =context.attach('#li' + id, contents);
 
         }
     },
@@ -1903,8 +1903,8 @@ var App = {
                   null
         ],
         pngdata: [],
-        resolution: 10,
-        radius: .00981,
+        resolution: 5,
+        radius: .0036,
         maxOpacity: 0.7,
         minOpacity :0,
         
@@ -2106,7 +2106,6 @@ var App = {
             $.each(this.curRasters, function (i, v) {
                 
                 var id = App.util.getLayerId(v.name);
-
                 
                 if (typeof (v.width) != 'undefined') {
                     var dims = v.width + '_' + v.height;
@@ -2127,7 +2126,10 @@ var App = {
                     rManager[dims].rasters.push(id);
                 }
                 else {
-                   rManager[dims] = { height: v.height, width: v.width, rasters: [id], nodata: v.nodata, ul: v.ul, step: v.step };
+                    var lng = parseFloat(v.upperLeft.split(',')[0]);
+                    var lat = parseFloat(v.upperLeft.split(',')[1]);
+
+                   rManager[dims] = { height: v.height, width: v.width, rasters: [id], nodata: v.nodata, ul: [lng, lat], step: v.step };
                 }
             });
 
@@ -2136,6 +2138,7 @@ var App = {
                 if (dims == 'geojson') {
                     this._crush_geojson(rManager.geojson.rasters);
                 } else {
+
                     this._crush(rManager[dims]);
                 }
             }
@@ -2161,9 +2164,8 @@ var App = {
         },
 
         _crush: function (colRasters) {
-
-            var curlng = colRasters.upperLeft[0];
-            var curlat = colRasters.upperLeft[1];
+            var curlng = colRasters.ul[0];
+            var curlat = colRasters.ul[1];
 
             for (var x = 0; x < colRasters.width - this.resolution; x += this.resolution) {
                 for (var y = 0; y < colRasters.height - this.resolution; y += this.resolution) {
@@ -2185,7 +2187,7 @@ var App = {
                     curlat -= (colRasters.step * this.resolution);
                 }
                 curlng += (colRasters.step * this.resolution);
-                curlat = colRasters.upperLeft[1];
+                curlat = colRasters.ul[1];
             }
         }
     },
@@ -2225,14 +2227,17 @@ var App = {
                 map.removeLayer(layer.mapLayer);
             }
 
-            $('#li' + id).remove();
+            context.destroy('#li' + id, layer.context);
 
-          App.util.updateUrl();
+            $('#li' + id).remove();
+            App.util.updateUrl();
+
             $('.img-block.active').each(function (index) {
-                if ($(this).find('img').attr('id').replace('img', '') == id) {
+                if ($(this).data('title') == layer.name) {
                     $(this).removeClass('active');
                 }
             });
+
         },
 
         getLayerId: function (name) {
@@ -2470,5 +2475,65 @@ function _(msg) {
 
 //document.load
 $(function () {
+
+    //Navigation Menu Slider
+        $('#btnToggleAddData').on('click',function(e){
+            e.preventDefault();
+            $('body').toggleClass('nav-addDataExpanded');
+            if($('body').hasClass('nav-addDataExpanded')){
+                $('#maprow').animate({
+                    'marginRight': "296px"
+                  }, 400, function() {
+                    // Animation complete.
+                  });
+
+                 $("img.lazy").lazyload({
+                        effect: "fadeIn",
+                        threshold:0,
+                        container: $("#scrollWrapper"),
+                        failurelimit:1000
+                    });
+           
+                $('#btnToggleAddData').fadeOut(300,function(){$(this).html('&gt;&gt;').removeClass('btn-primary').addClass('btn-default').fadeIn(100)});
+            }else{
+                 $('#maprow').animate({
+                    'marginRight': "0px"
+                  }, 300, function() {
+                    // Animation complete.
+                  });
+                 $('#btnToggleAddData').fadeOut(300,function(){$(this).html("<i class='glyphicon glyphicon-tasks' ></i> &nbsp;Add Layers").removeClass('btn-default').addClass('btn-primary').fadeIn(100)});
+            }
+        });
+
+        $('#btnToggleLegend').on('click',function(e){
+            e.preventDefault();
+            $('body').toggleClass('nav-legendExpanded');
+            if($('body').hasClass('nav-legendExpanded')){
+                $('#maprow').animate({
+                    'marginLeft': "255px"
+                  }, 300, function() {
+                    // Animation complete.
+                  });
+            $('#btnToggleLegend').fadeOut(300);
+            } else {
+                 $('#maprow').animate({
+                    'marginLeft': "0px"
+                  }, 300, function() {
+                    // Animation complete.
+                  });
+                 $('#btnToggleLegend').fadeIn(100);
+            }
+        });
+
+        $('#btnCloseLegend').on('click', function(){
+            $('body').removeClass('nav-legendExpanded');
+                $('#maprow').animate({
+                    'marginLeft': "0px"
+                  }, 300, function() {
+                    // Animation complete.
+                  });
+                 $('#btnToggleLegend').fadeIn(100);
+        });
+
     App.init();
 });

@@ -62,34 +62,35 @@ for (var i = 0; i < toutput.length; i++) {
 
 //compile scripts and css
 
-
 // Output
 var output = [
     // Javascript
     {
     minified_output_file: 'script.min.js',
-        files: [
-          "\\\\atlas\\www\\prod\\library\\libraries\\jquery/2.0.3/jquery.min.js",
-          "\\\\atlas\\www\\prod\\library\\libraries\\bootstrap/3.2.0/js/bootstrap.min.js",
-          "\\\\atlas\\www\\prod\\library\\libraries\\chartjs/Chart.min.js",
-          
-      '//atlas/www/prod/library/libraries/jquery.lazyload/jquery.lazyload.min.js',
-            "../views/views.min.js"
-           //, "../js/script.js"
-        ],
-        isjs: true,
-        output_directory: '../js'
+       files: [
+         '//atlas/www/prod/library/libraries/jquery/1.9.1/jquery.min.js',
+         "\\\\atlas\\www\\prod\\library\\libraries\\bootstrap/3.2.0/js/bootstrap.min.js",
+         "\\\\atlas\\www\\prod\\library\\libraries\\jquery.debounce/jquery.debounce.min.js",
+         '//atlas/www/prod/library/libraries/bootstrap-select/1.3.1/js/bootstrap-select.min.js',
+         '//atlas/www/prod/library/libraries/shufflejs/jquery.shuffle.modernizr.min.js'
+         ,'//atlas/www/prod/library/libraries/jquery.lazyload/jquery.lazyload.js'
+          // "../views/views.min.js"
+          //, "../js/script.js"
+       ],
+       isjs: true,
+       output_directory: '../js'
     },
 
     //CSS
     {
     minified_output_file: 'style.min.css',
-        files: [
-            "\\\\atlas\\www\\prod\\library\\libraries\\bootstrap/3.2.0/css/bootstrap.min.css",
-            "../css/style.css"
-        ],
-        isjs: false,
-        output_directory : '../css'
+       files: [
+           "\\\\atlas\\www\\prod\\library\\libraries\\bootstrap/3.2.0/css/bootstrap.min.css",
+           '../../css/bootstrap-select.min.css'
+          //, "../css/style.css"
+       ],
+       isjs: false,
+       output_directory : '../css'
     }
 ];
 

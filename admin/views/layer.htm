@@ -1,15 +1,14 @@
 <div class="form-horizontal">
     <fieldset id="layerTime">
-
         <!-- Form Name -->
-        <legend>Layer Editor</legend>
+       
 
         <!-- Prepended text-->
         <div class="form-group">
             <div class="col-md-8">
                 <div class="input-group">
                     <span class="input-group-addon">Name</span>
-                    <input id="lyrName" name="lyrName" class="form-control" placeholder="Name of layer" type="text" required="">
+                    <input id="lyrname" class="form-control" placeholder="Name of layer" type="text" required="" value="<%=layer.name%>">
                 </div>
             </div>
         </div>
@@ -19,7 +18,7 @@
             <div class="col-md-8">
                 <div class="input-group">
                     <span class="input-group-addon">URL</span>
-                    <input id="lyrUrl" name="lyrURL" class="form-control" placeholder="URL to data" type="text">
+                    <input id="lyrUrl" name="lyrurl" class="form-control" placeholder="URL to data" type="text" value="<%=layer.url%>">
                 </div>
             </div>
         </div>
@@ -29,15 +28,11 @@
             <div class="col-md-4">
                 <div class="input-group">
                     <span class="input-group-addon">Type</span>
-                    <select id="lyrType" name="lyrType" class="form-control">
-                        <option value="shapefile">Shapefile</option>
-                        <option value="geojson">GeoJSON</option>
-                        <option value="heatmap">Heatmap</option>
-                        <option value="tilelayer">Tilelayer</option>
-                        <option value="tilejson">TileJSON</option>
-                        <option value="ArcGIS Server Dynamic">ArcGIS Server Dynamic</option>
-                        <option value="ArcGIS Server Tiled">ArcGIS Server Tiled</option>
-                        <option value="CSV">CSV</option>
+                    <% var types=[{id:'shapefile', name:'Shapefile'}, {id:'geojson', name :'GeoJSON'}, {id:'heatmap', name:'Heatmap'},{id:'tilelayer', name:'Tilelayer'},{id:'tilejson', name:'TileJSON'},{id:'ArcGIS Dynamic', name:'ArcGIS Dynamic'},{id:'csv',name: 'CSV'}]; %>
+                    <select id="lyrType" name="lyrtype" class="form-control">
+                        <%     for(var type in types){ %>
+                        <option value="<%= types[type].id %>" <% if(layer.type == types[type].id){ print('selected'); } %>><%= types[type].name %></option>
+                        <%     }; %>
                     </select>
                 </div>
             </div>
@@ -48,7 +43,7 @@
             <div class="col-md-8">
                 <div class="input-group">
                     <span class="input-group-addon">Thumbnail URL</span>
-                    <input id="lyrThumb" name="lyrThumb" class="form-control" placeholder="URL to thumbnail" type="text">
+                    <input id="lyrThumb" name="lyrthumb" class="form-control" placeholder="URL to thumbnail" type="text" value="<%=layer.thumb%>">
                 </div>
 
             </div>
@@ -59,7 +54,7 @@
             <div class="col-md-8">
                 <div class="input-group">
                     <span class="input-group-addon">Metadata URL</span>
-                    <input id="lyrMetadataUrl" name="lyrMetadataUrl" class="form-control" placeholder="URL to metadata document" type="text">
+                    <input id="lyrmetadataUrl"  class="form-control" placeholder="URL to metadata document" type="text" value="<%=layer.metadataUrl%>">
                 </div>
             </div>
         </div>
@@ -69,41 +64,11 @@
             <div class="col-md-5">
                 <div class="input-group">
                     <span class="input-group-addon">Theme</span>
-                    <select id="lyrTheme" name="lyrTheme" class="form-control">
-                        <option value="Administrative">Administrative</option>
-                        <option value="Boundary">Boundary</option>
-                        <option value="Census">Census</option>
-                        <option value="Cities">Cities</option>
-                        <option value="Community">Community</option>
-                        <option value="Democratic Participation">Democratic Participation</option>
-                        <option value="Demographics">Demographics</option>
-                        <option value="Develop">Develop</option>
-                        <option value="Ecology">Ecology</option>
-                        <option value="Economic Opportunity">Economic Opportunity</option>
-                        <option value="Education">Education</option>
-                        <option value="Environment">Environment</option>
-                        <option value="Food">Food</option>
-                        <option value="General">General</option>
-                        <option value="Government">Government</option>
-                        <option value="Health Care">Health Care</option>
-                        <option value="Health Outcomes">Health Outcomes</option>
-                        <option value="Healthy Environment">Healthy Environment</option>
-                        <option value="Housing">Housing</option>
-                        <option value="Hydrology">Hydrology</option>
-                        <option value="Land">Land</option>
-                        <option value="Major Studies">Major Studies</option>
-                        <option value="Parks and Natural Areas">Parks and Natural Areas</option>
-                        <option value="Places">Places</option>
-                        <option value="Planning">Planning</option>
-                        <option value="Points of Interest">Points of Interest</option>
-                        <option value="Population Overlays">Population Overlays</option>
-                        <option value="Services and Amenities">Services and Amenities</option>
-                        <option value="Streets">Streets</option>
-                        <option value="TOD">TOD</option>
-                        <option value="Taxlots">Taxlots</option>
-                        <option value="Transit">Transit</option>
-                        <option value="Transportation">Transportation</option>
-                        <option value="Water">Water</option>
+                    <select id="lyrtheme" class="form-control">
+                        <%var themes = ["Administrative", "Boundary", "Census", "Cities", "Community", "Democratic Participation", "Demographics", "Develop", "Ecology", "Economic Opportunity", "Education", "Environment", "Food", "General", "Government", "Health Care", "Health Outcomes", "Healthy Environment", "Housing", "Hydrology", "Land", "Major Studies", "Parks and Natural Areas", "Places", "Planning", "Points of Interest", "Population Overlays", "Services and Amenities", "Streets", "TOD", "Taxlots", "Transit", "Transportation", "Water"]; %>
+                        <% for(var theme in themes){ %>
+                        <option value="<%= themes[theme] %>" <% if(layer.theme == themes[theme]){ print('selected'); } %>><%= themes[theme] %></option>
+                        <% }; %>
                     </select>
                 </div>
             </div>
@@ -114,19 +79,9 @@
             <div class="col-md-8">
                 <div class="input-group">
                     <span class="input-group-addon">Data Source</span>
-                    <input id="lyrSource" name="lyrSource" class="form-control" placeholder="Metro, Oregon State, DOGAMI etc." type="text">
+                    <input id="lyrSource" name="lyrSource" class="form-control" placeholder="Metro, Oregon State, DOGAMI etc." type="text" value="<%=layer.source%>">
                 </div>
 
-            </div>
-        </div>
-
-        <!-- Prepended text-->
-        <div class="form-group">
-            <div class="col-md-8">
-                <div class="input-group">
-                    <span class="input-group-addon">Data Source Icon</span>
-                    <input id="lyrIcon" name="lyrIcon" class="form-control" placeholder="URL to data source icon" type="text">
-                </div>
             </div>
         </div>
 
@@ -138,7 +93,7 @@
             <div class="col-md-8">
                 <div class="input-group">
                     <span class="input-group-addon">Symbol Field</span>
-                    <input id="lyrSymbolField" name="lyrSymbolField" class="form-control" placeholder="field to symbolize on" type="text">
+                    <input id="lyrSymbolField" name="lyrSymbolField" class="form-control" placeholder="field to symbolize on" type="text" value="<%=layer.symbolField%>">
                 </div>
             </div>
         </div>
@@ -148,30 +103,36 @@
             <div class="col-md-4">
                 <div class="input-group">
                     <span class="input-group-addon">Color Ramp</span>
-                    <select id="lyrRamp" name="lyrRamp" class="form-control">
-                        <option value="1">Option one</option>
-                        <option value="2">Option two</option>
+                    <% var ramps = ["None","YlGn","YlGnBu","GnBu","BuGn","PuBuGn","PuBu","BuPu","RdPu","PuRd","OrRd","YlOrRd","YlOrBr","Purples","Blues","Greens","Oranges","Reds","Greys","PuOr","BrBG","PRGn","PiYG","RdBu","RdGy","RdYlBu","Spectral","RdYlGn","Paired","Pastel1","Set1","Set3"]; %>
+                    <select id="lyrramp"  class="form-control">
+                        <% for(var ramp in ramps){ %>
+                        <option value="<%= ramps[ramp] %>" <% if(layer.ramp == ramps[ramp]){ print('selected'); } %>><%= ramps[ramp] %></option>
+                        <% }; %>
                     </select>
                 </div>
             </div>
         </div>
 
-        <!-- Textarea -->
         <div class="form-group">
             <div class="col-md-8">
                 <div class="input-group">
                     <span class="input-group-addon">Legend Object</span>
-                    <textarea class="form-control" id="lyrLegend" name="lyrLegend">Legend Object (JSON)</textarea>
+                    <textarea class="form-control" id="lyrlegend" name="lyrLegend" placeholder="Legend Object (JSON)">
+                        <% if(typeof (layer.legend) != 'undefined'){
+                        print (JSON.stringify(layer.legend,null, ' '));}%>
+                    </textarea>
                 </div>
             </div>
         </div>
-
-        <!-- Textarea -->
         <div class="form-group">
             <div class="col-md-8">
                 <div class="input-group">
                     <span class="input-group-addon">Style Object</span>
-                    <textarea class="form-control" id="lyrstyle">Style Object (JSON) - An alternative style definition</textarea>
+                    <textarea class="form-control" id="lyrstyle" placeholder="style object (json) - an alternative style definition">
+                        <% if(typeof (layer.legend) != 'undefined'){
+                        print (JSON.stringify(layer.style));}
+                        %>
+                    </textarea>
                 </div>
             </div>
         </div>
@@ -185,7 +146,11 @@
             <div class="col-md-8">
                 <div class="input-group">
                     <span class="input-group-addon">Popup Template</span>
-                    <textarea class="form-control" id="lyrPopupTemplate" name="lyrPopupTemplate">Mustache popup template</textarea>
+                    <textarea class="form-control" id="lyrpopupTemplate" placeholder="Mustache popup template">
+                        <% if(typeof (layer.popupTemplate) != 'undefined'){
+                        print (layer.popupTemplate);
+                        }%>
+                    </textarea>
                 </div>
                 <p class="help-block">help</p>
             </div>
@@ -196,7 +161,7 @@
             <div class="col-md-8">
                 <div class="input-group">
                     <span class="input-group-addon">Filter</span>
-                    <input id="lyrDefQuery" name="lyrDefQuery" class="form-control" placeholder="STATUS=1 etc." type="text">
+                    <input id="lyrDefQuery" name="lyrdefQuery" class="form-control" placeholder="STATUS=1 etc." type="text" value="<%=layer.defQuery%>">
                 </div>
                 <p class="help-block">help</p>
             </div>
@@ -207,7 +172,7 @@
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">Z-Index</span>
-                    <input id="lyrZIndex" name="lyrZIndex" class="form-control" placeholder="Tilelayer zIndex" type="text">
+                    <input id="lyrZIndex" name="lyrzIndex" class="form-control" placeholder="Tilelayer zIndex" type="text" value="<%=layer.zIndex%>">
                 </div>
             </div>
         </div>
@@ -217,25 +182,25 @@
             <div class="col-md-4">
                 <div class="checkbox">
                     <label for="checkboxes-0">
-                        <input type="checkbox" name="checkboxes" id="checkboxes-0" value="1">
+                        <input type="checkbox" id="lyrproxy" <% if(layer.proxy==true){ print ("checked");} %>>
                         Requires Proxy
                     </label>
                 </div>
                 <div class="checkbox">
                     <label for="checkboxes-1">
-                        <input type="checkbox" name="checkboxes" id="checkboxes-1" value="2">
+                        <input type="checkbox" id="lyrtoken" <% if(layer.requiresToken==true){ print ("checked");} %>>
                         Requires Token
                     </label>
                 </div>
                 <div class="checkbox">
                     <label for="checkboxes-2">
-                        <input type="checkbox" name="checkboxes" id="checkboxes-2" value="3">
+                        <input type="checkbox" id="lyrsimplify" <% if(layer.simplify==true){ print ("checked");} %>>
                         Simplify Geometry
                     </label>
                 </div>
                 <div class="checkbox">
                     <label for="checkboxes-3">
-                        <input type="checkbox" name="checkboxes" id="checkboxes-3" value="4">
+                        <input type="checkbox" id="lyrclickable" <% if((typeof(layer.clickable) == 'undefined' || layer.clickable==true) && (layer.type != 'tilejson' && layer.type != 'tilelayer')){ print ("checked");} %>>
                         Is Clickable
                     </label>
                 </div>
