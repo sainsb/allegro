@@ -37,52 +37,44 @@ var App = {
         //** will probably want to disable when the site goes into responsive mode..
         var mapmargin = parseInt($("#map").css("margin-bottom"), 10) + 258;
 
-        $('#map').css("height", ($(window).height() - mapmargin));
-        $('#scrollWrapper').css("height", ($(window).height() - 480));
+        $('#map,#legend').css("height", ($(window).height() - mapmargin));
 
         $(window).on("resize", function (e) {
-            
-            $('#scrollWrapper').css("height", ($(window).height() - 480));
-            $('#map').css("height", ($(window).height() - mapmargin));
-
+            $('#map,#legend').css("height", ($(window).height() - mapmargin));
             if ($(window).width() >= 980) {
-                $('#map').css("margin-bottom", 10);
+                $('#map,#legend').css("margin-bottom", 10);
             } else {
-                $('#map').css("margin-bottom", -20);
+                $('#map,#legend').css("margin-bottom", -20);
             }
         });
 
         //currently not using this but will want it/need it to handle responsive change
-        // if ($(window).width() >= 980) {
-        //     $('#map,#legend').css("margin-bottom", 10);
-        // } else {
-        //     $('#map,#legend').css("margin-bottom", -20);
-        // }
+        if ($(window).width() >= 980) {
+            $('#map,#legend').css("margin-bottom", 10);
+        } else {
+            $('#map,#legend').css("margin-bottom", -20);
+        }
 
         //assign handle to add Data button
         //init image lazy loader
-        // $('#btnAddData').click(function () {
+        $('#btnAddData').click(function () {
 
-        //   $('#imgLoadingData').hide();
+          $('#imgLoadingData').hide();
 
-        //     $('#dataModal').on('shown.bs.modal', function () {
+            $('#dataModal').on('shown.bs.modal', function () {
 
-        //         $("img.lazy").lazyload({
-        //             effect: "fadeIn",
-        //             container: $(".tab-content")
-        //         });
-        //     });
+                $("img.lazy").lazyload({
+                    effect: "fadeIn",
+                    container: $(".tab-content")
+                });
+            });
 
-        //     $('#dataModal').modal('show');
-        // });
+            $('#dataModal').modal('show');
+        });
 
         //assign handler to Basemap button
         $('#btnBasemap').click(function () {
             $('#basemapModal').modal('show');
-        });
-
-        $('#btnAdmin').on('click', function() {
-          window.location='./admin/';
         });
 
         //assign handler to Basemap button
@@ -90,8 +82,8 @@ var App = {
             $('#optionsModal').modal('show');
         });
 
-        $('#btnShare').on('click', function() {
-            $('#browserDialog').modal('show');
+        $('#btnExport').on('click', function() {
+          App.exportDialog.init();
         });
 
         //Attach behavior to legend checkboxes
@@ -99,8 +91,13 @@ var App = {
             var id = $(this).attr('id').replace('chk', '');
             var layer = App.util.getLayerById(id);
             if ($(this).is(':checked')) {
-                if (layer.type == App.LAYER_TYPES.GEOJSON || layer.type == App.LAYER_TYPES.SHAPEFILE) {
-                    layer.mapLayer.addTo(map).bringToFront();
+              if (layer.type == App.LAYER_TYPES.GEOJSON || layer.type == App.LAYER_TYPES.SHAPEFILE) {
+                    if (typeof(layer.selection) != 'undefined') {
+                      layer.selection.addTo(map).bringToFront();
+                    } else {
+                      layer.mapLayer.addTo(map).bringToFront();
+                    }
+                    
                     var other_layers = [];
                     $.each($('.legend-check'), function(i,v){
                         var iid = $(v).prop('id').replace('chk','');
@@ -113,14 +110,27 @@ var App = {
                         }
                     });
                     other_layers.reverse();
-                    for(var l=0;l<other_layers.length;l++){
+                    for (var l = 0; l < other_layers.length; l++) {
+                      if (typeof(App.util.getLayerById(other_layers[l]).selection) != 'undefined') {
+                        App.util.getLayerById(other_layers[l]).selection.bringToFront();
+                      } else {
                         App.util.getLayerById(other_layers[l]).mapLayer.bringToFront();
+                      }
+                        
                     }
+              } else {
+                if (typeof(layer.selection) != 'undefined') {
+                  layer.selection.addTo(map);
                 } else {
                   layer.mapLayer.addTo(map);
                 }
+              }
             } else {
+              if (typeof(layer.selection) != 'undefined') {
+                map.removeLayer(layer.selection);
+              } else {
                 map.removeLayer(layer.mapLayer);
+              }
             }
             //with this logic, the layer legend is dumb to the checkbox state.
 
@@ -149,11 +159,15 @@ var App = {
             layer.fillOpacity = $(this).val();
             switch (layer.type) {
                 case App.LAYER_TYPES.GEOJSON:
-                case App.LAYER_TYPES.SHAPEFILE:
-                    layer.mapLayer.setStyle({
-                        fillOpacity: layer.fillOpacity,
-                    });
-                    break;
+              	case App.LAYER_TYPES.SHAPEFILE:
+	                if (typeof(layer.selection) != 'undefined') {
+	                  	layer.selection.setStyle({fillOpacity: layer.fillOpacity });
+	                } else {
+	                  layer.mapLayer.setStyle({fillOpacity: layer.fillOpacity });
+	                }
+	                //update HTML Legend
+	                $('#leg'+App.util.getLayerId(layer.name)+ ' > div > svg > rect').attr('fill-opacity', layer.fillOpacity);
+                	break;
                 case App.LAYER_TYPES.TILELAYER:
                 case App.LAYER_TYPES.TILEJSON:
                     layer.mapLayer.setOpacity(layer.fillOpacity);
@@ -166,16 +180,23 @@ var App = {
             var id = $(this).attr('id').replace('sli', '');
             var layer = App.util.getLayerById(id);
             layer.strokeOpacity = $(this).val();
-            layer.mapLayer.setStyle({
-                opacity: layer.strokeOpacity
-            });
+          if (typeof(layer.selection) != 'undefined') {
+            layer.selection.setStyle({ opacity: layer.strokeOpacity });
+          } else {
+            layer.mapLayer.setStyle({ opacity: layer.strokeOpacity });
+          }
+          $('#leg'+App.util.getLayerId(layer.name)+ ' > div > svg > rect').attr('stroke-opacity', layer.strokeOpacity);
         });
-
         $('.dropdown.keep-open').on({
             "shown.bs.dropdown": function () { this.closable = false; },
             "mouseleave": function () {
                 this.closable = true; },
             "hide.bs.dropdown": function () { return this.closable; }
+        });
+
+        //dev labeling code
+        $('#txtSymbolRename').on('focusout', function() {
+          console.log($(this).val());
         });
 
         //init map
@@ -192,33 +213,26 @@ var App = {
         map = this.map;
 
         L.control.scale().addTo(this.map);
+
         new L.Hash(this.map);
 
-        //Get all the meta for each data source specified in the index.htm
-        var deferreds = this.layersDialog.getDataSources();
-
-        $.when.apply(null, deferreds).done(function () {
-          App.layersDialog.render();
-
-          //load layers passed in hash
-          var hash = location.hash.split('/');
-
-          if (hash.length > 3 && hash[3] != '') {
-            App.boot_layers = hash.slice(3, hash.length).reverse();
-            map.spin(true);
-            App.load_layers(0);
-          }
-        });
+        // Initialize dialogs
+        this.layersDialog.render();
 
         this.basemapDialog.render();
 
         this.symbolDialog.ramps.render();
 
-        //init selectpickers
+        //init bootstrap select controls
         $('.selectpicker').selectpicker();
 
         //init colorpickers
         $('.color').colorpicker();
+
+        //$('#colSymbolRecolor').colorpicker()
+        //  .on('changeColor', function (ev) {
+        //  console.log('yuay');
+        //});
 
         //init RLIS API autosuggest
         var x = new RLIS.Autosuggest("txtLocSearch", { "mode": 'locate', 'entries': 7 }, function (result, error) {
@@ -246,28 +260,35 @@ var App = {
             App.map.setView([result[0].lat, result[0].lng], 15);
         });
         
-        //Add drag and drop shapefile functionality
+        //Accept l param to load layers passed in querystring
+        var hash = location.hash.split('/');
+   
+        if (hash.length > 3 && hash[3] != '') {
+            App.boot_layers = hash.slice(3, hash.length).reverse();
+            map.spin(true);
+            App.load_layers(0);
+        }
+
         this.util.dragHandler();
+
     },
-
+    
     boot_layers : [],
-
     load_layers : function(layerIndex) {
       if (layerIndex < App.boot_layers.length && App.boot_layers[layerIndex] != '') {
        
         var name = App.boot_layers[layerIndex].trim().replace(/\-/g, ' ');
         var layer = this.util.getLayerByName(name);
-        
         if (layer != null) {
-          App.data.add(layer, function() { App.load_layers(layerIndex + 1); });
+          App.data.add(layer, function () { App.load_layers(layerIndex + 1); });
           $('.img-block.layer').each(function(i, v) {
-            if ($(v).data('title') == layer.name) {
+            var id = $(v).find('img').attr('id').replace('img', '');
+            //console.log(id);
+            if (id == App.util.getLayerId(layer.name)) {
+
               $(v).addClass('active');
             }
           });
-        } else {
-          console.log(name + ' layer not recognized...sorry');
-          App.load_layers(layerIndex + 1);
         }
       } else {
         $('#imgLoadingData').hide();
@@ -278,7 +299,7 @@ var App = {
     data: {
 
         /* event handler for add data button */
-        add: function (layer, cb) {
+      add: function (layer, cb) {
             switch (layer.type) {
                 case App.LAYER_TYPES.GEOJSON:
                     this.load.geoJSON(layer, cb);
@@ -329,13 +350,13 @@ var App = {
                 //** will need some sort of legend created.
                 layer.mapLayer = new L.TileLayer(layer.url, options);
                 layer.mapLayer.addTo(App.map);
-                map.spin(false);
+
             },
 
             tileJSON: function (layer) {
               
               var url = layer.url + ((layer.requireToken == true) ? "?token=" + config.token : "");
-              
+              //console.log(url.trim());
                 $.getJSON(url, function (data) {
 
                     //Add to legend
@@ -354,7 +375,7 @@ var App = {
 
                     layer.HTMLLegend = legend;
 
-                    App.contextMenu.apply(layer);
+                    App.contextMenu.applyTOC(layer);
 
                     //beware that this is based on my own spec of the tilejson
                     //doesn't conform to other tilejson spec.
@@ -368,7 +389,6 @@ var App = {
                     layer.mapLayer = new L.TileLayer(url, { subdomains: data.subdomains, zIndex: (typeof layer.zIndex != 'undefined') ? layer.zIndex : 70, maxZoom: 19, reuseTiles: true });
 
                     layer.mapLayer.addTo(map);
-                    map.spin(false);
                 });
             },
 
@@ -391,10 +411,9 @@ var App = {
                   //App.data.parse.geoJSON(localGeoJSON, layer);
                   return;
                 }
-                
-                if(typeof (FileReader) != 'undefined' && typeof(layer.simplify) != 'undefined' && layer.simplify==false){
-                // if (typeof (FileReader) != 'undefined') {
-                var xhr = new XMLHttpRequest(), reader = new FileReader();
+                 // if(1==2){
+                if (typeof (FileReader) != 'undefined') {
+                  var xhr = new XMLHttpRequest(), reader = new FileReader();
 
                   var url = '';
 
@@ -427,7 +446,8 @@ var App = {
                             shp(reader.result).then(function(data) {
                               //cache geojson in localstorage
                               try {
-                                localStorage.setObject(layer.url, data);
+                                //need to figure out a way to bust cache...
+                                //localStorage.setObject(layer.url, data);
                               } catch (ex) {
                                 console.log('unable to store this in local storage');
                               }
@@ -443,7 +463,8 @@ var App = {
                   }, false);
                   // Send XHR
                   xhr.send();
-                } else { //IE 9 or less polyfill
+                } else {
+                    //$('#browserModal').modal('show');
 
                     var url = './polyfill/?url=' + encodeURIComponent(layer.url);
                     if (layer.simplify) {
@@ -458,7 +479,93 @@ var App = {
                         $('#txtLoadingData').html('Parsing...');
                         callback(data);
                     });
+                  //$('#imgLoadingData').hide();
                 }
+            },
+
+            filegdb: function (layer, callback) {
+
+              $('#txtLoadingData').html('Loading...');
+              $('#imgLoadingData').fadeIn(100);
+
+              //Check in local storage first
+              var localGeoJSON = localStorage.getObject(layer.url);
+
+              if (localGeoJSON != null) {
+                callback(localGeoJSON);
+                //App.data.parse.geoJSON(localGeoJSON, layer);
+                return;
+              }
+              // if(1==2){
+              if (typeof (FileReader) != 'undefined') {
+                var xhr = new XMLHttpRequest(), reader = new FileReader();
+
+                var url = '';
+
+                if (typeof (layer.proxy) != 'undefined') {
+                  url = './proxy/?url=' + encodeURIComponent(layer.url);
+                } else {
+                  url = layer.url;
+                }
+
+                //url_prefix = 'data/';
+                xhr.open("GET", url, true);
+                // Set the responseType to blob
+                xhr.responseType = "blob";
+
+                xhr.addEventListener("load", function () {
+                  if (xhr.status === 200) {
+                    // onload needed since Google Chrome doesn't support addEventListener for FileReader
+                    if (typeof (FileReader) == 'undefined') {
+
+                    } else {
+                      reader.onload = function (e) {
+
+                        if (reader.readyState !== 2 || reader.error) {
+                          if (reader.error) {
+                            console.log(reader.error);
+                          }
+                          return;
+                        } else {
+
+                          shp(reader.result).then(function (data) {
+                            //cache geojson in localstorage
+                            try {
+                              //need to figure out a way to bust cache...
+                              //localStorage.setObject(layer.url, data);
+                            } catch (ex) {
+                              console.log('unable to store this in local storage');
+                            }
+                            $('#txtLoadingData').html('Parsing...');
+                            callback(data);
+                          });
+                        }
+                      }
+                      // Load blob as Data URL
+                      reader.readAsArrayBuffer(xhr.response);
+                    }
+                  }
+                }, false);
+                // Send XHR
+                xhr.send();
+              } else {
+                //$('#browserModal').modal('show');
+
+                var url = './polyfill/?url=' + encodeURIComponent(layer.url);
+                if (layer.simplify) {
+                  url += "&tolerance=.0005";
+                }
+                $.getJSON(url, function (data) {
+                  try {
+                    localStorage.setObject(layer.url, data);
+                  } catch (ex) {
+                    console.log('unable to store this in local storage');
+                  }
+                  $('#txtLoadingData').html('Parsing...');
+                  callback(data);
+                });
+                //$('#imgLoadingData').hide();
+              }
             },
 
             heatmap: function (layer, callback) {
@@ -476,7 +583,7 @@ var App = {
                 $('#ulHeatmapLegend').append($(layer.HTMLLegend));
 
                 var xhr = new XMLHttpRequest();
-                xhr.open('GET', layer.url, true);
+                xhr.open('GET', layer.file, true);
                 xhr.responseType = 'arraybuffer';
                 pngdata = [];
                 xhr.onload = function (e) {
@@ -488,7 +595,6 @@ var App = {
                             App.heatmap.curRasters.push(layer);
                             App.heatmap.rasters[id] = png;
                             App.heatmap.rasterMultiplier[id] = 1;
-
                             callback();
                         });
                     }
@@ -526,7 +632,7 @@ var App = {
                             for(var cl in layer.defQuery){
                                 clause+= 'feature.properties.'+layer.defQuery[cl];
                             }
-                            return eval(clause)
+                          return eval(clause);
                         }
                         else{clause='feature.properties.' + layer.defQuery}
 
@@ -545,12 +651,15 @@ var App = {
                          slayer.bindPopup(thm);
                      }
                 : function (feature, slayer) {
-                    if (feature.properties) {
-                        slayer.bindPopup('<h5>'+layer.name+'</h5>'+Object.keys(feature.properties).map(function (k) {
-                            if ($.inArray(k, App.STYLE_KEYWORDS) == -1) {
-                                return '<strong>' + k + "</strong>: " + feature.properties[k] + '<br/>';
-                            }
-                        }).join(""), { maxHeight: 200 });
+                  if (feature.properties) {
+                    var str = Object.keys(feature.properties).map(function(k) {
+                      if ($.inArray(k, App.STYLE_KEYWORDS) == -1) {
+                        console.log("<tr><td>" + k + "</td><td>feature.properties." + k+"</td></tr>");
+                        return '<strong>' + k + "</strong>: " + feature.properties[k] + '<br/>';
+                      }
+                    }).join("");
+                    //console.log(str);
+                        slayer.bindPopup('<h5>'+layer.name+'</h5>'+str, { maxHeight: 200 });
                     }
                 };
 
@@ -669,7 +778,7 @@ var App = {
 
                 $('#ulVectorLegend').prepend(layer.HTMLLegend);
          
-                App.contextMenu.apply(layer);
+                App.contextMenu.applyTOC(layer);
 
                 //init sortable functionality in TOC for this item
                 $('.sortable').sortable().bind('sortupdate', function (e, ui) {
@@ -685,7 +794,7 @@ var App = {
                 layer.mapLayer = geoJson;
                 layer.mapLayer.addTo(map);
              
-                map.spin(false);
+                $('#imgLoadingData').hide();
               if (typeof(cb) != 'undefined') {
                 cb();
               }
@@ -744,14 +853,14 @@ var App = {
                     layer.legend = data.legend;
 
                 } else if (typeof (layer.symbolField) != 'undefined') {
-
+                  
                     layer.ramp = (typeof(layer.ramp) != 'undefined') ? layer.ramp : App.DEFAULT_RAMP;
                     
                     layer.legend.type = App.RENDERER.UNIQUE_VALUE;
 
                     var values = [];
                     var temp_values = [];
-
+                  
                     for (var i = 0; i < data.features.length; i++) {
                         var value = data.features[i].properties[layer.symbolField];
 
@@ -768,7 +877,9 @@ var App = {
                     layer.scale = chroma.scale(layer.ramp).domain([1, (values.length > 1) ? values.length : 2]).out('hex');
 
                     for (var val in values.sort(App.util.comparator)) {
-                        var legend = App.legendFactory.createJSONLegend(layer.geom, values[val], layer.scale, layer.fillOpacity, layer.strokeOpacity);
+                      
+                      var legend = App.legendFactory.createJSONLegend(layer.geom, values[val], layer.scale, layer.fillOpacity, layer.strokeOpacity);
+
                         layer.legend.symbols.push(legend);
                     }
 
@@ -802,13 +913,9 @@ var App = {
 
         /* render each individual HTML legend Item */
         renderHTMLLegendItems: function (layer) {
-
             var HTMLLegend = "";
-
             layer.legend.symbols.forEach(function (symbol) {
-
-                HTMLLegend += App.legendFactory.renderHTMLLegendItem(layer.geom, symbol);
-
+              HTMLLegend += App.legendFactory.renderHTMLLegendItem(layer.geom, symbol);
             });
 
             return HTMLLegend;
@@ -837,8 +944,6 @@ var App = {
                     break;
                 case App.GEOM_TYPES.LINESTRING:
                 case App.GEOM_TYPES.MULTILINESTRING:
-                if (isNaN(symbol.weight)) {
-                        symbol.weight = 1;}
                     legendItem += '<rect width="12" height="' + (symbol.weight + 1) + '" fill=' + symbol.color + ' stroke-width="0" />';
                     break;
             }
@@ -906,19 +1011,18 @@ var App = {
             }
         }
 
-        if (layer.legend.type == App.RENDERER.SINGLE_SYMBOL) {
-            sym = layer.legend.symbols[0];
+   if (layer.legend.type == App.RENDERER.SINGLE_SYMBOL) {
+          sym = layer.legend.symbols[0];
         } else {
-
             var value = feature.properties[layer.symbolField];
 
             //NaN is the only value in javascript that does not equal itself
             if (value !== value) {
                 return style;
             }
-
+          
             for (var i = 0; i < layer.legend.symbols.length; i++) {
-                sym = layer.legend.symbols[i];
+              sym = layer.legend.symbols[i];
                 if (layer.legend.type == App.RENDERER.UNIQUE_VALUE) {
                     if (isNaN(value) && isNaN(sym.value)) {
                         if (sym.value.toUpperCase() == value.toUpperCase()) {
@@ -949,145 +1053,58 @@ var App = {
         if (feature.geometry.type == 'LineString') {
             style.dashArray = (typeof sym.dashArray != 'undefined') ? sym.dashArray : "";
         }
+
         return style;
     },
 
     layersDialog: {
 
-        $grid: null,
-        data_sources : [],
-        categories : [],
+        /* We keep track of this in order to apply the active class to the first tab */
+        madeFirstTab: false,
 
-        getDataSources : function() {
-          var deferreds = [];
-
-          //iterate data sources
-          for (var i in data_sources) {
-            deferreds.push(
-              $.getJSON('./getLayersBySource/' + data_sources[i]).success(function (data) {
-                //console.log(data);
-                config.layers.push.apply(config.layers, data);
-              }));
-          }
-          return deferreds;
-        },
+        /* DOM object for the <ul> element that contains the tabs */
+        $ulSourceTabs: null,
 
         /* Render the entire layer tabs collection */
         render: function () {
-            this.$grid = $('#layers');
 
-            for(var lyr in config.layers){
-                var l = config.layers[lyr];
-                var thumb = (typeof(l.thumb)=='undefined') ? 'img/placeholder.png': l.thumb;
+            this.$ulSourceTabs = $('#ulSourceTabs');
 
-                //var theme = (typeof(l.theme)=='undefined') ? "" : l.theme;
+            for (var _layer in config.layers) {
 
-                var $div = $('<div class="layer img-block col-xs-6 col-sm-4" data-groups=\'["'+l.theme+'"]\' data-title=\'["'+l.name+'"]\' data-theme=\'["'+l.theme+'"]\' data-source=\'["'+l.source+'"]\'"><img width="82" height="62" class="lazy" data-original="'+thumb+'"/>'+l.name+'<br/><span style="font-size:11px;"><b>Source: </b>'+l.source+'<br/><b>Category: </b>'+l.theme+'<b><br/>Data URL: </b><a href="'+l.url+'">'+l.url+'</a></span></div>');
+                var layer = config.layers[_layer];
 
-                if (this.data_sources.indexOf(l.source) == -1){
-                    
-                    this.data_sources.push(l.source);
+                //If the layers source tab doesn't exist, create it.
+                var source = layer.source.replace(/\s/g, '_');
+
+                if (!$('#' + source).length) {
+                    this.renderSourceTab(layer.source, layer.icon);
                 }
 
-                if (this.categories.indexOf(l.theme) == -1){
-                    
-                    this.categories.push(l.theme);
+                //If the layers theme section doesn't exist in the source tab content,
+                //create it.
+                var theme = (typeof layer.theme == 'undefined') ? '' : layer.theme.replace(/\s/g, '_');
+
+                if (!$('#' + source + '_' + theme).length) {
+                    $('#' + source).append('<div style="clear:both;" id="' + source + '_' + theme + '"><h4 style="margin:0;">' + layer.theme + '</h4><hr style="margin:0;padding:0;"/></div');
                 }
 
-                this.$grid.append($div);
+                var elem = this.renderLayerElement(layer);
+
+                $('#' + source + '_' + theme).append(elem);
             }
 
-            this.data_sources.sort();
-            this.categories.sort();
+            ////Put the custom tab at the end.
+            //this.$ulSourceTabs.append('  <li><a href="#customData" data-toggle="tab"><i class="fa fa-check-circle-o"></i>&nbsp;Custom</a></li>')
 
-            if(this.categories[0].trim()==''){
-                this.categories.splice(0,1);
-            }
+            //this.$ulSourceTabs.next().append("<div class='tab-pane fade' id='customData'>Data Source: &nbsp; <select class='selectpicker' id='selCustomData' data-style='btn-default' data-width='180'><option value='0'>GeoJSON</option><option value='1'>ArcGIS Server</option><option value='2'>Tile Layer</option><option value='3'>Shapefile</option><option value='4'>CSV</option></select></div>");
 
-            for(var c in this.categories){
-                $('#selCategories').append('<option value="'+this.categories[c]+'">'+this.categories[c]+'</option>');
-            }
-
-            for(var ds in this.data_sources){
-                $('#selDataSources').append('<option value="'+this.data_sources[ds]+'">'+this.data_sources[ds]+'</option>');
-            }
-
-            $('#selCategories').selectpicker('refresh');
-            $('#selDataSources').selectpicker('refresh');
-
-            this.$grid.shuffle({
-                itemSelector: '.img-block'
+          $('#ulSourceTabs > li > a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+            $("img.lazy").lazyload({
+              //effect: "fadeIn",
+              container: $(".tab-content")
             });
-
-            $('.sort-options').on('change', function() {
-              var sort = $(this).val(),
-                  opts = {};
-              // We're given the element wrapped in jQuery
-              if ( sort === 'date-created' ) {
-                opts = {
-                  reverse: true,
-                  by: function($el) {
-                    return $el.data('date-created');
-                  }
-                };
-              } else if ( sort === 'title' ) {
-                opts = {
-                  by: function($el) {
-                    return $el.data('title').toString().toLowerCase();
-                  }
-                };
-              }
-              // Filter elements
-              App.layersDialog.$grid.shuffle('sort', opts);
-               setTimeout(function(){
-                   $("img.lazy").lazyload('update');
-                   },500);
-            });
-
-            $('#txtLayerFilter').keyup($.debounce(250, function() {
-                var val = $(this).val().toLowerCase();
-                App.layersDialog.$grid.shuffle('shuffle', function($el, shuffle) {
-
-                //Only search elements in the current group
-                if (shuffle.group !== 'all' && $.inArray(shuffle.group, $el.data('groups')) === -1) {
-                  return false;
-                }
-
-                var text = $.trim($el.data('title') ).toLowerCase();
-
-                return text.indexOf(val) !== -1;
-                });
-
-                //refresh lazy Images;
-                setTimeout(function(){
-                $("img.lazy").lazyload('update');
-                },500);
-            }));
-
-            $('#selCategories').on('change', function(){
-
-                var val = $(this).val();
-                App.layersDialog.$grid.shuffle('shuffle', function($el, shuffle) {
-                   
-                  return $el.data('theme').indexOf(val) != -1;
-                });
-                setTimeout(function(){
-                $("img.lazy").lazyload('update');
-                },500);
-            })
-
-            $('#selDataSources').on('change', function(){
-
-                var val = $(this).val();
-                App.layersDialog.$grid.shuffle('shuffle', function($el, shuffle) {
-                   
-                  return $el.data('source').indexOf(val) != -1;
-                });
-                setTimeout(function(){
-                $("img.lazy").lazyload('update');
-                },500);
-            })
-
+          });
 
             this.attachEventHandler();
         },
@@ -1095,8 +1112,8 @@ var App = {
         attachEventHandler: function () {
             //Attach behavior to items in Add Data Modal
             $('.img-block.layer').on('click', function () {
-                var name = $(this).data('title');
-                var layer = App.util.getLayerByName(name);
+                var id = $(this).find('img').attr('id').replace('img', '');
+                var layer = App.util.getLayerById(id);
                 if ($(this).hasClass('active')) {
                     $(this).removeClass('active');
                     
@@ -1105,17 +1122,24 @@ var App = {
                         delete App.heatmap.rasterMultiplier[id];
                         App.heatmap.sync(id, false);
                     } else {
-                        map.removeLayer(layer.mapLayer);
+                      App.util.removeLayer(App.util.getLayerId(layer.name));
                     }
 
-                    $('#li' + App.util.getLayerId(layer.name)).remove();
+                    $('#li' + id).remove();
                     App.util.updateUrl();
                 }
                 else {
                     $(this).addClass('active');
                     if (typeof (layer.mapLayer) != 'undefined') {
-                        map.addLayer(layer.mapLayer);
-                        App.contextMenu.apply(layer);
+
+                      map.addLayer(layer.mapLayer);
+
+                      App.legendFactory.init(layer, layer.mapLayer.toGeoJSON());
+                      layer.HTMLLegend = App.legendFactory.renderHTMLLegend(layer);
+                      //$('#li' + App.util.getLayerId(layer.name)).empty().html();
+
+                      //App.legendFactory.init(layer, layer.mapLayer.toGeoJSON());
+
                         switch (layer.type) {
                             case App.LAYER_TYPES.GEOJSON:
                             case App.LAYER_TYPES.SHAPEFILE:
@@ -1141,11 +1165,101 @@ var App = {
                         }
                     }
                     else {
-                        map.spin(true);
                         App.data.add(layer, function() { App.util.updateUrl();});
                     }
                 }
             });
+        },
+
+        /* Render a tab for a given source 
+        returns:: @void; appends source tab to ulSourceTabs
+        */
+        renderSourceTab: function (source, icon) {
+
+            var safe_source = source.replace(/\s/g, '_');
+
+            var sourceTabString = '<li ';
+
+            if (!this.madeFirstTab) {
+                sourceTabString += 'class="active"';
+            }
+
+          //Get out your hatchets@!!!
+          if (source == 'OSU') {
+            sourceTabString += '><a href="#' + safe_source + '" style="padding-top:4px;padding-bottom:12px;" data-toggle="tab">';
+          } else {
+            sourceTabString += '><a href="#' + safe_source + '" data-toggle="tab">';
+          }
+          if (typeof (icon) != 'undefined') {
+                sourceTabString += '<img src="' + icon + '" align="left" />&nbsp;';
+            } else {
+                sourceTabString += '<i class="fa fa-check-circle-o"></i>&nbsp;';
+            }
+
+          if (source != 'OSU') {
+            sourceTabString += source;
+          }
+
+          sourceTabString += '</a></li>';
+
+            this.$ulSourceTabs.append(sourceTabString);
+
+            var tabstring = '<div class="tab-pane fade ';
+
+            if (!this.madeFirstTab) {
+                tabstring += 'active in';
+                this.madeFirstTab = true;
+            }
+
+            tabstring += '" id="' + safe_source + '"></div>';
+
+            this.$ulSourceTabs.next().append(tabstring);
+        },
+
+        /* Render individual data/layer item */
+        renderLayerElement: function (layer) {
+
+            var id = App.util.getLayerId(layer.name);
+
+            if (typeof (layer.thumb) != 'undefined') {
+                var thumb = layer.thumb;
+            }
+            else {
+                var thumb = '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/placeholder.png';
+            }
+
+            var elem = "<div class='layer img-block ";
+
+            if (layer.level == 2) {
+                elem += "img-block-m";
+            }
+
+            if (layer.level == 3) {
+                elem += "img-block-lg";
+            }
+
+            elem += "'><div class='caption ";
+
+            if (layer.level == 2) {
+                elem += "caption-m";
+            }
+
+            if (layer.level == 3) {
+                elem += "caption-lg";
+            }
+
+            elem += "'>" + layer.name + "</div><img ";
+
+            if (layer.level == 2 || layer.level == 3) {
+                elem += "width='190' height='130'";
+            } else {
+                elem += "width='82' height='62'";
+            }
+
+            elem += " class='lazy' data-original='" + thumb + "' alt='" + layer.name + "' id='img" + id + "'/></div>";
+
+            return elem;
+
         }
     },
 
@@ -1172,7 +1286,7 @@ var App = {
                 if (basemap.active == true) {
                     imgBlockText += ' active';
                     basemap.zIndex = 0;
-                    //App.data.load.tileLayer(basemap);
+                    App.data.load.tileLayer(basemap);
                 }
 
                 imgBlockText += "'><div class='caption caption-sm'>" + basemap.name + "</div><img class='idata' src='" + thumb + "' alt='" + basemap.name + "' id='img" + id + "'/></div>";
@@ -1187,7 +1301,6 @@ var App = {
         attachEventHandlers: function () {
 
             $('.img-block.basemap').on('click', function () {
-
                 var id = $(this).find('img').attr('id').replace('img', '');
 
                 var basemap = App.util.getBasemapById(id);
@@ -1198,7 +1311,7 @@ var App = {
 
 
                 //get existing basemap
-                var oldBasemapEl = $($('.img-block.basemap.active')[0]);
+              var oldBasemapEl = $($('.img-block.basemap.active')[0]);
                 var oldBasemapId = oldBasemapEl.find('img').attr('id').replace('img', '');
                 var oldBasemap = App.util.getBasemapById(oldBasemapId);
 
@@ -1208,12 +1321,10 @@ var App = {
 
                 //}
                 // else if(basemap.type != 'photo' && map.hasLayer(App.util.getBasemapById('Photo_Labels').mapLayer){
-                oldBasemapEl.removeClass('active');
+              oldBasemapEl.removeClass('active');
                 //         console.log("rocky");
                      oldBasemap.active = false;
-                     try{
                        App.map.removeLayer(oldBasemap.mapLayer);
-                   }catch(ex){}
                 //     }
 
                 $(this).addClass('active');
@@ -1250,16 +1361,17 @@ var App = {
         e.g. hide fill control for lines, show circle radius range for points
         */
 
-        refresh: function (id) {
+      refresh: function (id) {
+        
             var layer = App.util.getLayerById(id);
-
+           
             //hide stroke inputs if we're dealing with a LineString geometry
             if (layer.geom == App.GEOM_TYPES.LINESTRING || layer.geom == App.GEOM_TYPES.MULTILINESTRING) {
                 $('.lblStroke').hide();
             } else {
                 $('.lblStroke').show();
             }
-
+            
             App.symbolDialog.ramps.refresh(layer);
 
             //populate field select control
@@ -1277,10 +1389,10 @@ var App = {
             if (typeof (layer.symbolField) != 'undefined') {
                 $('#selCatField').selectpicker('val', layer.symbolField);
             } else {
-                $('#selCatField')
-		            .append($("<option></option>")
-		            .attr("value", '0')
-		            .text('No field Selected')).selectpicker('val', '0')
+              $('#selCatField')
+                .append($("<option></option>")
+                  .attr("value", '0')
+                  .text('No field Selected')).selectpicker('val', '0');
 
                 $('#selCatField').next().first().on('click.core', function () {
 
@@ -1310,7 +1422,7 @@ var App = {
             var legend = App.legendFactory.renderHTMLLegendItems(layer);
 
             //Just start from scratch on which tab each time
-            $('#symbolModal .tab-content > div').each(function (index) { $(this).removeClass('active in') });
+            $('#symbolModal .tab-content > div').each(function (index) { $(this).removeClass('active in'); });
 
             //Set to correct tab
             switch (layer.legend.type) {
@@ -1332,12 +1444,28 @@ var App = {
                     break;
 
                 case App.RENDERER.UNIQUE_VALUE:
-
-                    //recreate the legend in the dialog???
+                  
+                  //recreate the legend in the dialog???
+                 
                     $('#uniqueValuesLegend').empty().append(legend);
+
                     $('#symbolTabs > li:nth-child(2) > a').tab('show');
+
                     $('#uniqueValues').addClass('active in');
+
+                    $("#uniqueValuesLegend").contextMenu({
+                      layer:layer,
+                      menuSelector: "#legendItemContextMenu",
+                      menuSelected: function (invokedOn, selectedMenu) {
+                        if (selectedMenu.text() == 'Remove') {
+                          //filter
+                        }
+
+                      }
+                    });
+
                     break;
+
                 case App.RENDERER.CLASS_BREAKS:
 
                     //match number of classes, min, max and labels
@@ -1356,9 +1484,16 @@ var App = {
                 App.symbolDialog.legends.singleFill.refresh(layer);
             });
 
+            //$('#_colCatStroke').colorpicker('setValue', 
+
             //event handlers for categories
-            $('#_colCatStroke').off('changeColor').on('changeColor', function (ev) {
-                App.symbolDialog.legends.uniqueValues.refresh(layer);
+            $('#_colCatStroke').off('changeColor');
+
+            $('#_colCatStroke').colorpicker('setValue', layer.legend.symbols[0].color);
+
+            $('#_colCatStroke').on('changeColor', function (ev) {
+              
+              App.symbolDialog.legends.uniqueValues.refresh(layer);
             });
 
             $('#rngCatWeight').on('change', function () {
@@ -1369,6 +1504,13 @@ var App = {
                 if (typeof (layer.ramp) == 'undefined') {
                     App.symbolDialog.ramps.deefault();
                 }
+            
+                if (typeof (layer.selection) != 'undefined') {
+                 layer.legend = undefined;
+                  layer.symbolField = $(this).val();
+                  App.legendFactory.init(layer, layer.selection.toGeoJSON());
+                }
+
                 App.symbolDialog.legends.uniqueValues.refresh(layer);
             });
 
@@ -1387,6 +1529,9 @@ var App = {
                     return;
                 }
 
+               // at this point we might have a selection that isn't symbolized on 
+              // the new chosen field.
+
                 App.symbolDialog.legends.uniqueValues.refresh(layer);
             });
 
@@ -1402,7 +1547,7 @@ var App = {
             refresh: function (layer) {
 
                 if (typeof (layer.ramp) != 'undefined') {
-                    
+                 
                     var _ramp = layer.ramp;
 
                     //set a ramp in the selGradient combobox
@@ -1444,7 +1589,6 @@ var App = {
                 this.scaleCounter += 1;
                 var color = scale(this.scaleCounter);
                 if (this.scaleCounter == scale.domain()[1]) {
-                    //console.log(scaleCounter);
                     this.scaleCounter = 0;
                 }
                 return color;
@@ -1494,11 +1638,14 @@ var App = {
             },
 
             uniqueValues: {
-                refresh: function (layer) {
+                refresh: function (layer, autoApply) {
                     //get ramp, 
                     //if(typeof(layer.ramp) == 'undefined'){
+                  if (!autoApply) {
                     var ramp = $($('#selGradient').children()[0]).attr('title');
-                    //_(ramp);
+                  } else {
+                    ramp = layer.ramp;}
+                  //_(ramp);
                     //if ramp==undefined then we have a custom color set...
                     //test if layer.ramp==ramp?
 
@@ -1518,7 +1665,12 @@ var App = {
                     var values = [];
                     var tempValues = [];
 
-                    if (symbolField != layer.symbolField || layer.legend.symbols[0].value == '*') {
+                    //filter may have resulted in no features
+                    if (layer.legend.symbols.length == 0) {
+                      return;
+                    }
+
+                    if ((symbolField != layer.symbolField || layer.legend.symbols[0].value == '*') && !autoApply) {
                         for (var feature in layer.mapLayer._layers) {
                             var value = layer.mapLayer._layers[feature].feature.properties[symbolField];
                             if ($.inArray(value, tempValues) === -1) {
@@ -1531,24 +1683,23 @@ var App = {
                         //load the values with the values from the legend.
                         for (var i = 0; i < layer.legend.symbols.length; i++) {
                             //support labels
-
-                            var obj = { value: layer.legend.symbols[i].value };
+                            obj = { value: layer.legend.symbols[i].value };
                             if (typeof (layer.legend.symbols[i].label) != undefined) {
                                 obj.label = layer.legend.symbols[i].label;
                             }
                             values.push(obj);
                         }
                     }
-
+                  
                     var phantomSymbols = [];
-
-                    if (typeof (ramp) != 'undefined' || layer.ramp != ramp) {
-                        var scale = chroma.scale(ramp).domain([1, values.length]).out('hex');
+                  
+                    if ((typeof (ramp) != 'undefined' || layer.ramp != ramp) && layer.ramp != 'custom') {
+                      var scale = chroma.scale(ramp).domain([1, (values.length > 1) ? values.length : 2]).out('hex');
 
                         values.sort(App.util.comparator);
 
-                        for (var i = 0; i < values.length; i++) {
-                            var obj = App.legendFactory.createJSONLegend(layer.geom, values[i], scale, layer.fillOpacity, layer.strokeOpacity, color, weight);
+                        for (i = 0; i < values.length; i++) {
+                            obj = App.legendFactory.createJSONLegend(layer.geom, values[i], scale, layer.fillOpacity, layer.strokeOpacity, color, weight);
                             //if (typeof (values[i].label) != 'undefined') { obj.label = symbol.label; }
                             phantomSymbols.push(obj);
                         }
@@ -1557,7 +1708,7 @@ var App = {
                         //keep fillcolor the same here but alter weight and color....
                         for (var s in layer.legend.symbols) {
                             var sym = layer.legend.symbols[s];
-                            var obj = { value: sym.value, fillColor: sym.fillColor, color: sym.color, weight: weight, opacity: layer.strokeOpacity, fillOpacity: layer.fillOpacity };
+                            var obj = { value: sym.value, fillColor: sym.fillColor, color: color, weight: weight, opacity: layer.strokeOpacity, fillOpacity: layer.fillOpacity };
                             //if (typeof(symbol.label) != 'undefined'){obj.label = symbol.label;}
                             phantomSymbols.push(obj);
                         }
@@ -1567,6 +1718,13 @@ var App = {
 
                     $('#uniqueValuesLegend').empty().html(legendItems);
 
+                    if (typeof (autoApply) != 'undefined') {
+                      layer.scale = scale;
+
+                      App.symbolDialog.apply(layer, phantomSymbols, App.RENDERER.UNIQUE_VALUE, legendItems, ramp);
+                      return;
+                    }
+
                     $('#btnApplySymbol').off().on('click', function () {
 
                         //couple of uniqueValue renderer specifics, then off to the generic apply function.
@@ -1575,6 +1733,8 @@ var App = {
 
                         App.symbolDialog.apply(layer, phantomSymbols, App.RENDERER.UNIQUE_VALUE, legendItems, ramp);
                     });
+                    
+                    
                 }
             },
 
@@ -1588,6 +1748,10 @@ var App = {
         /* Applies chosen symbology to layer */
         apply: function (layer, newSymbol, renderer, legendItem, ramp) {
 
+            if (typeof(layer.style) != 'undefined') {
+              layer.style = undefined;
+            }
+
             layer.legend.symbols = newSymbol;
             layer.legend.type = renderer;
 
@@ -1595,11 +1759,17 @@ var App = {
                 layer.ramp = ramp;
             }
 
-            layer.mapLayer.setStyle(function (feature) {
-                return App.styleFeatures(feature, layer);
+          if (typeof(layer.selection) != 'undefined') {
+            layer.selection.setStyle(function(feature) {
+              return App.styleFeatures(feature, layer);
             });
+          } else {
+            layer.mapLayer.setStyle(function(feature) {
+              return App.styleFeatures(feature, layer);
+            });
+          }
 
-            var id = App.util.getLayerId(layer.name);
+          var id = App.util.getLayerId(layer.name);
 
             $('#leg' + id + ' .legend-item').remove();
             $('#leg' + id).append(legendItem);
@@ -1620,13 +1790,13 @@ var App = {
             //push layer's fields into selSelectFields
             $('#selSelectFields').empty();
 
-            for(var field in layer.fields){
-                $('#selSelectFields').append('<option value="'+layer.fields[field].name+'">'+layer.fields[field].name+'</option>')
+            for(var field in layer.fields) {
+              $('#selSelectFields').append('<option value="' + layer.fields[field].name + '">' + layer.fields[field].name + '</option>');
             }
 
             $('#selSelectFields').selectpicker('refresh');
-            $('#selectModal').modal('show');
 
+            $('#selectModal').modal('show');
 
             $('#selSelectFields').on('change', function(){
                 //remove numeric comparator symbols from selSQLOps
@@ -1642,6 +1812,7 @@ var App = {
                 var value = $('#txtSelection').val();
 
                 var layerField = null;
+
                 for (var fieldx in layer.fields){
 
                     if (layer.fields[fieldx].name==field){
@@ -1657,6 +1828,11 @@ var App = {
                 if ((op=='l' || op == 'nl') && layerField.type != 'string'){
                     alert('Unable to use like/not like with numbers');
                     return;
+                }
+
+                if (layerField.type != 'string' && isNaN(value)) {
+                  alert('Only numeric values are allowed with this field');
+                  return;
                 }
 
                 if(typeof (layer.selection) != 'undefined'){
@@ -1689,26 +1865,44 @@ var App = {
 
                         return bool;
                     }});
+              
+              layer.selection = L.geoJson(layer.mapLayer.toGeoJSON(), newoptions);
 
-                layer.selection =  L.geoJson(layer.mapLayer.toGeoJSON(), newoptions).addTo(map);
+              layer.legend = undefined;
+
+              App.legendFactory.init(layer, layer.selection.toGeoJSON());
+
+              $('#li' + App.util.getLayerId(layer.name)).empty().html(App.legendFactory.renderHTMLLegend(layer));
+
+              App.symbolDialog.legends.uniqueValues.refresh(layer, true);
+
+              layer.selection.addTo(map);
+                
             });
 
             $('#btnClearSelect').off('click').on('click', function(){
                 App.selectDialog.clear(layer);
             });
         },
+
         clear: function(layer){
            if(typeof(layer.selection) != 'undefined'){
                 map.removeLayer(layer.selection);
                 map.addLayer(layer.mapLayer);
-                layer.selection = {};
+             layer.legend = undefined;
+             layer.selection = undefined;
+             App.legendFactory.init(layer, layer.mapLayer.toGeoJSON());
+
+             $('#li' + App.util.getLayerId(layer.name)).empty().html(App.legendFactory.renderHTMLLegend(layer));
+
+             App.symbolDialog.legends.uniqueValues.refresh(layer, true);
             }
         }
     },
 
     contextMenu : {
 
-        apply: function (layer) {
+        applyTOC: function (layer) {
             var id = App.util.getLayerId(layer.name);
 
             context.init({
@@ -1846,6 +2040,7 @@ var App = {
             switch (layer.type) {
                 case "shapefile":
                 case "geojson":
+                	//event handlers for these are global and in the init method.
                     if (layer.geom != App.GEOM_TYPES.LINESTRING && layer.geom != App.GEOM_TYPES.MULTILINESTRING) {
                         contents.push({ header: 'Fill Opacity' }, {
                             klass: 'sliderFillOpacity',
@@ -1880,8 +2075,7 @@ var App = {
                 }
             });
 
-            //attach the id of the context menu to the layer;
-            layer.context =context.attach('#li' + id, contents);
+            context.attach('#li' + id, contents);
 
         }
     },
@@ -1903,8 +2097,8 @@ var App = {
                   null
         ],
         pngdata: [],
-        resolution: 5,
-        radius: .0036,
+        resolution: 10,
+        radius: .00981,
         maxOpacity: 0.7,
         minOpacity :0,
         
@@ -2106,6 +2300,7 @@ var App = {
             $.each(this.curRasters, function (i, v) {
                 
                 var id = App.util.getLayerId(v.name);
+
                 
                 if (typeof (v.width) != 'undefined') {
                     var dims = v.width + '_' + v.height;
@@ -2126,10 +2321,7 @@ var App = {
                     rManager[dims].rasters.push(id);
                 }
                 else {
-                    var lng = parseFloat(v.upperLeft.split(',')[0]);
-                    var lat = parseFloat(v.upperLeft.split(',')[1]);
-
-                   rManager[dims] = { height: v.height, width: v.width, rasters: [id], nodata: v.nodata, ul: [lng, lat], step: v.step };
+                   rManager[dims] = { height: v.height, width: v.width, rasters: [id], nodata: v.nodata, ul: v.ul, step: v.step };
                 }
             });
 
@@ -2138,7 +2330,6 @@ var App = {
                 if (dims == 'geojson') {
                     this._crush_geojson(rManager.geojson.rasters);
                 } else {
-
                     this._crush(rManager[dims]);
                 }
             }
@@ -2164,6 +2355,8 @@ var App = {
         },
 
         _crush: function (colRasters) {
+
+        
             var curlng = colRasters.ul[0];
             var curlat = colRasters.ul[1];
 
@@ -2190,6 +2383,43 @@ var App = {
                 curlat = colRasters.ul[1];
             }
         }
+    },
+
+    exportDialog : {
+      
+      init: function () {
+
+        //$('#exportModal').modal('show');
+
+        //package up config and data and template code
+
+        //var zip = new JSZip();
+        alert('yay');
+        //for each layer on map
+        $.each($('.legend-check'), function(i, v) {
+          var iid = $(v).prop('id').replace('chk', '');
+          var layer = App.util.getLayerById(iid);
+          if (typeof (layer.selection) != 'undefined') {
+            //App.util.getLayerById(other_layers[l]).selection.bringToFront();
+          } else {
+            //App.util.getLayerById(other_layers[l]).mapLayer.bringToFront();
+          }
+          console.log(layer.name);
+        });
+
+        //zip.file("Hello.txt", "Hello World\n");
+
+        //var img = zip.folder("images");
+
+        //img.file("smile.gif", imgData, { base64: true });
+
+        //var content = zip.generate({ type: "blob" });
+
+        //// see FileSaver.js
+        //saveAs(content, "example.zip");
+
+      }
+
     },
 
     util: {
@@ -2224,20 +2454,22 @@ var App = {
             if (layer.type == 'heatmap') {
                 App.heatmap.sync(id, false);
             } else {
-                map.removeLayer(layer.mapLayer);
+              map.removeLayer(layer.mapLayer);
+              if (typeof(layer.selection) != 'undefined') {
+                map.removeLayer(layer.selection);
+                layer.selection = undefined;
+                layer.legend = undefined;
+              }
             }
 
-            context.destroy('#li' + id, layer.context);
-
             $('#li' + id).remove();
-            App.util.updateUrl();
 
+          App.util.updateUrl();
             $('.img-block.active').each(function (index) {
-                if ($(this).data('title') == layer.name) {
+                if ($(this).find('img').attr('id').replace('img', '') == id) {
                     $(this).removeClass('active');
                 }
             });
-
         },
 
         getLayerId: function (name) {
@@ -2346,8 +2578,11 @@ var App = {
 
                   /* Enter Layer order z-index hell */
                   //Just bring any layers to the front that are above in the TOC after bringing this one to the front.
-
-                  layer.mapLayer.addTo(map).bringToFront();
+                  if (typeof(layer.selection) != 'undefined') {
+                    layer.selection.addTo(map).bringToFront();
+                  } else {
+                    layer.mapLayer.addTo(map).bringToFront();
+                  }
                   var other_layers = [];
                   $.each($('.legend-check'), function (i, v) {
                     var iid = $(v).prop('id').replace('chk', '');
@@ -2361,9 +2596,13 @@ var App = {
                   });
                   other_layers.reverse();
                   for (var l = 0; l < other_layers.length; l++) {
-                    App.util.getLayerById(other_layers[l]).mapLayer.bringToFront();
+                    if (typeof (App.util.getLayerById(other_layers[l]).selection) != 'undefined') {
+                      App.util.getLayerById(other_layers[l]).selection.bringToFront();
+                    } else {
+                      App.util.getLayerById(other_layers[l]).mapLayer.bringToFront();
+                    }
                   }
-                }
+               }
             }
 
             App.util.updateUrl();
@@ -2428,6 +2667,7 @@ var App = {
 
             location.hash = temp_hash+ '/'+_layers.join('/');
         }
+
     }
 }
 
@@ -2475,65 +2715,98 @@ function _(msg) {
 
 //document.load
 $(function () {
-
-    //Navigation Menu Slider
-        $('#btnToggleAddData').on('click',function(e){
-            e.preventDefault();
-            $('body').toggleClass('nav-addDataExpanded');
-            if($('body').hasClass('nav-addDataExpanded')){
-                $('#maprow').animate({
-                    'marginRight': "296px"
-                  }, 400, function() {
-                    // Animation complete.
-                  });
-
-                 $("img.lazy").lazyload({
-                        effect: "fadeIn",
-                        threshold:0,
-                        container: $("#scrollWrapper"),
-                        failurelimit:1000
-                    });
-           
-                $('#btnToggleAddData').fadeOut(300,function(){$(this).html('&gt;&gt;').removeClass('btn-primary').addClass('btn-default').fadeIn(100)});
-            }else{
-                 $('#maprow').animate({
-                    'marginRight': "0px"
-                  }, 300, function() {
-                    // Animation complete.
-                  });
-                 $('#btnToggleAddData').fadeOut(300,function(){$(this).html("<i class='glyphicon glyphicon-tasks' ></i> &nbsp;Add Layers").removeClass('btn-default').addClass('btn-primary').fadeIn(100)});
-            }
-        });
-
-        $('#btnToggleLegend').on('click',function(e){
-            e.preventDefault();
-            $('body').toggleClass('nav-legendExpanded');
-            if($('body').hasClass('nav-legendExpanded')){
-                $('#maprow').animate({
-                    'marginLeft': "255px"
-                  }, 300, function() {
-                    // Animation complete.
-                  });
-            $('#btnToggleLegend').fadeOut(300);
-            } else {
-                 $('#maprow').animate({
-                    'marginLeft': "0px"
-                  }, 300, function() {
-                    // Animation complete.
-                  });
-                 $('#btnToggleLegend').fadeIn(100);
-            }
-        });
-
-        $('#btnCloseLegend').on('click', function(){
-            $('body').removeClass('nav-legendExpanded');
-                $('#maprow').animate({
-                    'marginLeft': "0px"
-                  }, 300, function() {
-                    // Animation complete.
-                  });
-                 $('#btnToggleLegend').fadeIn(100);
-        });
-
     App.init();
 });
+
+(function ($, window) {
+
+  $.fn.contextMenu = function (settings) {
+
+    return this.each(function () {
+
+      // Open context menu
+      $(this).on("contextmenu", function (e) {
+        //open menu
+        $('#txtSymbolRename').val($(e.target).text());
+
+        var symbol = $($($(e.target).children()[0]).children());
+        var oldFill = symbol.attr('fill');
+
+        $('#colSymbolRecolor').colorpicker().off('changeColor').colorpicker('setValue', oldFill).on('changeColor', function (ev) {
+
+          symbol.attr('fill', ev.color.toHex());
+
+          //update Legend
+          settings.layer.legend.symbols.forEach(function(symbo) {
+            if (symbo.value == $(e.target).text().trim()) {
+              symbo.fillColor = ev.color.toHex();
+            }
+          });
+
+          settings.layer.ramp = 'custom';
+
+          App.symbolDialog.legends.uniqueValues.refresh(settings.layer);
+          //settings.layer.HTMLLegend = App.legendFactory.renderHTMLLegend(settings.layer);
+          //, (typeof(settings.layer.selection) != 'undefined'));
+
+        });
+
+        $(settings.menuSelector)
+            .data("invokedOn", $(e.target))
+            .show()
+            .css({
+              position: "absolute",
+              left: getLeftLocation(e),
+              top: getTopLocation(e)
+            })
+            .off('click')
+            .on('click', function (e) {
+              //$(this).hide();
+              var $invokedOn = $(this).data("invokedOn");
+              var $selectedMenu = $(e.target);
+
+              settings.menuSelected.call(this, $invokedOn, $selectedMenu);
+            });
+
+        return false;
+      });
+
+      //make sure menu closes on any click
+      $(document).click(function (e) {
+        var el = $(e.target);
+        if (el.prop('id') == 'txtSymbolRename' || el.hasClass('colorpicker-hue') || el.hasClass('colorpicker-saturation')) {
+          return;
+        }
+        $(settings.menuSelector).hide();
+
+      });
+    });
+
+    function getLeftLocation(e) {
+      var mouseWidth = e.pageX;
+      var pageWidth = $(window).width();
+      var menuWidth = $(settings.menuSelector).width();
+
+      // opening menu would pass the side of the page
+      if (mouseWidth + menuWidth > pageWidth &&
+          menuWidth < mouseWidth) {
+        return mouseWidth - menuWidth;
+      }
+      return mouseWidth;
+    }
+
+    function getTopLocation(e) {
+      var mouseHeight = e.pageY;
+      var pageHeight = $(window).height();
+      var menuHeight = $(settings.menuSelector).height();
+
+      // opening menu would pass the bottom of the page
+      if (mouseHeight + menuHeight > pageHeight &&
+          menuHeight < mouseHeight) {
+        return mouseHeight - menuHeight;
+      }
+      return mouseHeight;
+    }
+
+  };
+})(jQuery, window);

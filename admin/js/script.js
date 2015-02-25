@@ -14,7 +14,7 @@ $(function(){
     var deferreds = layersDialog.getDataSources();
 
     $.when.apply(null, deferreds).done(function () {
-        if (location.hash != '') {
+        if (location.hash != '' && location.hash != '#') {
             var name = location.hash.replace(/\-/g, ' ').replace('#', '');
             $('#leftNav > li').removeClass('active');
             $('#aEditLayers').addClass('active');
@@ -27,9 +27,28 @@ $(function(){
         }
         });
 
-    $('body').on('click', '.mute.edit', function() {
-        
-        });
+    $('#aLayers').on('click', function(){
+        if($('#layerEdit').is(':visible')){
+            $('#layerEdit').fadeOut();
+        }
+        $('#layerSelect').fadeIn();
+    })
+
+    $('body').on('click','.btn-edit', function () {
+        name = $(this).data('title');
+        location.hash = name.replace(/\s/g,'-');
+        $('#layerSelect').fadeOut();
+        $('#leftNav > li').removeClass('active');
+        $('#aEditLayers').addClass('active');
+        window.scrollTo(0, 0);
+        var layer = getLayerByName(name);
+        showLayerEditForm(layer);
+    });
+
+    $('body').on('click','.btn-view', function () {
+        name = $(this).data('title');
+        window.location = '../#10/45.5222/-122.6521/'+name.replace(/\s/g, '-');
+    });
 
     $('body').on('change','#layerTime input, select, textarea', function () {
         var fc = $(this).prop('id').replace("lyr", "");
@@ -46,7 +65,7 @@ $(function(){
     });
 
 });
-    
+
 showLayerEditForm = function (layer) {
     curLayer = layer;
     $('#editbox').html(templates.layer({ layer: layer }));
@@ -81,7 +100,7 @@ var layersDialog= {
 
                 //var theme = (typeof(l.theme)=='undefined') ? "" : l.theme;
 
-                var $div = $('<div class="layer img-block col-xs-6 col-sm-4" data-groups=\'["'+l.theme+'"]\' data-title=\'["'+l.name+'"]\' data-theme=\'["'+l.theme+'"]\' data-source=\'["'+l.source+'"]\'"><img width="82" height="62" class="lazy" data-original="'+thumb+'"/>'+l.name+'<br/><span style="font-size:11px;"><b>Source: </b>'+l.source+'<br/><b>Category: </b>'+l.theme+'<b><br/>Data URL: </b><a href="'+l.url+'">'+l.url+'</a></span></div>');
+                var $div = $('<div class="layer img-block col-xs-6 col-sm-4" data-groups=\'["'+l.theme+'"]\' data-title=\'["'+l.name+'"]\' data-theme=\'["'+l.theme+'"]\' data-source=\'["'+l.source+'"]\'"><img width="82" height="62" class="lazy" data-original="'+thumb+'"/>'+l.name+'<br/><span style="font-size:11px;"><b>Source: </b>'+l.source+'<br/><b>Category: </b>'+l.theme+'<b></span><br/><button class="btn btn-default btn-xs btn-edit" style="margin-top:5px;" data-title="'+l.name+'"><i class="glyphicon glyphicon-pencil"></i> Edit</button>&nbsp;&nbsp;<button class="btn btn-default btn-xs btn-view" style="margin-top:5px;" data-title="'+l.name+'"><i class="glyphicon glyphicon-play"></i> View</button></div>');
 
                 if (this.data_sources.indexOf(l.source) == -1){
                     
@@ -201,32 +220,22 @@ var layersDialog= {
 
         attachEventHandler: function () {
             //Attach behavior to items in Add Data Modal
-            $('.img-block.layer').on('click', function () {
-                name = $(this).data('title');
-                location.hash = name.replace(/\s/g,'-');
-                $('#layerSelect').fadeOut();
-                $('#leftNav > li').removeClass('active');
-                $('#aEditLayers').addClass('active');
-                window.scrollTo(0, 0);
-                var layer = getLayerByName(name);
-                showLayerEditForm(layer);
-            });
+            
         }
     }
 
 function saveData(layer) {
     for (var t in fieldsChanged) {
 
-        if (fieldsChanged[t]==
-
-        var yu = $('#lyr' + fieldsChanged[t]).val();
-        if(yu=='on'){
-            yu = true;
-        }else if (yu=='off'){
-            yu=false;
+        var value = null;
+        if (['clickable','simplify', 'proxy', 'token'].indexOf(fieldsChanged[t]) != -1)
+        {
+           value = $('#lyr' + fieldsChanged[t]).is(':checked');
+        }else{
+            value = $('#lyr' + fieldsChanged[t]).val();
         }
 
-        curLayer[fieldsChanged[t]] = yu;
+        curLayer[fieldsChanged[t]] = value;
     }
     console.log(JSON.stringify(curLayer));
     var id = location.hash.replace('#','').replace(/\-/g,' ');

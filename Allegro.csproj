@@ -149,7 +149,6 @@
     <Content Include="img\rcs_land_cover.jpg" />
     <Content Include="img\trimet_logo.png" />
     <Content Include="index.htm" />
-    <Content Include="js\config.min.js" />
     <Content Include="js\script.js" />
     <Content Include="js\script.min.js" />
     <Content Include="lib\Microsoft.Web.Infrastructure.dll" />

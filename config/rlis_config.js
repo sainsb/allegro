@@ -847,5 +847,108 @@
                        'source': 'Metro',
                        'theme': 'Water',
                        'zIndex': 75
-                   }
+                   },
+                   {
+                      'name': 'Major Rivers (fill)',
+                      'url': '//library.oregonmetro.gov/rlisdiscovery/mjriv_fi.zip',
+                      'type': 'shapefile',
+                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/mjriv_fi.png',
+                      'source': 'Metro',
+                      'theme': 'Water'
+                  },
+                  {
+                      'name': 'Major Rivers (line)',
+                      'url': '//library.oregonmetro.gov/rlisdiscovery/mjriv_li.zip',
+                      'type': 'shapefile',
+                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/mjriv_li.png',
+                      'source': 'Metro',
+                      'theme': 'Water'
+                  },
+                  {
+                      'name': 'Rivers (fill)',
+                      'url': '//library.oregonmetro.gov/rlisdiscovery/riv_fill.zip',
+                      'type': 'shapefile',
+                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/riv_fill.png',
+                      'source': 'Metro',
+                      'theme': 'Water',
+                      'symbolField':'CLASS',
+                      'legend':{"symbols":[{"label":"Major water body", "value":1,"opacity":.6,"fillOpacity":.7,"fillColor":"#052A6E","color":"#052A6E","weight":1},{"label":"Important water body", "value":2,"opacity":.6,"fillOpacity":.7,"fillColor":"#0682A6","color":"#0682A6","weight":1},{"label":"Significant water body", "value":3,"opacity":6,"fillOpacity":.7,"fillColor":"#6B90D4","color":"#6B90D4","weight":1}],"title":"Rivers (fill)","type":"uniqueValue"} 
+                  },
+                  {
+                      'name': 'Rivers (line)',
+                      'url': '//library.oregonmetro.gov/rlisdiscovery/riv_line.zip',
+                      'type': 'shapefile',
+                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/riv_line.png',
+                      'source': 'Metro',
+                      'theme': 'Water'
+                  },
+                  {
+                      'name': 'Streams (fill)',
+                      'url': '//library.oregonmetro.gov/rlisdiscovery/stm_fill.zip',
+                      'type': 'shapefile',
+                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/stm_fill.png',
+                      'source': 'Metro',
+                      'theme': 'Water',
+                      'symbolField':'CLASS',
+                      'legend':{"symbols":[{"label":"Major water body", "value":1,"opacity":.6,"fillOpacity":.7,"fillColor":"#052A6E","color":"#052A6E","weight":1},{"label":"Important water body", "value":2,"opacity":.6,"fillOpacity":.7,"fillColor":"#0682A6","color":"#0682A6","weight":1},{"label":"Significant water body", "value":3,"opacity":6,"fillOpacity":.7,"fillColor":"#6B90D4","color":"#6B90D4","weight":1},{"label":"Other water body", "value":4,"opacity":.6,"fillOpacity":.7,"fillColor":"#C4EDFF","color":"#052A6E","weight":1}],"title":"Streams (fill)","type":"uniqueValue"} 
+                  },
+                  {
+                      'name': 'Streams (line)',
+                      'url': '//library.oregonmetro.gov/rlisdiscovery/stm_line.zip',
+                      'type': 'shapefile',
+                      'thumb': '//library.oregonmetro.gov/rlisdiscovery/browse_graphic/stm_line.png',
+                      'source': 'Metro',
+                      'theme': 'Water'
+                  }
     );
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

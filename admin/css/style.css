@@ -689,7 +689,6 @@ body{padding-top:120px;font-family:'Lato';}
   width:255px;
   height:auto;
   position: relative;
-  cursor:pointer;
   float: left;
   overflow: hidden;
   -webkit-transition: all .1s linear;
@@ -698,10 +697,6 @@ body{padding-top:120px;font-family:'Lato';}
   -ms-transition: all .1s linear;
   -kthtml-transition: all .1s linear;
   transition: all .1s linear;
-  }
-
-  .img-block:hover{
-  box-shadow: 0px 0px 2px 2px #ddd;
   }
 
   .img-block.active{
