@@ -4,7 +4,7 @@
  */
 
 var map = null;
-
+var version = 'Area66';
 var App = {
     map: null,
     STYLE_KEYWORDS: ['marker-size', 'marker-symbol', 'marker-color', 'stroke', 'stroke-opacity', 'stroke-width', 'fill', 'fill-opacity'],
@@ -25,13 +25,15 @@ var App = {
     locateMarker:null,
   
     init: function () {
-      "use strict";
-      if ($('html').is('.ie6, .ie7, .ie8, .ie9')) {
+
+        "use strict";
+        if ($('html').is('.ie6, .ie7, .ie8, .ie9')) {
         $('#browserModal').modal('show');
-      }
+        }
       
        //Put the version in the top banner
-       $('#txtVersion').html(version);
+        $('#txtVersion').html(version);
+
         //resizes the map and legend height upon page resize
         //width is taken care of by the DOM.
         //** will probably want to disable when the site goes into responsive mode..
@@ -73,7 +75,7 @@ var App = {
         });
 
         //assign handler to Basemap button
-        $('#btnBasemap').click(function () {
+        $('#btnChangeBasemap').click(function () {
             $('#basemapModal').modal('show');
         });
 
@@ -83,15 +85,18 @@ var App = {
         });
 
         $('#btnExport').on('click', function() {
-          App.exportDialog.init();
+            App.exportDialog.init();
         });
 
         //Attach behavior to legend checkboxes
         $('body').on('click', '.legend-check', function (evt) {
+
             var id = $(this).attr('id').replace('chk', '');
             var layer = App.util.getLayerById(id);
+
             if ($(this).is(':checked')) {
               if (layer.type == App.LAYER_TYPES.GEOJSON || layer.type == App.LAYER_TYPES.SHAPEFILE) {
+                    
                     if (typeof(layer.selection) != 'undefined') {
                       layer.selection.addTo(map).bringToFront();
                     } else {
@@ -109,14 +114,15 @@ var App = {
                             return false;
                         }
                     });
+                    
                     other_layers.reverse();
+
                     for (var l = 0; l < other_layers.length; l++) {
                       if (typeof(App.util.getLayerById(other_layers[l]).selection) != 'undefined') {
                         App.util.getLayerById(other_layers[l]).selection.bringToFront();
                       } else {
                         App.util.getLayerById(other_layers[l]).mapLayer.bringToFront();
-                      }
-                        
+                      }   
                     }
               } else {
                 if (typeof(layer.selection) != 'undefined') {
@@ -132,6 +138,7 @@ var App = {
                 map.removeLayer(layer.mapLayer);
               }
             }
+            
             //with this logic, the layer legend is dumb to the checkbox state.
 
             if (evt.stopPropagation) {
@@ -145,11 +152,8 @@ var App = {
         //Basemap opacity slider
         $('#sliBasemap').on('change input', function () {
             //get active basemap
-            for (var b in config.basemaps) {
-                if (config.basemaps[b].active == true) {
-                    config.basemaps[b].mapLayer.setOpacity($(this).val() / 100);
-                }
-            }
+            var bm = App.util.getActiveBasemap();
+            bm.setOpacity($(this).val() / 100);
         });
 
         //Fill opacity sliders
@@ -157,6 +161,7 @@ var App = {
             var id = $(this).attr('id').replace('sli', '');
             var layer = App.util.getLayerById(id);
             layer.fillOpacity = $(this).val();
+           
             switch (layer.type) {
                 case App.LAYER_TYPES.GEOJSON:
               	case App.LAYER_TYPES.SHAPEFILE:
@@ -187,6 +192,8 @@ var App = {
           }
           $('#leg'+App.util.getLayerId(layer.name)+ ' > div > svg > rect').attr('stroke-opacity', layer.strokeOpacity);
         });
+
+        //Ad hoc context menu code
         $('.dropdown.keep-open').on({
             "shown.bs.dropdown": function () { this.closable = false; },
             "mouseleave": function () {
@@ -194,7 +201,7 @@ var App = {
             "hide.bs.dropdown": function () { return this.closable; }
         });
 
-        //dev labeling code
+        //dev rename field code
         $('#txtSymbolRename').on('focusout', function() {
           console.log($(this).val());
         });
@@ -202,6 +209,7 @@ var App = {
         //init map
         L.Icon.Default.imagePath = '//library.oregonmetro.gov/libraries/leaflet/0.8-dev/images/';
 
+        //init map
         this.map = new L.Map('map', {
             center: new L.LatLng(45.44944, -122.67599),
             zoom: 10,
@@ -235,6 +243,7 @@ var App = {
         //});
 
         //init RLIS API autosuggest
+        if(typeof(RLIS) != 'undefined'){
         var x = new RLIS.Autosuggest("txtLocSearch", { "mode": 'locate', 'entries': 7 }, function (result, error) {
             if (result.error == true || result[0].status == 'failure') {
                 $('#frmLocSearch').addClass('has-error');
@@ -259,7 +268,7 @@ var App = {
 
             App.map.setView([result[0].lat, result[0].lng], 15);
         });
-        
+        }
         //Accept l param to load layers passed in querystring
         var hash = location.hash.split('/');
    
@@ -283,9 +292,8 @@ var App = {
           App.data.add(layer, function () { App.load_layers(layerIndex + 1); });
           $('.img-block.layer').each(function(i, v) {
             var id = $(v).find('img').attr('id').replace('img', '');
-            //console.log(id);
+            
             if (id == App.util.getLayerId(layer.name)) {
-
               $(v).addClass('active');
             }
           });
@@ -654,7 +662,8 @@ var App = {
                   if (feature.properties) {
                     var str = Object.keys(feature.properties).map(function(k) {
                       if ($.inArray(k, App.STYLE_KEYWORDS) == -1) {
-                        console.log("<tr><td>" + k + "</td><td>feature.properties." + k+"</td></tr>");
+                        //this spits out the table rows for code generation purposes
+                        //console.log("<tr><td>" + k + "</td><td>feature.properties." + k+"</td></tr>");
                         return '<strong>' + k + "</strong>: " + feature.properties[k] + '<br/>';
                       }
                     }).join("");
@@ -1011,8 +1020,8 @@ var App = {
             }
         }
 
-   if (layer.legend.type == App.RENDERER.SINGLE_SYMBOL) {
-          sym = layer.legend.symbols[0];
+        if (layer.legend.type == App.RENDERER.SINGLE_SYMBOL) {
+            sym = layer.legend.symbols[0];
         } else {
             var value = feature.properties[layer.symbolField];
 
@@ -1286,7 +1295,7 @@ var App = {
                 if (basemap.active == true) {
                     imgBlockText += ' active';
                     basemap.zIndex = 0;
-                    App.data.load.tileLayer(basemap);
+                    //App.data.load.tileLayer(basemap);
                 }
 
                 imgBlockText += "'><div class='caption caption-sm'>" + basemap.name + "</div><img class='idata' src='" + thumb + "' alt='" + basemap.name + "' id='img" + id + "'/></div>";
@@ -1295,7 +1304,6 @@ var App = {
             }
 
             this.attachEventHandlers();
-
         },
 
         attachEventHandlers: function () {
@@ -2563,6 +2571,14 @@ var App = {
 
         export2GeoJSON: function (blob, options) {
 
+        },
+
+        getActiveBasemap : function(){
+             for (var b in config.basemaps) {
+                if (config.basemaps[b].active == true) {
+                    return config.basemaps[b].mapLayer;
+                }
+            }
         },
 
         sortHandler: function (e, ui) {

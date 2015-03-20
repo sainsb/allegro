@@ -1,9 +1,5 @@
 ﻿<!DOCTYPE html>
-<!--[if lt IE 7 ]> <html class="ie6"> <![endif]-->
-<!--[if IE 7 ]>    <html class="ie7"> <![endif]-->
-<!--[if IE 8 ]>    <html class="ie8"> <![endif]-->
-<!--[if IE 9 ]>    <html class="ie9"> <![endif]-->
-<!--[if (gt IE 9)|!(IE)]><!--> <html class=""> <!--<![endif]-->
+<html class="">
 <head>
   <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
   <link rel="icon" href="http://www.oregonmetro.gov/favicon.ico" type="image/x-icon">
@@ -14,34 +10,72 @@
   <meta name="author" content="">
 
   <link rel="stylesheet" href="./css/style.min.css" />
-<link rel="stylesheet" href="./css/styleNew.css" />
+<link rel="stylesheet" href="./css/style.css" />
+<style>
+body{padding-top:60px;}
 
+/*NIGHT */
+
+#map-row{
+  background-color:#333;
+}
+#legend{
+  background-color:#222;
+  border:1px solid #000;
+}
+#map{
+  background-color:#222;
+  border:1px solid #000;
+}
+
+.liVectorLegend{
+  background-color: #666;
+  color:#EEE;
+}
+
+.liVectorLegend:hover{
+  background-color:#888;
+}
+
+.dropdown-menu{
+  background-color: #666;
+border: 1px solid #999;
+}
+
+.dropdown-menu > li > a{
+  color:#DDD;
+}
+
+.dropdown-menu > li.nav-header{
+  color:#BBB;
+}
+
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus, .dropdown-submenu:hover > a, .dropdown-submenu:focus > a{
+  background-color:#888;
+}
+
+body{
+  background-color:#333;
+}
+
+</style>
 </head>
 <body>
-  <div class="navbar navbar-fixed-top" role="navigation">
-    <div class="container-fluid" style='padding:0;'>
-      <div class="navbar-inner">
-        <ul class="nav navbar-nav" data-toggle="collapse" data-target=".navbar-collapse.in" style="float:right;margin-top:38px;margin-right:20px;"><li class="label label-primary" style="cursor:pointer;font-size:14px;" onclick="window.location='./release.txt'" target="_blank" id="txtVersion"></li></ul>
 
-      </div>
-      <div>
-        <ul class="breadcrumb" style='height:auto;'>
-          <li><a href="//www.oregonmetro.gov/">Metro</a></li>
-          <li><a href="//gis.oregonmetro.gov/">GIS</a></li>
-          <li class='active'>Map Viewer</li>
-        </ul>
-      </div>
-    </div>
-  </div>
+
+
+
+
+
   <div class="container-fluid" style='background-color:transparent;'>
-    <div class="row-fluid" style="margin-bottom:20px;">
+    <div class="row" style="margin-bottom:20px;">
       <div class="input-group col-xs-3 pull-left form-group" style='margin-right:20px;' id='frmLocSearch'>
         <span class="input-group-addon"><i class="glyphicon glyphicon-map-marker"></i> Search</span>
         <input class="form-control input-sm has-warning" style="font-size:14px;" id="txtLocSearch" type="text" placeholder="Address, intersection, place..." />
       </div>
       <div class="btn-group">
         <button class='btn btn-default btn-sm' id='btnAddData'><i class="glyphicon glyphicon-plus"></i> Add Layers</button>
-        <button class='btn btn-default btn-sm' id='btnBasemap'><i class="glyphicon glyphicon-th"></i> Basemap</button>
+        <button class='btn btn-default btn-sm' id='btnChangeBasemap'><i class="glyphicon glyphicon-th"></i> Basemap</button>
         <div class="btn-group dropdown keep-open">
           <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
             Heatmap Options <span class="caret"></span>
@@ -95,14 +129,14 @@
     </div>
   </div>
   <div class="container-fluid">
-    <div class="row-fluid" style="background-color:#fff;">
+    <div class="row" id="map-row">
       <div class="col-md-2" id='legend'>
         <ul class='sortable' style='list-style:none;padding-left:0;' id="ulVectorLegend"></ul>
         <ul class='sortable' style='list-style:none;padding-left:0;' id="ulTileLegend"></ul>
         <ul style='list-style:none;padding-left:0;' id="ulHeatmapLegend"></ul>
       </div>
-      <div class="col-md-10" id='map-area' style="margin-bottom:0;">
-        <div id="map" style="background-color:#fff;width:100%;padding:0;margin-right:10px;margin:00px;"></div>
+      <div class="col-md-10" >
+        <div id="map" ></div>
       </div>
     </div>
   </div>
@@ -175,7 +209,7 @@
         </div>
         <div class="modal-body" style='overflow:hidden;'>
 
-          <div class='row-fluid'>
+          <div class='row'>
             <div class="box">
               <div class="col-md-12">
                 <div class='browser'>
@@ -385,7 +419,7 @@
   <!--<script type="text/javascript" src="./js/rTree.js"></script>-->
   <!--<script type="text/javascript" src="//library.oregonmetro.gov/libraries/leaflet.coordinates/0.1.4/Leaflet.Coordinates.min.js"></script>-->
 
-  <script src="//gis.oregonmetro.gov/rlisapi2/js/?token=jtJ3qevgR0oEBOZQVIrdF9nCWVlzEOnMqNi62askpes." type="text/javascript"></script>
+ <!-- <script src="//gis.oregonmetro.gov/rlisapi2/js/?token=jtJ3qevgR0oEBOZQVIrdF9nCWVlzEOnMqNi62askpes." type="text/javascript"></script>-->
   <!--<script src="js/config.min.js" type="text/javascript"></script>-->
   <script src="config/rlis_config.js" type="text/javascript"></script>
  <script src="config/equity_atlas_config.js" type="text/javascript"></script>

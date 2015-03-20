@@ -1,5 +1,6 @@
 ﻿body {
-    font-family: 'Lato', arial;
+    font-family: 'Consolas', arial;
+    
 }
   
 
@@ -320,12 +321,21 @@ input[type="range"]::-ms-thumb {
   background-image: linear-gradient(to bottom, #529de1 0, #245e8f 100%); /* W3C */
 }
 
+
    .input-sm {
               padding-left:6px !important;
           }
           #map {
               border: solid #DDD 1px;
+              background-color:#FFF;
+    
+              width:100%;
+              padding:0;
+              margin-right:10px;
+              margin:0px;
           }
+
+         
 
           .ranger, .indlabel {
               display: inline-block;
@@ -432,11 +442,11 @@ width: 40px;
 .panelyr>.accordion-toggle:hover:before{
    text-shadow: 0px 0px 2px rgb(0,0,0);
 }
-@media (min-width: 980px) {
+/*@media (min-width: 980px) {
   body {
     padding-top:160px !important;
   }
-}
+}*/
 
 /* Sliding divs CSS */
 .nav-expanded a.nav-expander.fixed {
@@ -464,18 +474,18 @@ width: 40px;
 }
 
 #legend {
-  background: #fff;
+  background: #444;
   display: block;
   border:1px solid #DDD;
-  overflow: auto;
-  position: fixed;
-  left: -21em;
+  /*overflow: auto;*/
+  /*position: fixed;*/
+  /*left: -21em;
   font-size: 15px;
   top: 210px;
   bottom:48px;
-  width: 17em;
+  width: 17em;*/
   z-index: 1000;
-  margin-left:.5em;
+  /*margin-left:.5em;*/
   padding:5px;
   
   transition: left 0.3s ease-in-out 0s;
